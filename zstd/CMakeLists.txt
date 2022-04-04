@@ -19,6 +19,9 @@ add_library(zstd SHARED
   ./compress/hist.c
   ./decompress/zstd_decompress.c
   ./decompress/huf_decompress.c
+  ./decompress/zstd_ddict.c
+  ./decompress/zstd_decompress.c
+  ./decompress/zstd_decompress_block.c
   ./deprecated/zbuff_common.c
   ./deprecated/zbuff_compress.c
   ./deprecated/zbuff_decompress.c
