@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Yann Collet, Facebook, Inc.
+ * Copyright (c) 2016-2020, Yann Collet, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under both the BSD-style license (found in the
@@ -204,7 +204,10 @@ typedef   signed long long  S64;
  * Prefer these methods in priority order (0 > 1 > 2)
  */
 #ifndef FSE_FORCE_MEMORY_ACCESS   /* can be defined externally, on command line for example */
-#  if defined(__INTEL_COMPILER) || defined(__GNUC__) || defined(__ICCARM__)
+#  if defined(__GNUC__) && ( defined(__ARM_ARCH_6__) || defined(__ARM_ARCH_6J__) || defined(__ARM_ARCH_6K__) || defined(__ARM_ARCH_6Z__) || defined(__ARM_ARCH_6ZK__) || defined(__ARM_ARCH_6T2__) )
+#    define FSE_FORCE_MEMORY_ACCESS 2
+#  elif (defined(__INTEL_COMPILER) && !defined(WIN32)) || \
+  (defined(__GNUC__) && ( defined(__ARM_ARCH_7__) || defined(__ARM_ARCH_7A__) || defined(__ARM_ARCH_7R__) || defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7S__) ))
 #    define FSE_FORCE_MEMORY_ACCESS 1
 #  endif
 #endif
@@ -340,7 +343,8 @@ FORCE_INLINE unsigned FSE_highbit32 (U32 val)
 {
 #   if defined(_MSC_VER)   /* Visual */
     unsigned long r;
-    return _BitScanReverse(&r, val) ? (unsigned)r : 0;
+    _BitScanReverse ( &r, val );
+    return (unsigned) r;
 #   elif defined(__GNUC__) && (GCC_VERSION >= 304)   /* GCC Intrinsic */
     return __builtin_clz (val) ^ 31;
 #   else   /* Software version */
@@ -1276,11 +1280,7 @@ static size_t HUF_decompress (void* dst, size_t maxDstSize, const void* cSrc, si
 *  Basic Types
 *********************************************************/
 #if defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L   /* C99 */
-# if defined(_AIX)
-#  include <inttypes.h>
-# else
-#  include <stdint.h> /* intptr_t */
-# endif
+# include <stdint.h>
 typedef  uint8_t BYTE;
 typedef uint16_t U16;
 typedef  int16_t S16;
