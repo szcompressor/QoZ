@@ -13,6 +13,9 @@ add_library(zstd SHARED
   ./compress/zstd_opt.c
   ./compress/zstd_double_fast.c
   ./compress/zstd_compress.c
+  ./compress/zstd_compress_superblock.c
+  ./compress/zstd_compress_sequences.c
+  ./compress/zstd_compress_literals.c
   ./compress/zstd_fast.c
   ./compress/fse_compress.c
   ./compress/zstdmt_compress.c
@@ -35,6 +38,7 @@ add_library(zstd SHARED
   ./dictBuilder/cover.c
   ./dictBuilder/divsufsort.c
   ./dictBuilder/zdict.c
+  ./dictBuilder/fastcover.c
   )
 
 target_include_directories(zstd
