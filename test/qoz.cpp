@@ -16,9 +16,9 @@
 #define SZ_INT64 9
 
 void usage() {
-    printf("Note: SZ3 command line arguments are backward compatible with SZ2, \n");
+    printf("Note: QoZ command line arguments are backward compatible with SZ2/3, \n");
     printf("      use -h2 to show the supported SZ2 command line arguments. \n");
-    printf("Usage: sz <options>\n");
+    printf("Usage: qoz <options>\n");
     printf("Options:\n");
     printf("* general options:\n");
     printf("	-h: print the help information\n");
@@ -36,7 +36,7 @@ void usage() {
     printf("	-d: double precision (double type)\n");
     printf("	-I <width>: integer type (width = 32 or 64)\n");
     printf("* configuration file: \n");
-    printf("	-c <configuration file> : configuration file sz.config\n");
+    printf("	-c <configuration file> : configuration file qoz.config\n");
     printf("* error control: (the error control parameters here will overwrite the setting in sz.config)\n");
     printf("	-M <error control mode> <error bound (optional)> \n");
     printf("	error control mode as follows: \n");
@@ -58,21 +58,21 @@ void usage() {
     printf("	-3 <nx> <ny> <nz> : dimensions for 3D data such as data[nz][ny][nx] \n");
     printf("	-4 <nx> <ny> <nz> <np>: dimensions for 4D data such as data[np][nz][ny][nx] \n");
     printf("* examples: \n");
-    printf("	sz -f -i test.dat    -z test.dat.sz     -3 8 8 128 -M ABS 1e-3 \n");
-    printf("	sz -f -z test.dat.sz -o test.dat.sz.out -3 8 8 128 -M REL 1e-3 -a \n");
-    printf("	sz -f -i test.dat    -o test.dat.sz.out -3 8 8 128 -M ABS_AND_REL -A 1 -R 1e-3 -a \n");
-    printf("	sz -f -i test.dat    -o test.dat.sz.out -3 8 8 128 -c sz.config \n");
-    printf("	sz -f -i test.dat    -o test.dat.sz.out -3 8 8 128 -c sz.config -M ABS 1e-3 -a\n");
+    printf("	qoz -f -i test.dat    -z test.dat.qoz     -3 8 8 128 -M ABS 1e-3 \n");
+    printf("	qoz -f -z test.dat.qoz -o test.dat.qoz.out -3 8 8 128 -M REL 1e-3 -a \n");
+    printf("	qoz -f -i test.dat    -o test.dat.qoz.out -3 8 8 128 -M ABS_AND_REL -A 1 -R 1e-3 -a \n");
+    printf("	qoz -f -i test.dat    -o test.dat.qoz.out -3 8 8 128 -c qoz.config \n");
+    printf("	qoz -f -i test.dat    -o test.dat.qoz.out -3 8 8 128 -c qoz.config -M ABS 1e-3 -a\n");
     exit(0);
 }
 
 void usage_sz2() {
     printf("Note: below are the supported command line arguments in SZ2 style\n");
-    printf("Usage: sz <options>\n");
+    printf("Usage: qoz <options>\n");
     printf("Options:\n");
     printf("* operation type:\n");
     printf("	-z <compressed file>: the compression operation with an optionally specified output file.\n");
-    printf("                          (the compressed file will be named as <input_file>.sz if not specified)\n");
+    printf("                          (the compressed file will be named as <input_file>.qoz if not specified)\n");
     printf("	-x <decompressed file>: the decompression operation with an optionally specified output file\n");
     printf("                      (the decompressed file will be named as <cmpred_file>.out if not specified)\n");
 //    printf("	-p: print meta data (configuration info)\n");
@@ -82,8 +82,8 @@ void usage_sz2() {
     printf("	-f: single precision (float type)\n");
     printf("	-d: double precision (double type)\n");
     printf("* configuration file: \n");
-    printf("	-c <configuration file> : configuration file sz.config\n");
-    printf("* error control: (the error control parameters here will overwrite the setting in sz.config)\n");
+    printf("	-c <configuration file> : configuration file qoz.config\n");
+    printf("* error control: (the error control parameters here will overwrite the setting in qoz.config)\n");
     printf("	-M <error bound mode> : 10 options as follows. \n");
     printf("		ABS (absolute error bound)\n");
     printf("		REL (value range based error bound, so a.k.a., VR_REL)\n");
@@ -112,13 +112,13 @@ void usage_sz2() {
     printf("* print compression results: \n");
     printf("	-a : print compression results such as distortions\n");
     printf("* examples: \n");
-    printf("	sz -z -f -c sz.config -i testdata/x86/testfloat_8_8_128.dat -3 8 8 128\n");
-    printf("	sz -z -f -c sz.config -M ABS -A 1E-3 -i testdata/x86/testfloat_8_8_128.dat -3 8 8 128\n");
-    printf("	sz -x -f -s testdata/x86/testfloat_8_8_128.dat.sz -3 8 8 128\n");
-    printf("	sz -x -f -s testdata/x86/testfloat_8_8_128.dat.sz -i testdata/x86/testfloat_8_8_128.dat -3 8 8 128 -a\n");
-    printf("	sz -z -d -c sz.config -i testdata/x86/testdouble_8_8_128.dat -3 8 8 128\n");
-    printf("	sz -x -d -s testdata/x86/testdouble_8_8_128.dat.sz -3 8 8 128\n");
-    printf("	sz -p -s testdata/x86/testdouble_8_8_128.dat.sz\n");
+    printf("	qoz -z -f -c qoz.config -i testdata/x86/testfloat_8_8_128.dat -3 8 8 128\n");
+    printf("	qoz -z -f -c qoz.config -M ABS -A 1E-3 -i testdata/x86/testfloat_8_8_128.dat -3 8 8 128\n");
+    printf("	qoz -x -f -s testdata/x86/testfloat_8_8_128.dat.qoz -3 8 8 128\n");
+    printf("	qoz -x -f -s testdata/x86/testfloat_8_8_128.dat.qoz -i testdata/x86/testfloat_8_8_128.dat -3 8 8 128 -a\n");
+    printf("	qoz -z -d -c qoz.config -i testdata/x86/testdouble_8_8_128.dat -3 8 8 128\n");
+    printf("	qoz -x -d -s testdata/x86/testdouble_8_8_128.dat.qoz -3 8 8 128\n");
+    printf("	qoz -p -s testdata/x86/testdouble_8_8_128.dat.qoz\n");
     exit(0);
 }
 
@@ -134,7 +134,7 @@ void compress(char *inPath, char *cmpPath, SZ::Config conf) {
 
     char outputFilePath[1024];
     if (cmpPath == nullptr) {
-        sprintf(outputFilePath, "%s.sz", inPath);
+        sprintf(outputFilePath, "%s.qoz", inPath);
     } else {
         strcpy(outputFilePath, cmpPath);
     }
@@ -379,7 +379,7 @@ int main(int argc, char *argv[]) {
     if (inPath != nullptr && cmpPath == nullptr && decPath != nullptr) {
         compression = true;
         decompression = true;
-        sprintf(cmpPathTmp, "%s.sz.tmp", inPath);
+        sprintf(cmpPathTmp, "%s.qoz.tmp", inPath);
         cmpPath = cmpPathTmp;
         delCmpPath = true;
     }
