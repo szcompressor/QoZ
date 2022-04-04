@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
-project(SZ3 VERSION 3.1.3.0)
+project(QoZ VERSION 0.1.0.0)
 include(GNUInstallDirs)
 include(CTest)
 
@@ -18,7 +18,7 @@ endif()
 find_package(PkgConfig)
 find_package(OpenMP)
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/SZ3/version.hpp.in ${CMAKE_CURRENT_SOURCE_DIR}/include/SZ3/version.hpp)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/QoZ/version.hpp.in ${CMAKE_CURRENT_SOURCE_DIR}/include/QoZ/version.hpp)
 
 add_library(${PROJECT_NAME} INTERFACE)
 target_include_directories(
@@ -32,17 +32,17 @@ target_compile_features(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME} INTERFACE OpenMP::OpenMP_CXX)
 
-option(SZ3_USE_BUNDLED_ZSTD "prefer the bundled version of Zstd" OFF)
-option(SZ3_DEBUG_TIMINGS "print debug timing information" ON)
+option(QoZ_USE_BUNDLED_ZSTD "prefer the bundled version of Zstd" OFF)
+option(QoZ_DEBUG_TIMINGS "print debug timing information" ON)
 
-if(SZ3_DEBUG_TIMINGS)
-  target_compile_definitions(${PROJECT_NAME} INTERFACE SZ3_DEBUG_TIMINGS=1)
+if(QoZ_DEBUG_TIMINGS)
+  target_compile_definitions(${PROJECT_NAME} INTERFACE QoZ_DEBUG_TIMINGS=1)
 else()
-  target_compile_definitions(${PROJECT_NAME} INTERFACE SZ3_DEBUG_TIMINGS=0)
+  target_compile_definitions(${PROJECT_NAME} INTERFACE QoZ_DEBUG_TIMINGS=0)
 endif()
 
 pkg_search_module(ZSTD IMPORTED_TARGET libzstd)
-if(ZSTD_FOUND AND NOT SZ3_USE_BUNDLED_ZSTD)
+if(ZSTD_FOUND AND NOT QoZ_USE_BUNDLED_ZSTD)
   target_link_libraries(${PROJECT_NAME} INTERFACE PkgConfig::ZSTD)
 else()
   add_subdirectory(zstd)
@@ -57,24 +57,24 @@ endif()
 add_subdirectory(test)
 
 install(TARGETS ${PROJECT_NAME} 
-  EXPORT SZ3Targets
+  EXPORT QoZTargets
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
   )
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-install(EXPORT SZ3Targets NAMESPACE SZ3:: DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/SZ3)
+install(EXPORT QoZTargets NAMESPACE SZ3:: DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/QoZ)
 include(CMakePackageConfigHelpers)
-configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/SZ3Config.cmake.in
-  "${CMAKE_CURRENT_BINARY_DIR}/SZ3Config.cmake"
-  INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/SZ3
+configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/QoZConfig.cmake.in
+  "${CMAKE_CURRENT_BINARY_DIR}/QoZConfig.cmake"
+  INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/QoZ
   )
 write_basic_package_version_file(
-  "${CMAKE_CURRENT_BINARY_DIR}/SZ3ConfigVersion.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/QoZConfigVersion.cmake"
   VERSION ${PROJECT_VERSION}
   COMPATIBILITY AnyNewerVersion
   )
 install(FILES
-  ${CMAKE_CURRENT_BINARY_DIR}/SZ3Config.cmake
-  ${CMAKE_CURRENT_BINARY_DIR}/SZ3ConfigVersion.cmake
-  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/SZ3
+  ${CMAKE_CURRENT_BINARY_DIR}/QoZConfig.cmake
+  ${CMAKE_CURRENT_BINARY_DIR}/QoZConfigVersion.cmake
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/QoZ
   )

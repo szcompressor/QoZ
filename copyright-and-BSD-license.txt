@@ -1,14 +1,17 @@
 Copyright © 2016 , UChicago Argonne, LLC
 All Rights Reserved
-[SZ, Version 3.0]
+[QoZ, Version 0.1]
+
 Sheng Di
 Kai Zhao
 Xin Liang
 Dingwen Tao
+Jinyang Liu
 Franck Cappello
+
 Argonne National Laboratory
 
-SZ licence is under the BSD license. Details are shown below.
+QoZ licence is under the BSD license. Details are shown below.
 
 OPEN SOURCE LICENSE (license number: SF-16-105)
  

@@ -48,7 +48,7 @@ target_include_directories(zstd
   )
 
 
-install(TARGETS zstd EXPORT SZ3Targets
+install(TARGETS zstd EXPORT QoZTargets
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} 
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
