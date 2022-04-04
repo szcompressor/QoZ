@@ -666,7 +666,7 @@ size_t HUF_decompress4X1_usingDTable_internal_default(void* dst, size_t dstSize,
 
 #if ZSTD_ENABLE_ASM_X86_64_BMI2
 
-HUF_ASM_DECL void HUF_decompress4X1_usingDTable_internal_bmi2_asm_loop(HUF_DecompressAsmArgs* args) ZSTDLIB_HIDDEN;
+//HUF_ASM_DECL void HUF_decompress4X1_usingDTable_internal_bmi2_asm_loop(HUF_DecompressAsmArgs* args) ZSTDLIB_HIDDEN;
 
 static HUF_ASM_X86_64_BMI2_ATTRS
 size_t
@@ -687,7 +687,7 @@ HUF_decompress4X1_usingDTable_internal_bmi2_asm(
     }
 
     assert(args.ip[0] >= args.ilimit);
-    HUF_decompress4X1_usingDTable_internal_bmi2_asm_loop(&args);
+    //HUF_decompress4X1_usingDTable_internal_bmi2_asm_loop(&args);
 
     /* Our loop guarantees that ip[] >= ilimit and that we haven't
     * overwritten any op[].
@@ -1380,9 +1380,9 @@ size_t HUF_decompress4X2_usingDTable_internal_default(void* dst, size_t dstSize,
 }
 #endif
 
-//#if ZSTD_ENABLE_ASM_X86_64_BMI2
+#if ZSTD_ENABLE_ASM_X86_64_BMI2
 
-HUF_ASM_DECL void HUF_decompress4X2_usingDTable_internal_bmi2_asm_loop(HUF_DecompressAsmArgs* args) ZSTDLIB_HIDDEN;
+//HUF_ASM_DECL void HUF_decompress4X2_usingDTable_internal_bmi2_asm_loop(HUF_DecompressAsmArgs* args) ZSTDLIB_HIDDEN;
 
 static HUF_ASM_X86_64_BMI2_ATTRS size_t
 HUF_decompress4X2_usingDTable_internal_bmi2_asm(
@@ -1401,7 +1401,7 @@ HUF_decompress4X2_usingDTable_internal_bmi2_asm(
     }
 
     assert(args.ip[0] >= args.ilimit);
-    HUF_decompress4X2_usingDTable_internal_bmi2_asm_loop(&args);
+    //HUF_decompress4X2_usingDTable_internal_bmi2_asm_loop(&args);
 
     /* note : op4 already verified within main loop */
     assert(args.ip[0] >= iend);
@@ -1432,7 +1432,7 @@ HUF_decompress4X2_usingDTable_internal_bmi2_asm(
     /* decoded size */
     return dstSize;
 }
-//#endif /* ZSTD_ENABLE_ASM_X86_64_BMI2 */
+#endif /* ZSTD_ENABLE_ASM_X86_64_BMI2 */
 
 static size_t HUF_decompress4X2_usingDTable_internal(void* dst, size_t dstSize, void const* cSrc,
                     size_t cSrcSize, HUF_DTable const* DTable, int bmi2)
