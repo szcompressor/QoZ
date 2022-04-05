@@ -676,12 +676,12 @@ namespace SZ {
             assert(maxStep>0);
             if(tuning>1)
                 return;
-            else if(tuning==1 and conf.sampleBlockSize<conf.maxStep){
+            else if(tuning==1 and conf.sampleBlockSize<conf.maxStep and conf.tuningTarget==SZ::TUNING_TARGET_RD){
                 quantizer.insert_unpred(*data);
                 return;
 
             }
-            
+
             if (N==2){
                 for (size_t x=maxStep*(tuning==1);x<conf.dims[0];x+=maxStep){
                     for (size_t y=maxStep*(tuning==1);y<conf.dims[1];y+=maxStep){
