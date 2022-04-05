@@ -647,9 +647,10 @@ namespace SZ {
             }
 
             if (maxStep>0){
+                anchor=true;
                 int max_interpolation_level=(uint)log2(maxStep)+1;
                 if (max_interpolation_level<=interpolation_level){
-                    anchor=true;
+                    
                     interpolation_level=max_interpolation_level;
                 }
 
@@ -675,12 +676,12 @@ namespace SZ {
             
             assert(maxStep>0);
 
-            std::cout<<int(conf.tuningTarget)<<std::endl;
+           
             if(tuning>1)
                 return;
             
             else if(tuning==1 and conf.sampleBlockSize<conf.maxStep and conf.tuningTarget==SZ::TUNING_TARGET_RD){
-                std::cout<<"dd"<<std::endl;
+                //std::cout<<"dd"<<std::endl;
                 quantizer.insert_unpred(*data);
                 return;
 
