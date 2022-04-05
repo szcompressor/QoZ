@@ -647,10 +647,10 @@ namespace SZ {
             }
 
             if (maxStep>0){
-                anchor=true;
+               
                 int max_interpolation_level=(uint)log2(maxStep)+1;
                 if (max_interpolation_level<=interpolation_level){
-                    
+                    anchor=true;
                     interpolation_level=max_interpolation_level;
                 }
 
