@@ -10,4 +10,5 @@ for file in os.listdir(datafolder):
     filepath=os.path.join(datafolder,file)
     newfilename=file.split(".")[0]+".f32"
     newfilepath=os.path.join(datafolder,newfilename)
-    np.fromfile(filepath,dtype=np.double).astype(np.float32).tofile(newfilepath)
+    a=np.fromfile(filepath,dtype=np.double).astype(np.float32)
+    a.tofile(newfilepath)
