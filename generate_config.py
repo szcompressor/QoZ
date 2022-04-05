@@ -4,8 +4,8 @@ import os
 tt=sys.argv[1]
 tuning_target_dict={"psnr":"TUNING_TARGET_RD","cr":"TUNING_TARGET_CR","ssim":"TUNING_TARGET_SSIM","ac":"TUNING_TARGET_AC"}
 tuning_target=tuning_target_dict[tt]
-if not os.path.exists("configs")
-os.mkdir("configs")
+if not os.path.exists("configs"):
+    os.mkdir("configs")
 datasets=["cesm","miranda","nyx","scale","hurricane"]
 
 for dataset in datasets:
