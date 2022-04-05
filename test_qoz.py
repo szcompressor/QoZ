@@ -160,14 +160,14 @@ if __name__=="__main__":
     #alpha_df.to_csv("%s_alpha.tsv" % args.output,sep='\t')
     #beta_df.to_csv("%s_beta.tsv" % args.output,sep='\t')
 
-    if args.ssim: 
+    if args.target=="ssim": 
         overall_ssim=np.mean(ssim,axis=1)
         #ssim_df=pd.DataFrame(ssim,index=ebs,columns=datafiles)
         overall_ssim_df=pd.DataFrame(overall_ssim,index=ebs,columns=["overall_ssim"])
         #ssim_df.to_csv("%s_ssim.tsv" % args.output,sep='\t')
         overall_ssim_df.to_csv("%s_overall_ssim.tsv" % args.output,sep='\t')
         
-    if (args.autocorr):
+    elif args.target=="ac":
         overall_ac=np.mean(ac,axis=1)
         #ac_df=pd.DataFrame(ac,index=ebs,columns=datafiles)
         overall_ac_df=pd.DataFrame(overall_ac,index=ebs,columns=["overall_ac"])
