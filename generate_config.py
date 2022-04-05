@@ -23,7 +23,7 @@ for dataset in datasets:
         predictorTuningRate=0.005
         levelwisePredictionSelection=4
 
-    configstr="[GlobalSettings]\nCmprAlgo = ALGO_INTERP_LORENZO \ntuningTarget = %s \n[AlgoSettings]\nautoTuningRate = %f \npredictorTuningRate= %f \nlevelwisePredictionSelection = %d \nmaxStep = %d \ntestLorenzo = %d \nsampleBlockSize = %d \nverbose = 1 \n" % \
+    configstr="[GlobalSettings]\nCmprAlgo = ALGO_INTERP_LORENZO \ntuningTarget = %s \n[AlgoSettings]\nautoTuningRate = %f \npredictorTuningRate= %f \nlevelwisePredictionSelection = %d \nmaxStep = %d \ntestLorenzo = %d \nsampleBlockSize = %d \nverbose = 0 \n" % \
     (tuning_target,autoTuningRate,predictorTuningRate,levelwisePredictionSelection,maxStep,testLorenzo,sampleBlockSize) 
     with open(os.path.join("configs", "%s_%s.config" % (dataset,tt) ),"w") as f:
         f.write(configstr)
