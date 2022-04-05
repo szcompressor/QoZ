@@ -677,6 +677,7 @@ namespace SZ {
             if(tuning>1)
                 return;
             else if(tuning==1 and conf.sampleBlockSize<conf.maxStep and conf.tuningTarget==SZ::TUNING_TARGET_RD){
+                std::cout<<"dwd"<<std::endl;
                 quantizer.insert_unpred(*data);
                 return;
 
