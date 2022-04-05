@@ -42,7 +42,7 @@ if __name__=="__main__":
     datafolder=args.input
     datafiles=os.listdir(datafolder)
     datafiles=[file for file in datafiles if file.split(".")[-1]=="dat" or file.split(".")[-1]=="f32" or file.split(".")[-1]=="bin"]
-    print(datafiles)
+    #print(datafiles)
     num_files=len(datafiles)
 
     #ebs=[1e-5,5e-5]+[i*1e-4 for i in range(1,10)]+[i*1e-3 for i in range(1,10)]+[i*1e-3 for i in range(10,21,5)]
@@ -62,8 +62,8 @@ if __name__=="__main__":
     cr=np.zeros((num_ebs,num_files),dtype=np.float32)
     psnr=np.zeros((num_ebs,num_files),dtype=np.float32)
     ssim=np.zeros((num_ebs,num_files),dtype=np.float32)
-    #alpha=np.zeros((num_ebs,num_files),dtype=np.float32)
-    #beta=np.zeros((num_ebs,num_files),dtype=np.float32)
+    alpha=np.zeros((num_ebs,num_files),dtype=np.float32)
+    beta=np.zeros((num_ebs,num_files),dtype=np.float32)
     overall_cr=np.zeros((num_ebs,1),dtype=np.float32)
     overall_psnr=np.zeros((num_ebs,1),dtype=np.float32)
     overall_ssim=np.zeros((num_ebs,1),dtype=np.float32)
@@ -99,7 +99,7 @@ if __name__=="__main__":
                 cr[i][j]=r 
                 psnr[i][j]=p
                 overall_psnr[i]+=n**2
-                '''
+               
                 for line in lines:
                     if "alpha" in line:
                         #print(line)
@@ -107,7 +107,7 @@ if __name__=="__main__":
                         b=eval(line.split(" ")[7][:-1])
                         alpha[i][j]=a
                         beta[i][j]=b
-                '''
+               
             
                 
             if args.target=="ssim":
@@ -150,16 +150,16 @@ if __name__=="__main__":
     #psnr_df=pd.DataFrame(psnr,index=ebs,columns=datafiles)
     overall_cr_df=pd.DataFrame(overall_cr,index=ebs,columns=["overall_cr"])
     overall_psnr_df=pd.DataFrame(overall_psnr,index=ebs,columns=["overall_psnr"])
-    #alpha_df=pd.DataFrame(alpha,index=ebs,columns=datafiles)
-    #beta_df=pd.DataFrame(beta,index=ebs,columns=datafiles)
+    alpha_df=pd.DataFrame(alpha,index=ebs,columns=datafiles)
+    beta_df=pd.DataFrame(beta,index=ebs,columns=datafiles)
 
 
     #cr_df.to_csv("%s_cr.tsv" % args.output,sep='\t')
     #psnr_df.to_csv("%s_psnr.tsv" % args.output,sep='\t')
     overall_cr_df.to_csv("%s_overall_cr.tsv" % args.output,sep='\t')
     overall_psnr_df.to_csv("%s_overall_psnr.tsv" % args.output,sep='\t')
-    #alpha_df.to_csv("%s_alpha.tsv" % args.output,sep='\t')
-    #beta_df.to_csv("%s_beta.tsv" % args.output,sep='\t')
+    alpha_df.to_csv("%s_alpha.tsv" % args.output,sep='\t')
+    beta_df.to_csv("%s_beta.tsv" % args.output,sep='\t')
 
     if args.target=="ssim": 
         overall_ssim=np.mean(ssim,axis=1)
