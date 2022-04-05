@@ -674,20 +674,18 @@ namespace SZ {
         void build_grid(Config &conf, T *data,size_t maxStep,int tuning=0){
             
             assert(maxStep>0);
-            std::cout<<"dwd"<<std::endl;
-            std::cout<<conf.sampleBlockSize<<std::endl;
-            std::cout<<conf.maxStep<<std::endl;
+
             std::cout<<int(conf.tuningTarget)<<std::endl;
             if(tuning>1)
                 return;
-
+            /*
             else if(tuning==1 and conf.sampleBlockSize<conf.maxStep and conf.tuningTarget==SZ::TUNING_TARGET_RD){
                 
                 quantizer.insert_unpred(*data);
                 return;
 
             }
-
+            */
             if (N==2){
                 for (size_t x=maxStep*(tuning==1);x<conf.dims[0];x+=maxStep){
                     for (size_t y=maxStep*(tuning==1);y<conf.dims[1];y+=maxStep){
