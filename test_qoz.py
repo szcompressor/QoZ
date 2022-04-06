@@ -46,7 +46,8 @@ if __name__=="__main__":
     num_files=len(datafiles)
 
     #ebs=[1e-5,5e-5]+[i*1e-4 for i in range(1,10)]+[i*1e-3 for i in range(1,10)]+[i*1e-3 for i in range(10,21,5)]
-    ebs=[1e-4,1e-3,1e-2]
+    ebs=[1e-5,5e-5,1e-4,5e-4,1e-3,5e-3,1e-2,2e-2]
+    #ebs=[1e-4,1e-3,1e-2]
     num_ebs=len(ebs)
 
     total_data_size=num_files
@@ -158,6 +159,10 @@ if __name__=="__main__":
     ds_df=pd.DataFrame(d_speed,index=ebs,columns=["Decompression Speed (MB/s)"])
 
 
+    output_dir=os.path.dirname(args.output)
+    if output_dir!="" and not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
     #cr_df.to_csv("%s_cr.tsv" % args.output,sep='\t')
     #psnr_df.to_csv("%s_psnr.tsv" % args.output,sep='\t')
     overall_cr_df.to_csv("%s_overall_cr.tsv" % args.output,sep='\t')
@@ -166,6 +171,9 @@ if __name__=="__main__":
     #beta_df.to_csv("%s_beta.tsv" % args.output,sep='\t')
 
     
+
+
+
     
     cs_df.to_csv("%s_cspeed.tsv" % args.output,sep='\t')
     ds_df.to_csv("%s_dspeed.tsv" % args.output,sep='\t')
