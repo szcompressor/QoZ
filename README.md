@@ -2,7 +2,7 @@ QoZ: Dynamic Quality Metric Oriented Error Bounded Lossy Compression for Scienti
 
 ## Introduction
 
-This is the source code for SC 22' submisssion: Dynamic Quality Metric Oriented Error Bounded Lossy Compression for Scientific Datasets
+This is the source code of QoZ: Dynamic Quality Metric Oriented Error Bounded Lossy Compression for Scientific Datasets
 
 ## Dependencies
 
