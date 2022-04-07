@@ -39,13 +39,13 @@ Step 1: Download the dataset from the following links,then unzip them:
 
 * CESM-ATM: https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/CESM-ATM/SDRBENCH-CESM-ATM-cleared-1800x3600.tar.gz 
 * Miranda: https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/S3D/S3D.tar.gz
-* Hurricane-ISABEL: https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/Hurricane-ISABEL/SDRBENCH-Hurricane-ISABEL-100x500x500.tar.gz
-* NYX: https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/EXASKY/NYX/SDRBENCH-EXASKY-NYX-512x512x512.tar.gz
-* SCALE-LETKF: https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/SCALE_LETKF/SDRBENCH-SCALE-98x1200x1200.tar.gz
+* Hurricane-ISABEL: https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/Hurricane-ISABEL/SDRBENCH-Hurricane-ISABEL-100x500x500_log.tar.gz
+* NYX: https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/EXASKY/NYX/SDRBENCH-EXASKY-NYX-512x512x512_log.tar.gz
+* SCALE-LETKF: https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/SCALE_LETKF/SDRBENCH-SCALE_98x1200x1200_log.tar.gz
 * Data download command: wget {DataLink} --no-check-certificate (DataLink: The link of data)
 * Data unzip command: tar -zxvf {DataFile} (DataFile: the .tar file of downloaded data)
 
-Step 2: Preprocess the downloaded data with the preprocess_data.py:
+Step 2: Preprocess the downloaded Miranda data with the preprocess_data.py:
 
 * Usage: python preprocess_data -m {MirandaPath} (MirandaPath is the folder of the Miranda Dataset)
 
