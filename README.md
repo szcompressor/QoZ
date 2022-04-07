@@ -1,12 +1,5 @@
 QoZ: Dynamic Quality Metric Oriented Error Bounded Lossy Compression for Scientific Datasets
 
-=====
-(C) 2016 by Mathematics and Computer Science (MCS), Argonne National Laboratory. See COPYRIGHT in top-level directory.
-
-* Major Authors: Sheng Di, Jinyang Liu, Kai Zhao, Xin Liang
-* Supervisor: Franck Cappello
-* Other Contributors: Robert Underwood, Sihuan Li, Ali M. Gok
-
 ## Introduction
 
 This is the source code for SC 22' submisssion: Dynamic Quality Metric Oriented Error Bounded Lossy Compression for Scientific Datasets
