@@ -83,6 +83,7 @@ The output will contain:
 Output examples:
 
 * For fast execution only part of the data points (error bounds) are covered in the output.
+* The example outputs are in the results folder. Notice that the results are different from the results in the paper as different machine and nodes are used.
 
 Tips for plotting the rate-distortions:
 
