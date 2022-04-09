@@ -40,6 +40,7 @@ namespace SZ {
         }
 
         T *decompress(uchar const *cmpData, const size_t &cmpSize, T *decData) {
+
             size_t remaining_length = cmpSize;
             uchar *buffer = lossless.decompress(cmpData, remaining_length);
             int levelwise_predictor_levels;
@@ -90,7 +91,7 @@ namespace SZ {
             
 
             init();
-            
+            //SZ::Timer timer(true);
             quantizer.load(buffer_pos, remaining_length);
             encoder.load(buffer_pos, remaining_length);
             quant_inds = encoder.decode(buffer_pos, num_elements);
@@ -98,12 +99,25 @@ namespace SZ {
             encoder.postprocess_decode();
 
             lossless.postdecompress_data(buffer);
-            
+            //timer.stop("decode");
+            //timer.start();
             double eb = quantizer.get_eb();
             if(!anchor){
                 *decData = quantizer.recover(0, quant_inds[quant_index++]);
             }
+            
+            else{
+
+             
+                 recover_grid(decData,global_dimensions,maxStep);
+                    
+                interpolation_level--;
+
+                
+            }
             size_t op_index=0;
+
+
     
             for (uint level = interpolation_level; level > 0 && level <= interpolation_level; level--) {
                 if (alpha<0) {
@@ -113,6 +127,7 @@ namespace SZ {
                         quantizer.set_eb(eb);
                     }
                 }
+                
                 else if (alpha>=1){
                     
                     
@@ -134,19 +149,15 @@ namespace SZ {
                     quantizer.set_eb(eb*cur_ratio);
                 }
 
-
-
-                 
-                if(anchor and level==interpolation_level){
-                    //quantizer.print_unpred();
-                    recover_grid(decData,global_dimensions,maxStep);
-                    //break;
-                    continue;
-
-                }
-                uint8_t cur_interpolator;
-                uint8_t cur_direction;
-                if(!blockwiseTuning){
+               
+               
+                
+                
+                    
+                uint8_t cur_interpolator=interpolator_id;
+                uint8_t cur_direction=direction_sequence_id;
+                
+                //if(!blockwiseTuning){
                     if (levelwise_predictor_levels==0){
                         cur_interpolator=interpolator_id;
                         cur_direction=direction_sequence_id;
@@ -161,20 +172,25 @@ namespace SZ {
                             cur_direction=interpDirection_list[levelwise_predictor_levels-1];
                         }
                     }
-                }
-
+                //}
+                
+                
+                
                 size_t stride = 1U << (level - 1);
                 size_t cur_blocksize;
-                if (blockwiseTuning){
-                    cur_blocksize=blocksize;
-                }
-                else if (fixBlockSize>0){
+                
+                //if (blockwiseTuning){
+                 //   cur_blocksize=blocksize;
+                //}
+                //else 
+                    if (fixBlockSize>0){
                     cur_blocksize=fixBlockSize;
                 }
                 else{
                     cur_blocksize=blocksize*stride;
                 }
-
+                
+                //std::cout<<cur_blocksize<<std::endl;
 
                 auto inter_block_range = std::make_shared<
                         SZ::multi_dimensional_range<T, N>>(decData,
@@ -182,7 +198,10 @@ namespace SZ {
                                                            cur_blocksize, 0);
                 auto inter_begin = inter_block_range->begin();
                 auto inter_end = inter_block_range->end();
+                
+                //timer.stop("prep");
                 for (auto block = inter_begin; block != inter_end; ++block) {
+
                     auto start_idx=block.get_global_index();
                     auto end_idx = start_idx;
                     for (int i = 0; i < N; i++) {
@@ -191,7 +210,7 @@ namespace SZ {
                             end_idx[i] = global_dimensions[i] - 1;
                         }
                     }
-
+                    /*
                     if (blockwiseTuning){
                         
     
@@ -199,13 +218,17 @@ namespace SZ {
                                         interpolators[interpAlgo_list[op_index]], interpDirection_list[op_index], stride);
                         op_index++;
                     }
-
-                    else{
+                   */
+                   //else{
                         block_interpolation(decData, block.get_global_index(), end_idx, PB_recover,
                                         interpolators[cur_interpolator], cur_direction, stride);
-                    }
+                   // }
+                   
 
                 }
+                
+                
+                //std::cout<<count<<std::endl;
             }
             quantizer.postdecompress_data();
            
@@ -251,13 +274,6 @@ namespace SZ {
             double eb = quantizer.get_eb();
 
 //            printf("Absolute error bound = %.5f\n", eb);
-            if(!anchor){
-                quant_inds.push_back(quantizer.quantize_and_overwrite(*data, 0));
-            }
-
-            
-            double predict_error=0.0;
-          
 
             if (start_level<=0 or start_level>interpolation_level ){
                 start_level=interpolation_level;
@@ -266,6 +282,25 @@ namespace SZ {
             if(end_level>=start_level){
                 end_level=0;
             }
+
+
+            if(!anchor){
+                quant_inds.push_back(quantizer.quantize_and_overwrite(*data, 0));
+            }
+            else if (start_level==interpolation_level){
+                if(tuning){
+                    conf.quant_bin_counts[start_level-1]=quant_inds.size();
+                }
+                    
+                build_grid(conf,data,maxStep,tuning);
+                start_level--;
+            }
+
+            
+            double predict_error=0.0;
+          
+
+            
             int levelwise_predictor_levels=conf.interpAlgo_list.size();
 
             
@@ -303,26 +338,18 @@ namespace SZ {
                     quantizer.set_eb(eb*cur_ratio);
                 }
               
-                if (anchor and level==interpolation_level){
-                    if(tuning){
-                        
-                        conf.quant_bin_counts[level-1]=quant_inds.size();
-
-                    }
+               
                     
-                    build_grid(conf,data,maxStep,tuning);
                     
                    
 
 
 
-                    continue;
-                }
-
+              
 
                 int cur_interpolator;
                 int cur_direction;
-                if(!conf.blockwiseTuning){
+                //if(!conf.blockwiseTuning){
                     if (levelwise_predictor_levels==0){
                         cur_interpolator=interpolator_id;
                         cur_direction=direction_sequence_id;
@@ -337,14 +364,15 @@ namespace SZ {
                             cur_direction=conf.interpDirection_list[levelwise_predictor_levels-1];
                         }
                     }
-                }
+                //}
                 
                 uint stride = 1U << (level - 1);
                 size_t cur_blocksize;
-                if (conf.blockwiseTuning){
+                //if (conf.blockwiseTuning){
                     cur_blocksize=blocksize;
-                }
-                else if (conf.fixBlockSize>0){
+                //}
+                //else 
+                    if (conf.fixBlockSize>0){
                     cur_blocksize=conf.fixBlockSize;
                 }
                 else{
@@ -376,7 +404,7 @@ namespace SZ {
                             end_idx[i] = global_dimensions[i] - 1;
                         }
                     }
-
+                    /*
                     if (conf.blockwiseTuning){
                         size_t cur_element_num=1;
                         for (int i=0;i<N;i++){
@@ -459,16 +487,16 @@ namespace SZ {
 
                     
 
-
+                    */
 
                     
 
-                    else{
+                    //else{
                     
                     
                         predict_error+=block_interpolation(data, start_idx, end_idx, PB_predict_overwrite,
                                             interpolators[cur_interpolator], cur_direction, stride,tuning);
-                    }
+                    //}
                 
                     
                 }
@@ -790,6 +818,7 @@ namespace SZ {
         double block_interpolation_1d(T *data, size_t begin, size_t end, size_t stride,
                                       const std::string &interp_func,
                                       const PredictorBehavior pb,int tuning=0) {
+
             size_t n = (end - begin) / stride + 1;
             if (n <= 1) {
                 return 0;
@@ -933,6 +962,127 @@ namespace SZ {
 
             return predict_error;
         }
+
+        double block_interpolation_1d_2(T *data, size_t begin, size_t end, size_t stride,
+                                      const std::string &interp_func,
+                                      const PredictorBehavior pb) {
+
+            size_t n = (end - begin) / stride + 1;
+            if (n <= 1) {
+                return 0;
+            }
+            double predict_error = 0;
+
+            size_t stride3x = 3 * stride;
+            size_t stride5x = 5 * stride;
+
+            if (interp_func == "linear" || n < 5) {
+                if (pb == PB_predict_overwrite) {
+
+                    
+                       
+
+                        for (size_t i = 1; i + 1 < n; i += 2) {
+                            T *d = data + begin + i * stride;
+                            quantize(d - data, *d, interp_linear(*(d - stride), *(d + stride)));
+                        }
+                      
+
+                        if (n % 2 == 0) {
+                            T *d = data + begin + (n - 1) * stride;
+                            if (n < 4) {
+                                
+                              
+                                quantize(d - data, *d, *(d - stride));
+                               
+
+                            } else {
+                               
+
+                                quantize(d - data, *d, interp_linear1(*(d - stride3x), *(d - stride)));
+                                
+
+                            }
+                        }
+                       
+
+                    
+
+                } else {
+                    for (size_t i = 1; i + 1 < n; i += 2) {
+                        T *d = data + begin + i * stride;
+                        recover(d - data, *d, interp_linear(*(d - stride), *(d + stride)));
+                    }
+                    if (n % 2 == 0) {
+                        T *d = data + begin + (n - 1) * stride;
+                        if (n < 4) {
+                            recover(d - data, *d, *(d - stride));
+                        } else {
+                            recover(d - data, *d, interp_linear1(*(d - stride3x), *(d - stride)));
+                        }
+                    }
+                }
+            } else {
+                if (pb == PB_predict_overwrite) {
+
+                    
+
+                    
+                    
+                        
+
+                        T *d;
+                        size_t i;
+                        for (i = 3; i + 3 < n; i += 2) {
+                            d = data + begin + i * stride;
+                            quantize(d - data, *d,
+                                     interp_cubic(*(d - stride3x), *(d - stride), *(d + stride), *(d + stride3x)));
+                        }
+                       
+
+                        d = data + begin + stride;
+                        quantize(d - data, *d, interp_quad_1(*(d - stride), *(d + stride), *(d + stride3x)));
+
+                        d = data + begin + i * stride;
+                        
+                        quantize(d - data, *d, interp_quad_2(*(d - stride3x), *(d - stride), *(d + stride)));
+                        
+                        if (n % 2 == 0) {
+                            d = data + begin + (n - 1) * stride;
+                            quantize(d - data, *d, interp_quad_3(*(d - stride5x), *(d - stride3x), *(d - stride)));
+                        }
+                        
+                    
+
+                } else {
+                    T *d;
+                    //SZ::Timer timer(true);
+
+                    size_t i;
+                    for (i = 3; i + 3 < n; i += 2) {
+                        d = data + begin + i * stride;
+                        recover(d - data, *d, interp_cubic(*(d - stride3x), *(d - stride), *(d + stride), *(d + stride3x)));
+                    }
+                    d = data + begin + stride;
+
+                    recover(d - data, *d, interp_quad_1(*(d - stride), *(d + stride), *(d + stride3x)));
+
+                    d = data + begin + i * stride;
+                    recover(d - data, *d, interp_quad_2(*(d - stride3x), *(d - stride), *(d + stride)));
+
+                    if (n % 2 == 0) {
+                        d = data + begin + (n - 1) * stride;
+                        recover(d - data, *d, interp_quad_3(*(d - stride5x), *(d - stride3x), *(d - stride)));
+                    }
+                   // if ((begin==0 or begin==512 or begin==512*512) and (stride==1 or stride==512 or stride==512*512) )
+                        //timer.stop("Recover");
+                }
+            }
+
+            return predict_error;
+        }
+
+
 
         double block_interpolation_2d(T *data, size_t begin1, size_t end1, size_t begin2, size_t end2, size_t stride1,size_t stride2,
                                       const std::string &interp_func,
@@ -1349,9 +1499,10 @@ namespace SZ {
         typename std::enable_if<NN == 3, double>::type
         block_interpolation(T *data, std::array<size_t, N> begin, std::array<size_t, N> end, const PredictorBehavior pb,
                             const std::string &interp_func, const int direction, uint stride = 1,int tuning=0) {
+
             double predict_error = 0;
             size_t stride2x = stride * 2;
-            if(direction!=6){
+            //if(direction!=6){
             
 
                 const std::array<int, N> dims = dimension_sequences[direction];
@@ -1388,8 +1539,8 @@ namespace SZ {
                                                                 stride * dimension_offsets[dims[2]], interp_func, pb,tuning);
                     }
                 }
-            }
-
+            //}
+            /*
             else{
 
                 const std::array<int, N> dims = dimension_sequences[0];
@@ -1498,7 +1649,8 @@ namespace SZ {
 
 
 
-            }
+            }*/
+
 
 
 
