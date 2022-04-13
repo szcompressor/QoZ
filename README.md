@@ -67,21 +67,25 @@ Step 4: Run test_qoz.py to generate the test results.
 * Target: See step 3
 
 The output will contain:
-* overall_cr: the overall compression ratio under different vr-rel error bounds
-* overall_psnr: the overall compression PSNR under different vr-rel error bounds
-* cspeed: the compression speed under different vr-rel error bounds (the speed results in the paper are generated with psnr mode)
-* dspeed: the decompression speed under different vr-rel error bounds (the speed results in the paper are generated with psnr mode)
-* overall_ssim: the overall compression SSIM under different vr-rel error bounds (ssim target only)
-* overall_ac: the overall compression Autocorrelation under different vr-rel error bounds (ac target only)
+* overall_cr: the overall compression ratio under different vr-rel error bounds.
+* overall_psnr: the overall compression PSNR under different vr-rel error bounds.
+* cspeed: the compression speed under different vr-rel error bounds (the speed results in the paper are generated with psnr mode).
+* dspeed: the decompression speed under different vr-rel error bounds (the speed results in the paper are generated with psnr mode).
+* overall_ssim: the overall compression SSIM under different vr-rel error bounds (ssim target only).
+* overall_ac: the overall compression Autocorrelation under different vr-rel error bounds (ac target only).
 
 Output examples:
 
 * For fast execution only part of the data points (error bounds) are covered in the output.
 * The example outputs are in the results folder. Notice that the results are different from the results in the paper as different machine and nodes are used.
 
-Tips for plotting the rate-distortions:
+Tips for plotting and comparing the results genereted with the results in the paper:
 
-* Bit rate = 32 / compression ratio
-
+* Bit rate = 32 / compression ratio.
+* The compression ratios generated using mode cr correspond to the table 3 in the paper.
+* The cr and PSNR generated using mode psnr correspond to the figure 8 in the paper.
+* The cr and SSIM generated using mode ssim correspond to the figure 9 in the paper.
+* The cr and AC generated using mode ac correspond to the figure 10 in the paper.
+* The compression/decompression speeds generated using mode psnr correspond to the table 4 in the paper (different results may achieved if not run on the same nodes listed in the paper).
 
 
