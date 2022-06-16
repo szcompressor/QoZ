@@ -126,7 +126,7 @@ char *SZ_compress_AutoSelectiveInterp(SZ::Config &conf, T *data, size_t &outSize
         uint8_t best_interpAlgo;
         uint8_t best_interpDirection;
         size_t best_cmpsize=0;
-        size_t best_predloss=9e10;
+        double best_predloss=9e10;
         for (int i=0;i<element_num;i++){
             orig_data[i]=data[i];
         }
@@ -360,6 +360,9 @@ double Tuning(SZ::Config &conf, T *data){
     double anchor_rate=0;
     if (conf.maxStep>0){
         anchor_rate=1/(pow(conf.maxStep,N));
+        int max_interp_level=(int)log2(conf.maxStep);
+        if (conf.levelwisePredictionSelection>max_interp_level)
+            conf.levelwisePredictionSelection=max_interp_level;
     }
     
         
