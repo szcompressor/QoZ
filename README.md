@@ -15,7 +15,7 @@ Please Installing the following dependencies before running the artiact evaluati
 
 ## 3rd party libraries/tools
 
-* Zstandard (https://facebook.github.io/zstd/). Not mandatory to be mannually installed as Zstandard v1.4.5 is included and will be used if libzstd can not be found by
+* Zstd >= 1.3.5 (https://facebook.github.io/zstd/). Not mandatory to be mannually installed as Zstandard v1.4.5 is included and will be used if libzstd can not be found by
   pkg-config.
 
 ## Installation
@@ -25,7 +25,7 @@ Please Installing the following dependencies before running the artiact evaluati
 * make
 * make install
 
-Then, you'll find all the executables in [INSTALL_DIR]/bin and header files in [INSTALL_DIR]/include. A Cmake version >= 3.13.0 is needed and we recommend use gcc version 9.x to compile the code. 
+Then, you'll find all the executables in [INSTALL_DIR]/bin and header files in [INSTALL_DIR]/include. A Cmake version >= 3.13.0 is needed and we recommend to use gcc version 9.x to compile the code. 
 
 ## Single compression/decompression testing Examples
 
