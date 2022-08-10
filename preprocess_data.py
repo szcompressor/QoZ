@@ -2,10 +2,12 @@ import os
 import numpy as np 
 import sys
 import argparse 
+parser = argparse.ArgumentParser()
 parser.add_argument('--miranda','-m',type=str)
 parser.add_argument('--hurricane','-u',type=str,default="")
 parser.add_argument('--nyx','-n',type=str,default="")
 parser.add_argument('--scale','-s',type=str,default="")
+ args = parser.parse_args()
 for file in os.listdir(args.miranda):
     if file.split(".")[-1]!="d64":
         continue
