@@ -60,7 +60,7 @@ After that, the configuration files for QoZ test will generated in configs/ fold
 
 Step 4: Run test_qoz.py to generate the test results.
 
-* Command: test_qoz.py -i {Datapath} -o {OutputPath} -d {DatasetName} -t {Target}
+* Command: python test_qoz.py -i {Datapath} -o {OutputPath} -d {DatasetName} -t {Target}
 * Datapath: the folder path of the dataset
 * OutputPath: the output data file prefix. The output files will be in format of Outputpath_{Metric}.tsv
 * DatasetName: See step 3
