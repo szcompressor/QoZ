@@ -26,6 +26,7 @@ Please Installing the following dependencies before running the artiact evaluati
 * make install
 
 Then, you'll find all the executables in [INSTALL_DIR]/bin and header files in [INSTALL_DIR]/include. A Cmake version >= 3.13.0 is needed and we recommend to use gcc version 9.x to compile the code. 
+Before you proceed to the following evaluations, please add the installation path of QoZ to your system path so that you can directly run qoz command in your machine for further evaluations.
 
 ## Single compression/decompression testing Examples
 
@@ -87,5 +88,22 @@ Tips for plotting and comparing the results genereted with the results in the pa
 * The cr and SSIM generated using mode ssim correspond to the figure 9 in the paper.
 * The cr and AC generated using mode ac correspond to the figure 10 in the paper.
 * The compression/decompression speeds generated using mode psnr correspond to the table 4 in the paper (different results may achieved if not run on the same nodes listed in the paper).
+
+An evaluation exmaple for MIRANDA dataset:
+
+* git clone https://github.com/Meso272/QoZ.git -b sc
+* mkdir build
+* cd build
+* cmake -DCMAKE_INSTALL_PREFIX:PATH=qoz-install
+* make
+* make install
+* add qoz-install to the system path (make sure that the qoz command is runable)
+* cd .. (now in the root of QoZ)
+* wget https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/Miranda/SDRBENCH-Miranda-256x384x384.tar.gz
+* tar -xzvf SDRBENCH-Miranda-256x384x384.tar.gz
+* python3 preprocess_data.py -m build/SDRBENCH-Miranda-256x384x384
+* python3 generate_config.py 
+* python3 test_qoz.py -i SDRBENCH-Miranda-256x384x384 -o results/SDRBENCH-Miranda-256x384x384 -d miranda -t cr
+* cat results/SDRBENCH-Miranda-256x384x384_overall_cr.tsv
 
 
