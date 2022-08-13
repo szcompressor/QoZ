@@ -106,4 +106,12 @@ An evaluation exmaple for MIRANDA dataset:
 * python3 test_qoz.py -i SDRBENCH-Miranda-256x384x384 -o results/SDRBENCH-Miranda-256x384x384 -d miranda -t cr
 * cat results/SDRBENCH-Miranda-256x384x384_overall_cr.tsv
 
+Figure Plotting:
+
+In the plotting folder, there is a example of generating the plots in the paper, which corresponds to the Figure 8(b) in the paper. When running the test_qoz.py, if we use mode psnr and dataset miranda, the output will be a part of the plotting/miranda.txt (there is also some comparison results from other compressors with more error bounds). To plotting the rate-distortion, the gnuplot is need and please run the following command:
+
+* cd plotting
+* gnuplot psnr-MIRANDA.p
+
+After that, a eps figure psnr-MIRANDA.eps will be generated, which is the Figure 8(b).
 
