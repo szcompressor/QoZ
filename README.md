@@ -103,7 +103,7 @@ An evaluation exmaple for MIRANDA dataset:
 * tar -xzvf SDRBENCH-Miranda-256x384x384.tar.gz
 * python3 preprocess_data.py -m build/SDRBENCH-Miranda-256x384x384
 * python3 generate_config.py 
-* python3 test_qoz.py -i SDRBENCH-Miranda-256x384x384 -o results/SDRBENCH-Miranda-256x384x384 -d miranda -t cr
+* python3 test_qoz.py -i SDRBENCH-Miranda-256x384x384 -o results/SDRBENCH-Miranda-256x384x384 -d miranda -t psnr
 * cat results/SDRBENCH-Miranda-256x384x384_overall_cr.tsv
 
 Figure Plotting:
