@@ -85,12 +85,13 @@ Output examples:
 
 The relationship of generated results and the provided results in the paper:
 
-* Bit rate = 32 / compression ratio.
+QoZ is a user-specific metric driven lossy compression, which means that it can provide different compression results with the same input and error bound if different compression mode (optimization target) is specified. Particularly speaking, currently there are 4 compression modes in QoZ, and the compression results of all the 4 modes are presented in table 3 and figure 8/9/10 of the paper. 
 * The compression ratios generated using mode cr correspond to the table 3 in the paper.
 * The cr and PSNR generated using mode psnr correspond to the figure 8 in the paper.
 * The cr and SSIM generated using mode ssim correspond to the figure 9 in the paper.
 * The cr and AC generated using mode ac correspond to the figure 10 in the paper.
 * The compression/decompression speeds generated using mode psnr correspond to the table 4 in the paper (different results may achieved if not run on the same nodes listed in the paper).
+* Bit rate = 32 / compression ratio.
 
 A full evaluation exmaple for MIRANDA dataset:
 
@@ -108,6 +109,8 @@ A full evaluation exmaple for MIRANDA dataset:
 * python3 generate_config.py 
 * python3 test_qoz.py -i SDRBENCH-Miranda-256x384x384 -o results/SDRBENCH-Miranda-256x384x384 -d miranda -t psnr
 * cat results/SDRBENCH-Miranda-256x384x384_overall_cr.tsv
+
+The output of this example is part of the results in figure 8 (b) of the paper.
 
 ## Figure Plotting:
 
