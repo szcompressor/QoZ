@@ -1065,7 +1065,7 @@ double Tuning(SZ::Config &conf, T *data){
                     uint8_t bestInterpAlgo = SZ::INTERP_ALGO_CUBIC;
                     uint8_t bestDirection = 0;
                     double best_interp_absloss=9999999999;
-                    conf.cmprAlgo == SZ::ALGO_INTERP;
+                    //conf.cmprAlgo = SZ::ALGO_INTERP;
                     
                     
                     
