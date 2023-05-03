@@ -34,8 +34,8 @@ Before you proceed to the following evaluations, please add the installation pat
 
 ## Single compression/decompression testing Examples
 
-You can use the executable 'qoz' command to do the compression/decompression. Just run "qoz" command to check the instructions for its arguments.
-The qoz executable includes the SZ3.1 compression, and the qoz features are automatically involved. You can add argument "-q 0" to disable them for comparing the compression results with SZ3-based compression.
+You can use the executable 'qoz' command to do the compression/decompression. Just run "qoz" command without any argument to check the instructions for its arguments.
+The qoz executable includes the SZ3.1 compression, but the qoz features are automatically involved. You can add argument "-q 0" to disable them for comparing the compression results with SZ3-based compression (adding -q 0 will make qoz command perform the same as SZ3.1).
 Currently you need to add a configuration file to the argument line (-c) for modifying the qoz-related parameters in the compression. 
 By running 
 * python generate_config.py
