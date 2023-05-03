@@ -1,2 +1,2 @@
 # QoZ
-Please check the sc branch for SC 22' submission AD, or the develop branch for the developing version of QoZ.
+If you Would like to test QoZ, please check the sc branch.
