@@ -1,4 +1,4 @@
-QoZ: Dynamic Quality Metric Oriented Error Bounded Lossy Compression for Scientific Datasets
+## QoZ: Dynamic Quality Metric Oriented Error Bounded Lossy Compression for Scientific Datasets
 
 ## Introduction
 
