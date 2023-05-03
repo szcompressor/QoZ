@@ -198,7 +198,7 @@ int main(int argc, char *argv[]) {
     bool compression = false;
     bool decompression = false;
     int dataType = SZ_FLOAT;
-    int qoz =1;
+    int qoz =-1;
     char *inPath = nullptr;
     char *cmpPath = nullptr;
     char *conPath = nullptr;
@@ -312,7 +312,7 @@ int main(int argc, char *argv[]) {
                 conPath = argv[i];
                 break;
             case 'q':
-                if (++i == argc || sscanf(argv[i], "%zu", &qoz) != 1)
+                if (++i == argc || sscanf(argv[i], "%d", &qoz) != 1)
                     usage();
                 break;
 
@@ -423,8 +423,8 @@ int main(int argc, char *argv[]) {
     if (compression && conPath != nullptr) {
         conf.loadcfg(conPath);
     }
-    if (qoz){
-        conf.QoZ=1;
+    if (qoz>=0){
+        conf.QoZ=qoz;
     }
 
     if (errBoundMode != nullptr) {
