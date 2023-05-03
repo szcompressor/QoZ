@@ -18,7 +18,7 @@ for dataset in datasets:
         levelwisePredictionSelection=6
     else:
         maxStep=32
-        sampleBlockSize=16
+        sampleBlockSize=32
         autoTuningRate=0.005
         predictorTuningRate=0.005
         levelwisePredictionSelection=4
