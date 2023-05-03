@@ -1,2 +1,2 @@
 # QoZ
-If you Would like to test QoZ, please check the sc branch.
+If you Would like to use or test QoZ, please check the sc branch.
