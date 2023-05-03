@@ -40,7 +40,7 @@ Currently you need to add a configuration file to the argument line (-c) for mod
 By running 
 * python generate_config.py
 
-, you can create some examples of the configuration file. The qoz-related parameters are on the line 14-20 of generate_config.py
+you can create some examples of the configuration file. The qoz-related parameters are on the line 14-20 of generate_config.py.
 
 ## SC 22' Evaluation guides (only for SC 22' AD evaluation)
 
