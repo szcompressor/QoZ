@@ -1,8 +1,8 @@
-## QoZ: Dynamic Quality Metric Oriented Error Bounded Lossy Compression for Scientific Datasets
+# QoZ: Dynamic Quality Metric Oriented Error Bounded Lossy Compression for Scientific Datasets
 
 ## Introduction
 
-This is the source code of QoZ: Dynamic Quality Metric Oriented Error Bounded Lossy Compression for Scientific Datasets
+This is the source code of the QoZ data compression introduced in the paper: QoZ: Dynamic Quality Metric Oriented Error Bounded Lossy Compression for Scientific Datasets ([paper link](https://www.computer.org/csdl/proceedings-article/sc/2022/544400a892/1I0bT6kfcas)). 
 
 ## Dependencies
 
