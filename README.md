@@ -77,7 +77,7 @@ Step 4: Run test_qoz.py to generate the test results.
 * Target: See step 3
 * Metric: Includes compression ratio (overall_cr), psnr (overall_psnr), ssim (overall_ssim), autocorrelation (overall_ac), compression speed (cspeed) and decompression speed (dspeed).
 
-###Output examples
+### Output examples
 
 The output files contain:
 * overall_cr: the overall compression ratio under different vr-rel error bounds.
@@ -100,7 +100,7 @@ QoZ is a user-specific metric driven lossy compression, which means that it can 
 * The compression/decompression speeds generated using mode psnr correspond to the table 4 in the paper (different results may achieved if not run on the same nodes listed in the paper).
 * Bit rate = 32 / compression ratio.
 
-###A full evaluation exmaple for MIRANDA dataset
+### A full evaluation exmaple for MIRANDA dataset
 
 * git clone https://github.com/Meso272/QoZ.git -b sc
 * mkdir build
