@@ -44,6 +44,7 @@ you can create some examples of the configuration file. The qoz-related paramete
 
 ## SC 22' Evaluation guides (only for SC 22' AD evaluation)
 
+### Steps
 Step 1: Download the dataset from the following links,then unzip them:
 
 * CESM-ATM: https://g-8d6b0.fd635.8443.data.globus.org/ds131.2/Data-Reduction-Repo/raw-data/CESM-ATM/SDRBENCH-CESM-ATM-cleared-1800x3600.tar.gz 
@@ -118,7 +119,7 @@ A full evaluation exmaple for MIRANDA dataset:
 
 The output of this example is part of the results in figure 8 (b) of the paper.
 
-## Figure Plotting:
+### Figure Plotting:
 
 In the plotting/ folder, there is an example of generating the plots in the paper, which corresponds to the Figure 8(b) in the paper. When running the test_qoz.py, if  mode psnr and dataset miranda are used, the output will be a part of the plotting/miranda.txt. To plot the rate-distortion, the gnuplot is need to be installed and please run the following command for plotting:
 
