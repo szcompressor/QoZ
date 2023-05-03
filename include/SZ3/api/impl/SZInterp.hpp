@@ -357,9 +357,6 @@ double Tuning(SZ::Config &conf, T *data){
         if (conf.levelwisePredictionSelection<=0)
             conf.levelwisePredictionSelection = (N==2?6:4);
         if (conf.sampleBlockSize<=0){
-            if(conf.waveletAutoTuning>=2)
-                conf.sampleBlockSize = 64;
-            else
                 conf.sampleBlockSize = (N==2?64:32);
         }
     }  
@@ -369,7 +366,6 @@ double Tuning(SZ::Config &conf, T *data){
         conf.maxStep=0;
         conf.levelwisePredictionSelection=0;
         conf.profiling=0;
-        conf.var_first=0;
     }
 
 
