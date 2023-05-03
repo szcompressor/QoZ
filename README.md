@@ -14,9 +14,9 @@ Please Install the following dependencies before running the artiact evaluation 
 * cmake>=3.13
 * gcc>=6.0
 
-The following dependencies are only for SC 22' artifaction evaluation:
+The following dependencies are only for SC 22' artifact evaluation:
 * Python >= 3.6 
-* qcat (from https://github.com/Meso272/qcat, check its readme for installation guides. Make sure the following executables are successfully installed: calculateSSIM and computeErrAutoCorrelation)
+* qcat (from https://github.com/Meso272/qcat, check its readme for installation guides. Make sure the following executables are successfully installed: calculateSSIM and computeErrAutoCorrelation).
 
 ## 3rd party libraries/tools
 
