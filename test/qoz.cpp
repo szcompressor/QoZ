@@ -1,7 +1,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>
-#include "SZ3/api/sz.hpp"
+#include "QoZ/api/sz.hpp"
 
 
 #define SZ_FLOAT 0
@@ -139,12 +139,12 @@ void usage_sz2() {
 }
 
 template<class T>
-void compress(char *inPath, char *cmpPath, SZ::Config conf) {
+void compress(char *inPath, char *cmpPath, QoZ::Config conf) {
     T *data = new T[conf.num];
-    SZ::readfile<T>(inPath, conf.num, data);
+    QoZ::readfile<T>(inPath, conf.num, data);
 
     size_t outSize;
-    SZ::Timer timer(true);
+    QoZ::Timer timer(true);
     char *bytes = SZ_compress<T>(conf, data, outSize);
     double compress_time = timer.stop();
 
@@ -154,7 +154,7 @@ void compress(char *inPath, char *cmpPath, SZ::Config conf) {
     } else {
         strcpy(outputFilePath, cmpPath);
     }
-    SZ::writefile(outputFilePath, bytes, outSize);
+    QoZ::writefile(outputFilePath, bytes, outSize);
 
     printf("compression ratio = %.2f \n", conf.num * 1.0 * sizeof(T) / outSize);
     printf("compression time = %f\n", compress_time);
@@ -166,13 +166,13 @@ void compress(char *inPath, char *cmpPath, SZ::Config conf) {
 
 template<class T>
 void decompress(char *inPath, char *cmpPath, char *decPath,
-                SZ::Config conf,
+                QoZ::Config conf,
                 int binaryOutput, int printCmpResults) {
 
     size_t cmpSize;
-    auto cmpData = SZ::readfile<char>(cmpPath, cmpSize);
+    auto cmpData = QoZ::readfile<char>(cmpPath, cmpSize);
 
-    SZ::Timer timer(true);
+    QoZ::Timer timer(true);
     T *decData = SZ_decompress<T>(conf, cmpData.get(), cmpSize);
     double compress_time = timer.stop();
 
@@ -183,16 +183,16 @@ void decompress(char *inPath, char *cmpPath, char *decPath,
         strcpy(outputFilePath, decPath);
     }
     if (binaryOutput == 1) {
-        SZ::writefile<T>(outputFilePath, decData, conf.num);
+        QoZ::writefile<T>(outputFilePath, decData, conf.num);
     } else {
-        SZ::writeTextFile<T>(outputFilePath, decData, conf.num);
+        QoZ::writeTextFile<T>(outputFilePath, decData, conf.num);
     }
     if (printCmpResults) {
         //compute the distortion / compression errors...
         size_t totalNbEle;
-        auto ori_data = SZ::readfile<T>(inPath, totalNbEle);
+        auto ori_data = QoZ::readfile<T>(inPath, totalNbEle);
         assert(totalNbEle == conf.num);
-        SZ::verify<T>(ori_data.get(), decData, conf.num);
+        QoZ::verify<T>(ori_data.get(), decData, conf.num);
     }
     delete[]decData;
 
@@ -423,15 +423,15 @@ int main(int argc, char *argv[]) {
         exit(0);
     }
 
-    SZ::Config conf;
+    QoZ::Config conf;
     if (r2 == 0) {
-        conf = SZ::Config(r1);
+        conf = QoZ::Config(r1);
     } else if (r3 == 0) {
-        conf = SZ::Config(r2, r1);
+        conf = QoZ::Config(r2, r1);
     } else if (r4 == 0) {
-        conf = SZ::Config(r3, r2, r1);
+        conf = QoZ::Config(r3, r2, r1);
     } else {
-        conf = SZ::Config(r4, r3, r2, r1);
+        conf = QoZ::Config(r4, r3, r2, r1);
     }
     if (compression && conPath != nullptr) {
         conf.loadcfg(conPath);
@@ -458,30 +458,30 @@ int main(int argc, char *argv[]) {
                 conf.l2normErrorBound = atof(normErrorBound);
             }
         }
-        if (strcmp(errBoundMode, SZ::EB_STR[SZ::EB_ABS]) == 0) {
-            conf.errorBoundMode = SZ::EB_ABS;
+        if (strcmp(errBoundMode, QoZ::EB_STR[QoZ::EB_ABS]) == 0) {
+            conf.errorBoundMode = QoZ::EB_ABS;
             if (errBound != nullptr) {
                 conf.absErrorBound = atof(errBound);
             }
-        } else if (strcmp(errBoundMode, SZ::EB_STR[SZ::EB_REL]) == 0 || strcmp(errBoundMode, "VR_REL") == 0) {
-            conf.errorBoundMode = SZ::EB_REL;
+        } else if (strcmp(errBoundMode, QoZ::EB_STR[QoZ::EB_REL]) == 0 || strcmp(errBoundMode, "VR_REL") == 0) {
+            conf.errorBoundMode = QoZ::EB_REL;
             if (errBound != nullptr) {
                 conf.relErrorBound = atof(errBound);
             }
-        } else if (strcmp(errBoundMode, SZ::EB_STR[SZ::EB_PSNR]) == 0) {
-            conf.errorBoundMode = SZ::EB_PSNR;
+        } else if (strcmp(errBoundMode, QoZ::EB_STR[QoZ::EB_PSNR]) == 0) {
+            conf.errorBoundMode = QoZ::EB_PSNR;
             if (errBound != nullptr) {
                 conf.psnrErrorBound = atof(errBound);
             }
-        } else if (strcmp(errBoundMode, SZ::EB_STR[SZ::EB_L2NORM]) == 0) {
-            conf.errorBoundMode = SZ::EB_L2NORM;
+        } else if (strcmp(errBoundMode, QoZ::EB_STR[QoZ::EB_L2NORM]) == 0) {
+            conf.errorBoundMode = QoZ::EB_L2NORM;
             if (errBound != nullptr) {
                 conf.l2normErrorBound = atof(errBound);
             }
-        } else if (strcmp(errBoundMode, SZ::EB_STR[SZ::EB_ABS_AND_REL]) == 0) {
-            conf.errorBoundMode = SZ::EB_ABS_AND_REL;
-        } else if (strcmp(errBoundMode, SZ::EB_STR[SZ::EB_ABS_OR_REL]) == 0) {
-            conf.errorBoundMode = SZ::EB_ABS_OR_REL;
+        } else if (strcmp(errBoundMode, QoZ::EB_STR[QoZ::EB_ABS_AND_REL]) == 0) {
+            conf.errorBoundMode = QoZ::EB_ABS_AND_REL;
+        } else if (strcmp(errBoundMode, QoZ::EB_STR[QoZ::EB_ABS_OR_REL]) == 0) {
+            conf.errorBoundMode = QoZ::EB_ABS_OR_REL;
         } else {
             printf("Error: wrong error bound mode setting by using the option '-M'\n");
             usage();
@@ -491,16 +491,16 @@ int main(int argc, char *argv[]) {
     if (tuningTarget!= nullptr) {
        
         if (strcmp(tuningTarget, "PSNR") == 0) {
-            conf.tuningTarget = SZ::TUNING_TARGET_RD;
+            conf.tuningTarget = QoZ::TUNING_TARGET_RD;
         }
         else if (strcmp(tuningTarget, "CR") == 0) {
-            conf.tuningTarget = SZ::TUNING_TARGET_CR;
+            conf.tuningTarget = QoZ::TUNING_TARGET_CR;
         }
         else if (strcmp(tuningTarget, "SSIM") == 0) {
-            conf.tuningTarget = SZ::TUNING_TARGET_SSIM;
+            conf.tuningTarget = QoZ::TUNING_TARGET_SSIM;
         }
         else if (strcmp(tuningTarget, "AC") == 0) {
-            conf.tuningTarget = SZ::TUNING_TARGET_AC;
+            conf.tuningTarget = QoZ::TUNING_TARGET_AC;
         }
         else {
             printf("Error: wrong tuning target setting by using the option '-T'\n");
