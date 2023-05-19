@@ -30,7 +30,7 @@ namespace SZ {
         uchar *compress(const Config &conf, T *data, size_t &compressed_size,int tuning=0) {
 
             Timer timer(true);
-            //std::cout<<"general1"<<std::endl;
+            
            
             std::vector<int> new_quant_inds = frontend.compress(data);
             quant_inds.insert(quant_inds.end(),new_quant_inds.begin(),new_quant_inds.end());
@@ -42,7 +42,7 @@ namespace SZ {
                 return buffer;
 
             }
-            //std::cout<<"general2"<<std::endl;
+            
 //            timer.stop("Prediction & Quantization");
            
             size_t bufferSize = 1.5 * (frontend.size_est());
@@ -50,7 +50,7 @@ namespace SZ {
             uchar *buffer_pos = buffer;
 
             frontend.save(buffer_pos);
-            //std::cout<<"general3"<<std::endl;
+           
 
             timer.start();
             encoder.preprocess_encode(quant_inds, 0);
@@ -59,11 +59,11 @@ namespace SZ {
             encoder.postprocess_encode();
 //            timer.stop("Coding");
             assert(buffer_pos - buffer < bufferSize);
-            //std::cout<<"general4"<<std::endl;
+           
 
             //timer.start();
             uchar *lossless_data = lossless.compress(buffer, buffer_pos - buffer, compressed_size);
-            //std::cout<<"general5"<<std::endl;
+          
             lossless.postcompress_data(buffer);
 //            timer.stop("Lossless");
 
@@ -76,7 +76,7 @@ namespace SZ {
             uchar *buffer_pos = buffer;
 
             frontend.save(buffer_pos);
-            //std::cout<<"general3"<<std::endl;
+            
 
             //timer.start();
             encoder.preprocess_encode(quant_inds, 0);
@@ -85,11 +85,11 @@ namespace SZ {
             encoder.postprocess_encode();
 //            timer.stop("Coding");
             assert(buffer_pos - buffer < bufferSize);
-            //std::cout<<"general4"<<std::endl;
+        
 
             //timer.start();
             uchar *lossless_data = lossless.compress(buffer, buffer_pos - buffer, compressed_size);
-            //std::cout<<"general5"<<std::endl;
+         
             lossless.postcompress_data(buffer);
 //            timer.stop("Lossless");
 

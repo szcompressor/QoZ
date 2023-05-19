@@ -27,8 +27,10 @@ namespace SZ {
 
     template<class T, uint N>
     inline void
-    profiling_block_3d(T *data, std::vector<size_t> &dims, std::vector< std::vector<size_t> > &starts,size_t block_size, double abseb) {
+    profiling_block_3d(T *data, std::vector<size_t> &dims, std::vector< std::vector<size_t> > &starts,size_t block_size, double abseb,size_t stride=4) {
         assert(dims.size() == N);
+        if (stride==0)
+            stride=block_size;
         
         size_t dimx=dims[0],dimy=dims[1],dimz=dims[2],dimyz=dimy*dimz;
         
@@ -38,9 +40,9 @@ namespace SZ {
                     size_t start_idx=i*dimyz+j*dimz+k;
                     T min=data[start_idx];
                     T max=data[start_idx];
-                    for (int ii=0;ii<=block_size;ii+=block_size){
-                        for(int jj=0;jj<=block_size;jj+=block_size){
-                            for (int kk=0;kk<=block_size;kk+=block_size){
+                    for (int ii=0;ii<=block_size;ii+=stride){
+                        for(int jj=0;jj<=block_size;jj+=stride){
+                            for (int kk=0;kk<=block_size;kk+=stride){
                                 size_t cur_idx=start_idx+ii*dimyz+jj*dimz+kk;
                                 T cur_value=data[cur_idx];
                                 if (cur_value<min)
@@ -100,8 +102,10 @@ namespace SZ {
  
     template<class T, uint N>
     inline void
-    profiling_block_2d(T *data, std::vector<size_t> &dims, std::vector< std::vector<size_t> > &starts,size_t block_size, double abseb) {
+    profiling_block_2d(T *data, std::vector<size_t> &dims, std::vector< std::vector<size_t> > &starts,size_t block_size, double abseb,size_t stride=4) {
         assert(dims.size() == N);
+        if (stride==0)
+            stride=block_size;
         
         size_t dimx=dims[0],dimy=dims[1];
         
@@ -111,8 +115,8 @@ namespace SZ {
                 size_t start_idx=i*dimy+j;
                 T min=data[start_idx];
                 T max=data[start_idx];
-                for (int ii=0;ii<=block_size;ii+=block_size){
-                    for(int jj=0;jj<=block_size;jj+=block_size){
+                for (int ii=0;ii<=block_size;ii+=stride){
+                    for(int jj=0;jj<=block_size;jj+=stride){
                            
                         size_t cur_idx=start_idx+ii*dimy+jj;
                         T cur_value=data[cur_idx];

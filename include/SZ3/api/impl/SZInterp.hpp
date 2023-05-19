@@ -108,183 +108,6 @@ double do_not_use_this_interp_compress_block_test(T *data, std::vector<size_t> d
     return compression_ratio;
 }
 
-template<class T, SZ::uint N>
-char *SZ_compress_AutoSelectiveInterp(SZ::Config &conf, T *data, size_t &outSize,std::vector <int> InterpAlgo_Candidates,std::vector <int>interpDirection_Candidates,bool blockwise=false){
-    //Assert absError already calculated
-
-    
-    size_t element_num=conf.num;
-   
-   
-        
-    
-    
-    if (conf.levelwisePredictionSelection<=1){
-        std::vector<T> orig_data(element_num,0);
-        //std::vector<int> best_quant_bins;
-        //std::vector<T> best_decomp(element_num,0);
-        uint8_t best_interpAlgo;
-        uint8_t best_interpDirection;
-        size_t best_cmpsize=0;
-        double best_predloss=9e10;
-        for (int i=0;i<element_num;i++){
-            orig_data[i]=data[i];
-        }
-        auto sz = SZ::SZInterpolationCompressor<T, N, SZ::LinearQuantizer<T>, SZ::HuffmanEncoder<int>, SZ::Lossless_zstd>(
-                        SZ::LinearQuantizer<T>(conf.absErrorBound),
-                        SZ::HuffmanEncoder<int>(),
-                        SZ::Lossless_zstd());
-        for (auto &interp_op:InterpAlgo_Candidates) {
-            for (auto &interp_direction: interpDirection_Candidates) {
-                conf.interpAlgo=interp_op;
-                conf.interpDirection=interp_direction;
-                
-                size_t cur_cmpsize;
-                
-                if (blockwise){
-                    double cur_predloss;
-
-                    auto cmprData = sz.compress(conf,data,cur_cmpsize,2);
-                    delete []cmprData;
-                    cur_predloss=conf.decomp_square_error;
-                   
-                    if (cur_predloss<best_predloss){
-                        
-                        
-                        best_predloss=cur_predloss;
-                        best_interpAlgo=interp_op;
-                        best_interpDirection=interp_direction;
-                        //best_quant_bins=conf.quant_bins;
-
-                    }
-                }
-                else{
-                    auto cmprData=sz.compress(conf,data,cur_cmpsize,0);
-                    delete []cmprData;
-                   
-                    if (best_cmpsize==0 or cur_cmpsize<best_cmpsize){
-                        
-                        
-                        best_cmpsize=cur_cmpsize;
-                        best_interpAlgo=interp_op;
-                        best_interpDirection=interp_direction;
-                        //best_quant_bins=conf.quant_bins;
-
-                    }
-                }
-                for(int i=0;i<element_num;i++){
-                    
-                    data[i]=orig_data[i];
-
-                }
-
-            }
-        
-        }
-        //delete sz;
-        
-        conf.interpAlgo=best_interpAlgo;
-        conf.interpDirection=best_interpDirection;
-        
-       
-
-      
-
-            //size_t cur_cmpsize;
-        auto sz2 = SZ::SZInterpolationCompressor<T, N, SZ::LinearQuantizer<T>, SZ::HuffmanEncoder<int>, SZ::Lossless_zstd>(
-                    SZ::LinearQuantizer<T>(conf.absErrorBound),
-                    SZ::HuffmanEncoder<int>(),
-                    SZ::Lossless_zstd());
-            /*
-            return (char*)sz.encoding_lossless(conf,best_quant_bins,cur_cmpsize,true);
-            */
-        return (char*)sz2.compress(conf,data,outSize,blockwise?1:0);
-
-
-        
-    }
-    else{//levelwise
-        std::vector<T> orig_data(element_num,0);
-        //std::vector<int> best_quant_bins;
-        //std::vector<T> best_decomp(element_num,0);
-        std::vector<uint8_t> best_interpAlgo_list(conf.levelwisePredictionSelection,0);
-        std::vector<uint8_t> best_interpDirection_list(conf.levelwisePredictionSelection,0);
-        
-        for (int i=0;i<element_num;i++){
-
-            orig_data[i]=data[i];
-        }
-        auto sz = SZ::SZInterpolationCompressor<T, N, SZ::LinearQuantizer<T>, SZ::HuffmanEncoder<int>, SZ::Lossless_zstd>(
-                            SZ::LinearQuantizer<T>(conf.absErrorBound),
-                            SZ::HuffmanEncoder<int>(),
-                            SZ::Lossless_zstd());
-        for(int start_level=conf.levelwisePredictionSelection;start_level>=1;start_level--){
-            double best_loss=10e10;
-            uint8_t best_interpAlgo;
-            uint8_t best_interpDirection;
-            for (auto &interp_op:InterpAlgo_Candidates) {
-                for (auto &interp_direction: interpDirection_Candidates) {
-                    conf.interpAlgo=interp_op;
-                    conf.interpDirection=interp_direction;
-                    size_t cur_cmpsize;
-                    
-                    auto cmprData = sz.compress(conf,data,cur_cmpsize,2,conf.levelwisePredictionSelection?9999:start_level,start_level-1);
-                    delete []cmprData;
-                    double cur_loss=conf.decomp_square_error;
-                    if ( cur_loss<best_loss){
-                        best_loss=cur_loss;
-                        best_interpAlgo=interp_op;
-                        best_interpDirection=interp_direction;
-
-                        //best_quant_bins=conf.quant_bins;
-
-                    }
-
-
-                    for(int i=0;i<element_num;i++){
-                       
-                        data[i]=orig_data[i];
-
-                    }
-
-                }
-            
-            }
-            size_t cur_cmpsize;
-           
-            conf.interpAlgo=best_interpAlgo;
-            conf.interpDirection=best_interpDirection;
-            best_interpAlgo_list[start_level-1]=best_interpAlgo;
-            best_interpDirection_list[start_level-1]=best_interpDirection;
-            
-            auto cmprData = sz.compress(conf,data,cur_cmpsize,2,conf.levelwisePredictionSelection?9999:start_level,start_level-1);
-            delete []cmprData;
-        }
-        //delete sz;
-
-        conf.interpAlgo_list=best_interpAlgo_list;
-        conf.interpDirection_list=best_interpDirection_list;
-        for(int i=0;i<element_num;i++){
-                       
-                        data[i]=orig_data[i];
-
-                    }
-
-        
-        //size_t cur_cmpsize;
-        auto sz_2 = SZ::SZInterpolationCompressor<T, N, SZ::LinearQuantizer<T>, SZ::HuffmanEncoder<int>, SZ::Lossless_zstd>(
-                    SZ::LinearQuantizer<T>(conf.absErrorBound),
-                    SZ::HuffmanEncoder<int>(),
-                    SZ::Lossless_zstd());
-        return (char*)sz_2.compress(conf,data,outSize,blockwise?1:0);
-            
-
-     
-        
-    }
-
-
-}
 
 
 inline void init_alphalist(std::vector<double> &alpha_list,const double &rel_bound, SZ::Config &conf){
@@ -346,6 +169,8 @@ double Tuning(SZ::Config &conf, T *data){
         rel_bound=conf.relErrorBound;
     else
         rel_bound=conf.absErrorBound/rng;
+    if(rel_bound>1e-3)
+        conf.testLorenzo=0;
 
     if(conf.QoZ){
         if(conf.autoTuningRate<=0)
@@ -359,6 +184,7 @@ double Tuning(SZ::Config &conf, T *data){
         if (conf.sampleBlockSize<=0){
                 conf.sampleBlockSize = (N==2?64:32);
         }
+        conf.profiling=1//added.
     }  
     if(N!=2&&N!=3){
         conf.autoTuningRate=0;
@@ -409,7 +235,7 @@ double Tuning(SZ::Config &conf, T *data){
         conf.sampleBlockSize = (N==2?64:32);
     }
     
-    size_t minimum_sbs=2;
+    size_t minimum_sbs=16;
     if (conf.sampleBlockSize<minimum_sbs)
         conf.sampleBlockSize=minimum_sbs;
 
@@ -447,532 +273,142 @@ double Tuning(SZ::Config &conf, T *data){
 
     }
 
-        if (conf.predictorTuningRate>0 and conf.predictorTuningRate<1){
-            if (conf.verbose)
-                std::cout<<"Predictor tuning started."<<std::endl;
+    if(num_blocks<=(int)(0.3*conf.predictorTuningRate))//temp. to refine
+        conf.profiling=0;
+
+    if (conf.predictorTuningRate>0 and conf.predictorTuningRate<1){
+        if (conf.verbose)
+            std::cout<<"Predictor tuning started."<<std::endl;
 
 
-            std::vector<size_t> global_dims=conf.dims;
-            size_t global_num=conf.num;
-            double o_alpha=conf.alpha;
-            double o_beta=conf.beta;
+        std::vector<size_t> global_dims=conf.dims;
+        size_t global_num=conf.num;
+        double o_alpha=conf.alpha;
+        double o_beta=conf.beta;
 
 
 
             
             
-            //int step_length=int(pow(sample_ratio,1.0/N));
-            //std::vector< std::vector<T> > sampled_blocks;
-           
-         
-            {//if(!conf.exhaustiveTuning or conf.predictorTuningRate!=conf.autoTuningRate){
-                
-                for(int i=0;i<sampled_blocks.size();i++){
-                    std::vector< T >().swap(sampled_blocks[i]);
-                   
-                }
-                std::vector< std::vector<T> >().swap(sampled_blocks);
-                  
-                
-                
-                if (totalblock_num==-1){
-                    totalblock_num=1;
-                    for(int i=0;i<N;i++){
-                        
-                        totalblock_num*=(int)((conf.dims[i]-1)/sampleBlockSize);
-                    }
-
-
-                }
-
+        //int step_length=int(pow(sample_ratio,1.0/N));
+        //std::vector< std::vector<T> > sampled_blocks;
+       
+     
+        {//if(!conf.exhaustiveTuning or conf.predictorTuningRate!=conf.autoTuningRate){
+            
+            for(int i=0;i<sampled_blocks.size();i++){
+                std::vector< T >().swap(sampled_blocks[i]);
                
-                //sampled_blocks.resize( (int)((totalblock_num-1)/sample_ratio)+1 );
-                int idx=0,block_idx=0;   
-
-                if(conf.profiling){
+            }
+            std::vector< std::vector<T> >().swap(sampled_blocks);
+              
+            
+            
+            if (totalblock_num==-1){
+                totalblock_num=1;
+                for(int i=0;i<N;i++){
                     
-                    int sample_ratio=int(num_blocks/(totalblock_num*conf.predictorTuningRate));
-                   
-                    
-
-                    if(N==2){
-                        for(int i=0;i<num_blocks;i+=sample_ratio){
-                            std::vector<T> s_block;
-                            SZ::sample_block_2d<T,N>(data, s_block,conf.dims, starts[i],sampleBlockSize+1);
-                            sampled_blocks.push_back(s_block);
-
-                        }
-                    }
-                    else if(N==3){
-                        for(int i=0;i<num_blocks;i+=sample_ratio){
-                            std::vector<T> s_block;
-                            SZ::sample_block_3d<T,N>(data, s_block,conf.dims, starts[i],sampleBlockSize+1);
-                            sampled_blocks.push_back(s_block);
-
-                        }
-                    }
-
-
-
-
-
+                    totalblock_num*=(int)((conf.dims[i]-1)/sampleBlockSize);
                 }
+
+
+            }
+
+           
+            //sampled_blocks.resize( (int)((totalblock_num-1)/sample_ratio)+1 );
+            int idx=0,block_idx=0;   
+
+            if(conf.profiling){
                 
-                else{
-                    int sample_ratio=int(1.0/conf.predictorTuningRate);
-                    if (N==2){
+                int sample_ratio=int(num_blocks/(totalblock_num*conf.predictorTuningRate));
+               
+                
+
+                if(N==2){
+                    for(int i=0;i<num_blocks;i+=sample_ratio){
+                        std::vector<T> s_block;
+                        SZ::sample_block_2d<T,N>(data, s_block,conf.dims, starts[i],sampleBlockSize+1);
+                        sampled_blocks.push_back(s_block);
+
+                    }
+                }
+                else if(N==3){
+                    for(int i=0;i<num_blocks;i+=sample_ratio){
+                        std::vector<T> s_block;
+                        SZ::sample_block_3d<T,N>(data, s_block,conf.dims, starts[i],sampleBlockSize+1);
+                        sampled_blocks.push_back(s_block);
+
+                    }
+                }
+
+
+
+
+
+            }
+            
+            else{
+                int sample_ratio=int(1.0/conf.predictorTuningRate);
+                if (N==2){
+                    
+                    //std::vector<size_t> sample_dims(2,sampleBlockSize+1);
+
+                    for (size_t x_start=0;x_start<conf.dims[0]-sampleBlockSize;x_start+=sampleBlockSize){
                         
-                        //std::vector<size_t> sample_dims(2,sampleBlockSize+1);
+                        for (size_t y_start=0;y_start<conf.dims[1]-sampleBlockSize;y_start+=sampleBlockSize){
+                            if (idx%sample_ratio==0){
+                               
 
-                        for (size_t x_start=0;x_start<conf.dims[0]-sampleBlockSize;x_start+=sampleBlockSize){
-                            
-                            for (size_t y_start=0;y_start<conf.dims[1]-sampleBlockSize;y_start+=sampleBlockSize){
+                                std::vector<size_t> starts{x_start,y_start};
+                                std::vector<T> s_block;
+                                SZ::sample_block_2d<T,N>(data, s_block,conf.dims, starts,sampleBlockSize+1);
+                                sampled_blocks.push_back(s_block);
+                            }
+                            idx+=1;
+
+                        }
+                    }
+                }
+                else if (N==3){
+                    //std::vector<size_t> sample_dims(3,sampleBlockSize+1);
+                    
+                    for (size_t x_start=0;x_start<conf.dims[0]-sampleBlockSize;x_start+=sampleBlockSize){
+                        
+                        for (size_t y_start=0;y_start<conf.dims[1]-sampleBlockSize;y_start+=sampleBlockSize){
+                            for (size_t z_start=0;z_start<conf.dims[2]-sampleBlockSize;z_start+=sampleBlockSize){
                                 if (idx%sample_ratio==0){
-                                   
-
-                                    std::vector<size_t> starts{x_start,y_start};
+                                    std::vector<size_t> starts{x_start,y_start,z_start};
                                     std::vector<T> s_block;
-                                    SZ::sample_block_2d<T,N>(data, s_block,conf.dims, starts,sampleBlockSize+1);
+                                    SZ::sample_block_3d<T,N>(data, s_block,conf.dims, starts,sampleBlockSize+1);
                                     sampled_blocks.push_back(s_block);
                                 }
                                 idx+=1;
 
-                            }
-                        }
-                    }
-                    else if (N==3){
-                        //std::vector<size_t> sample_dims(3,sampleBlockSize+1);
-                        
-                        for (size_t x_start=0;x_start<conf.dims[0]-sampleBlockSize;x_start+=sampleBlockSize){
-                            
-                            for (size_t y_start=0;y_start<conf.dims[1]-sampleBlockSize;y_start+=sampleBlockSize){
-                                for (size_t z_start=0;z_start<conf.dims[2]-sampleBlockSize;z_start+=sampleBlockSize){
-                                    if (idx%sample_ratio==0){
-                                        std::vector<size_t> starts{x_start,y_start,z_start};
-                                        std::vector<T> s_block;
-                                        SZ::sample_block_3d<T,N>(data, s_block,conf.dims, starts,sampleBlockSize+1);
-                                        sampled_blocks.push_back(s_block);
-                                    }
-                                    idx+=1;
 
-
-                                }
                             }
                         }
                     }
                 }
             }
-            
-            
-            num_sampled_blocks=sampled_blocks.size();
-            per_block_ele_num=pow(sampleBlockSize+1,N);
-            ele_num=num_sampled_blocks*per_block_ele_num;
-            conf.dims=std::vector<size_t>(N,sampleBlockSize+1);
-            conf.num=per_block_ele_num;
-            std::vector<T> cur_block(per_block_ele_num,0);
-
-
-           
-            double lorenzo_average_cr=0;
-            if(conf.testLorenzo and conf.autoTuningRate==0){
-            
-                lorenzo_config.cmprAlgo = SZ::ALGO_LORENZO_REG;
-                lorenzo_config.dims=conf.dims;
-                lorenzo_config.num=conf.num;
-                //lorenzo_config.setDims(sample_dims.begin(), sample_dims.end());
-                lorenzo_config.lorenzo = true;
-                lorenzo_config.lorenzo2 = true;
-                lorenzo_config.regression = false;
-                lorenzo_config.regression2 = false;
-                lorenzo_config.openmp = false;
-                lorenzo_config.blockSize = 5;//why?
-                lorenzo_config.quantbinCnt = 65536 * 2;
-
-                //char *cmpData;
-                auto quantizer = SZ::LinearQuantizer<T>(conf.absErrorBound, conf.quantbinCnt / 2);
-                if (N == 3 && !conf.regression2) {
-                    // use fast version for 3D
-                    auto sz = SZ::make_sz_general_compressor<T, N>(SZ::make_sz_fast_frontend<T, N>(conf, quantizer), SZ::HuffmanEncoder<int>(),
-                                                                   SZ::Lossless_zstd());
-                    for (int i=0;i<num_sampled_blocks;i++){
-                        size_t sampleOutSize;
-                        cur_block=sampled_blocks[i];
-                        auto cmprData = sz->compress(lorenzo_config, cur_block.data(), sampleOutSize,1);
-                        delete[]cmprData;
-                       
-                    }
-                    size_t sampleOutSize;
-                    auto cmprData=sz->encoding_lossless(sampleOutSize);
-                    //delete sz;
-                    delete[]cmprData;
-                    best_lorenzo_ratio=ele_num * 1.0 * sizeof(T) / sampleOutSize;
-
-                   
-                } else {
-                    auto sz = make_lorenzo_regression_compressor<T, N>(conf, quantizer, SZ::HuffmanEncoder<int>(), SZ::Lossless_zstd());
-                    for (int i=0;i<num_sampled_blocks;i++){
-                        size_t sampleOutSize;
-                        cur_block=sampled_blocks[i];
-                        auto cmprData = sz->compress(lorenzo_config, cur_block.data(), sampleOutSize,1);
-                        delete[]cmprData;
-                    }
-                    size_t sampleOutSize;
-                    auto cmprData=sz->encoding_lossless(sampleOutSize);
-                    //delete sz;
-                    delete[]cmprData;
-                    
-                    best_lorenzo_ratio=ele_num * 1.0 * sizeof(T) / sampleOutSize;
-                  
-
-                    
-                }
-                
-                    //double ratio = per_block_ele_num * 1.0 * sizeof(T) / sampleOutSize;
-
-          
-                    //lorenzo_average_cr+=ratio/num_sampled_blocks;
-
-                
-
-               
-
-                //best_lorenzo_ratio=lorenzo_average_cr;
-                if(conf.verbose)
-                    std::cout << "lorenzo best cr = " << best_lorenzo_ratio << std::endl;
-            }
-            
-           
-            
-            if (conf.exhaustiveTuning==0 and conf.autoTuningRate>0){
-                double cur_alpha,cur_beta;
-                
-                if (rel_bound>=0.01){
-                    cur_alpha=2;
-                    cur_beta=2;
-                }
-                else if (rel_bound>=0.007){
-                    cur_alpha=1.75;
-                    cur_beta=2;
-                }
-                
-                else if (rel_bound>=0.004){
-                    cur_alpha=1.5;
-                    cur_beta=2;
-                }
-                
-                else if (rel_bound>0.001){
-                    cur_alpha=1.25;
-                    cur_beta=1.5;
-                }
-                else {
-                    cur_alpha=1;
-                    cur_beta=1;
-                }
-                
-        
-               
-                
-                
-                conf.alpha=cur_alpha;
-                conf.beta=cur_beta;
-            
-            }
-           
-            std::vector<int> interpAlgo_Candidates={SZ::INTERP_ALGO_LINEAR, SZ::INTERP_ALGO_CUBIC};
-            std::vector<int> interpDirection_Candidates={0, SZ::factorial(N) -1};
-            if(conf.multiDimInterp)
-                interpDirection_Candidates.push_back(SZ::factorial(N));
-            if(conf.levelwisePredictionSelection>0){
-               
-
-                std::vector<uint8_t> interpAlgo_list(conf.levelwisePredictionSelection,0);
-                std::vector<uint8_t> interpDirection_list(conf.levelwisePredictionSelection,0);
-                auto sz = SZ::SZInterpolationCompressor<T, N, SZ::LinearQuantizer<T>, SZ::HuffmanEncoder<int>, SZ::Lossless_zstd>(
-                                            SZ::LinearQuantizer<T>(conf.absErrorBound),
-                                            SZ::HuffmanEncoder<int>(),
-                                            SZ::Lossless_zstd());
-                
-                for(int level=conf.levelwisePredictionSelection;level>0;level--){
-                    int start_level=(level==conf.levelwisePredictionSelection?9999:level);
-                    int end_level=level-1;
-                    uint8_t bestInterpAlgo = SZ::INTERP_ALGO_CUBIC;
-                    uint8_t bestDirection = 0;
-                    double best_interp_absloss=9999999999;
-                    //conf.cmprAlgo = SZ::ALGO_INTERP;
-                    
-                    
-                    
-                    for (auto &interp_op: interpAlgo_Candidates) {
-                        for (auto &interp_direction: interpDirection_Candidates) {
-                            /*
-                            if (interp_direction==2 and level<=2)
-                                continue;
-                            */
-                            conf.interpAlgo=interp_op;
-                            conf.interpDirection=interp_direction;
-                            double cur_absloss=0;
-
-                            
-                            for (int i=0;i<num_sampled_blocks;i++){
-
-                                cur_block=sampled_blocks[i];
-                                
-
-                                size_t outSize=0;
-                               
-                                auto cmprData =sz.compress(conf, cur_block.data(), outSize,2,start_level,end_level);
-                                delete []cmprData;
-                                
-                                
-                                
-                                
-                                cur_absloss+=conf.decomp_square_error;
-
-                            }
-                          
-                            if (cur_absloss<best_interp_absloss){
-                                best_interp_absloss=cur_absloss;
-                                bestInterpAlgo=interp_op;
-                                bestDirection=interp_direction;
-                            }
-                        }
-                    }
-                    
-                    interpAlgo_list[level-1]=bestInterpAlgo;
-                    interpDirection_list[level-1]=bestDirection;
-
-
-
-
-                }
-                
-                
-                conf.interpAlgo_list=interpAlgo_list;
-                conf.interpDirection_list=interpDirection_list;
-                if(conf.autoTuningRate==0){
-               
-                    std::vector<int> q_bins;
-
-                    std::vector<std::vector<int> > block_q_bins;
-                        //block_q_bins.reverse(num_sampled_blocks);
-                    std::vector<size_t> q_bin_counts;
-
-                    q_bins.reserve(ele_num);
-                    block_q_bins.reserve(num_sampled_blocks);
-
-
-
-                    
-                    for (int i=0;i<num_sampled_blocks;i++){
-                        size_t sampleOutSize;
-                        cur_block=sampled_blocks[i];
-                        
-                        auto cmprData = sz.compress(conf, cur_block.data(), sampleOutSize,1);
-                        delete []cmprData;
-                       
-                        block_q_bins.push_back(conf.quant_bins);
-                        
-                        //delete[]cmprData;
-                       
-                        //double ratio = per_block_ele_num * 1.0 * sizeof(T) / sampleOutSize;
-
-              
-                        //best_interp_cr+=ratio/num_sampled_blocks;
-
-                    }
-                    q_bin_counts=conf.quant_bin_counts;
-                        
-
-                    size_t level_num=q_bin_counts.size();
-                       
-                    size_t last_pos=0;
-                    for(int k=level_num-1;k>=0;k--){
-                        for (size_t l =0;l<num_sampled_blocks;l++){
-                              
-                             for (size_t m=last_pos;m<q_bin_counts[k];m++){
-                                q_bins.push_back(block_q_bins[l][m]);
-                            }
-                        }
-                           
-                        last_pos=q_bin_counts[k];
-                           
-                    }
-                        
-                        
-                    size_t outSize=0;
-               
-                    auto cmprData=sz.encoding_lossless(conf,q_bins,outSize);
-                    
-                    //delete sz;
-                    delete []cmprData;
-                    best_interp_cr=ele_num*1.0*sizeof(T)/outSize;
-                    
-                    //if (anchor_rate>0)
-                    //  best_interp_cr=1/((1-anchor_rate)/best_interp_cr+anchor_rate);
-                   
-                    std::vector<int>().swap( q_bins);
-
-                    std::vector<std::vector<int> >().swap( block_q_bins);
-                    std::vector<size_t>().swap( q_bin_counts);
-                }
-
-
-              
-
-
-
-            }
-
-            else{
-                
-                uint8_t bestInterpAlgo = SZ::INTERP_ALGO_CUBIC;
-                uint8_t bestDirection = 0;
-                auto sz = SZ::SZInterpolationCompressor<T, N, SZ::LinearQuantizer<T>, SZ::HuffmanEncoder<int>, SZ::Lossless_zstd>(
-                                            SZ::LinearQuantizer<T>(conf.absErrorBound),
-                                            SZ::HuffmanEncoder<int>(),
-                                            SZ::Lossless_zstd());
-                
-                //conf.cmprAlgo == SZ::ALGO_INTERP;
-                std::vector<int> q_bins;
-
-                std::vector<std::vector<int> > block_q_bins;
-                std::vector<size_t> q_bin_counts;
-                q_bins.reserve(ele_num);
-                block_q_bins.reserve(num_sampled_blocks);
-                for (auto &interp_op: interpAlgo_Candidates) {
-                    for (auto &interp_direction: interpDirection_Candidates) {
-                        conf.interpAlgo=interp_op;
-                        conf.interpDirection=interp_direction;
-                        double cur_ratio=0;
-                        
-                        
-                        //block_q_bins.reverse(num_sampled_blocks);
-                        
-                        for (int i=0;i<num_sampled_blocks;i++){
-                            size_t sampleOutSize;
-                            std::vector<T> cur_block=sampled_blocks[i];
-                            auto cmprData = sz.compress(conf, cur_block.data(), sampleOutSize,1);
-                            delete []cmprData;
-
-                    
-                            block_q_bins.push_back(conf.quant_bins);
-
-          
-                           //cur_ratio+=ratio/num_sampled_blocks;
-
-                        }
-                        q_bin_counts=conf.quant_bin_counts;
-                        
-
-                        size_t level_num=q_bin_counts.size();
-                            
-                        size_t last_pos=0;
-                        for(int k=level_num-1;k>=0;k--){
-                            for (size_t l =0;l<num_sampled_blocks;l++){
-                                    
-                                 for (size_t m=last_pos;m<q_bin_counts[k];m++){
-                                    q_bins.push_back(block_q_bins[l][m]);
-                                }
-                            }
-                               
-                            last_pos=q_bin_counts[k];
-                              
-                        }
-                        
-                       
-                        size_t outSize=0;
-                   
-                        auto cmprData=sz.encoding_lossless(conf,q_bins,outSize);
-                        
-                        delete []cmprData;
-
-                        cur_ratio=ele_num*1.0*sizeof(T)/outSize;
-                        //cur_ratio=100;
-                        if (cur_ratio>best_interp_cr){
-                            best_interp_cr=cur_ratio;
-                            bestInterpAlgo=interp_op;
-                            bestDirection=interp_direction;
-
-
-                        }
-                        std::vector<int>().swap( q_bins);
-
-                        std::vector<std::vector<int> >().swap( block_q_bins);
-                        std::vector<size_t>().swap( q_bin_counts);
-
-
-
-                    }
-
-                }
-                //delete sz;
-                conf.interpAlgo=bestInterpAlgo;
-                conf.interpDirection=bestDirection;
-                
-             
-                
-
-            }
-            
-
-
-            
-
-
-            if(conf.verbose)
-            
-                printf("Predictor tuning finished.\n");
-            
-            conf.alpha=o_alpha;
-            conf.beta=o_beta;
-            conf.dims=global_dims;
-            conf.num=global_num;
-
-
-            //determine predictor
-            useInterp= (best_interp_cr>=best_lorenzo_ratio) or best_lorenzo_ratio>=80 or best_interp_cr>=80;//orig 0.95*lorenzo_ratio
-            
-            if(conf.verbose){
-        
-                if (conf.levelwisePredictionSelection<=0){
-                    std::cout << "interp best interpAlgo = " << (conf.interpAlgo == 0 ? "LINEAR" : "CUBIC") << std::endl;
-                    std::cout << "interp best direction = " << (unsigned) conf.interpDirection << std::endl;
-                    
-                }
-                else{
-                    for(int level=conf.levelwisePredictionSelection;level>0;level--){
-                        std::cout << "Level: " << (unsigned) level<<std::endl;
-                        std::cout << "\tinterp best interpAlgo = " << (conf.interpAlgo_list[level-1] == 0 ? "LINEAR" : "CUBIC") << std::endl;
-                        std::cout << "\tinterp best direction = " << (unsigned) conf.interpDirection_list[level-1] << std::endl;
-                    }
-                }
-                if(conf.autoTuningRate==0){
-                    std::cout << "interp best cr = " << best_interp_cr << std::endl;
-                    printf("choose %s\n", useInterp ? "interp" : "Lorenzo");
-                }
-            }
-            
-            
-            
-            
-          
-
-
-            
-
-
-
-
         }
-        else{
-            SZ::Timer timer(true);
-            //size_t sampling_num, sampling_block;
-            //std::vector<size_t> sample_dims(N);
-            
-            sampling_data = SZ::sampling<T, N>(data, conf.dims, sampling_num, sample_dims, sampling_block);
-            //SZ::Config lorenzo_config = conf;
+        
+        
+        num_sampled_blocks=sampled_blocks.size();
+        per_block_ele_num=pow(sampleBlockSize+1,N);
+        ele_num=num_sampled_blocks*per_block_ele_num;
+        conf.dims=std::vector<size_t>(N,sampleBlockSize+1);
+        conf.num=per_block_ele_num;
+        std::vector<T> cur_block(per_block_ele_num,0);
+
+
+           
+        double lorenzo_average_cr=0;
+        if(conf.testLorenzo and conf.autoTuningRate==0){
+        
             lorenzo_config.cmprAlgo = SZ::ALGO_LORENZO_REG;
-            lorenzo_config.setDims(sample_dims.begin(), sample_dims.end());
+            lorenzo_config.dims=conf.dims;
+            lorenzo_config.num=conf.num;
+            //lorenzo_config.setDims(sample_dims.begin(), sample_dims.end());
             lorenzo_config.lorenzo = true;
             lorenzo_config.lorenzo2 = true;
             lorenzo_config.regression = false;
@@ -980,218 +416,717 @@ double Tuning(SZ::Config &conf, T *data){
             lorenzo_config.openmp = false;
             lorenzo_config.blockSize = 5;//why?
             lorenzo_config.quantbinCnt = 65536 * 2;
-            //SZ::writeTextFile<T>("sampled_data.dat", sampling_data.data(), lorenzo_config.num);
-            
-            size_t sampleOutSize;
-            std::vector<T> cur_sampling_data=sampling_data;
-            auto cmprData = SZ_compress_LorenzoReg<T, N>(lorenzo_config, cur_sampling_data.data(), sampleOutSize);
-            
-            delete[]cmprData;
-            double ratio = sampling_num * 1.0 * sizeof(T) / sampleOutSize;
-            if(conf.verbose)
-                printf("Lorenzo ratio = %.4f\n", ratio);
 
-            best_lorenzo_ratio = ratio;
-            double best_interp_ratio = 0;
-
-
-            for (auto &interp_op: {SZ::INTERP_ALGO_LINEAR, SZ::INTERP_ALGO_CUBIC}) {
-                //cur_sampling_data=sampling_data;
-                ratio = do_not_use_this_interp_compress_block_test<T, N>(sampling_data.data(), sample_dims, sampling_num, conf.absErrorBound,
-                                                                         interp_op, conf.interpDirection, sampling_block);
-                if (ratio > best_interp_ratio) {
-                    best_interp_ratio = ratio;
-                    conf.interpAlgo = interp_op;
+            //char *cmpData;
+            auto quantizer = SZ::LinearQuantizer<T>(conf.absErrorBound, conf.quantbinCnt / 2);
+            if (N == 3 && !conf.regression2) {
+                // use fast version for 3D
+                auto sz = SZ::make_sz_general_compressor<T, N>(SZ::make_sz_fast_frontend<T, N>(conf, quantizer), SZ::HuffmanEncoder<int>(),
+                                                               SZ::Lossless_zstd());
+                for (int i=0;i<num_sampled_blocks;i++){
+                    size_t sampleOutSize;
+                    cur_block=sampled_blocks[i];
+                    auto cmprData = sz->compress(lorenzo_config, cur_block.data(), sampleOutSize,1);
+                    delete[]cmprData;
+                   
                 }
-            }
-            if(conf.verbose)
-                std::cout << "interp best interpAlgo = " << (conf.interpAlgo == 0 ? "LINEAR" : "CUBIC") << std::endl;
-            
-            int direction_op = SZ::factorial(N) - 1;
-            //cur_sampling_data=sampling_data;
-            ratio = do_not_use_this_interp_compress_block_test<T, N>(sampling_data.data(), sample_dims, sampling_num, conf.absErrorBound,
-                                                                     conf.interpAlgo, direction_op, sampling_block);
-            if (ratio > best_interp_ratio * 1.02) {
-                best_interp_ratio = ratio;
-                conf.interpDirection = direction_op;
-            }
-            useInterp=!(best_lorenzo_ratio > best_interp_ratio && best_lorenzo_ratio < 80 && best_interp_ratio < 80);
-            if(conf.verbose){
-                std::cout << "interp best direction = " << (unsigned) conf.interpDirection << std::endl;
-            
-                printf("Interp ratio = %.4f\n", best_interp_ratio);
+                size_t sampleOutSize;
+                auto cmprData=sz->encoding_lossless(sampleOutSize);
+                //delete sz;
+                delete[]cmprData;
+                best_lorenzo_ratio=ele_num * 1.0 * sizeof(T) / sampleOutSize;
+
+               
+            } else {
+                auto sz = make_lorenzo_regression_compressor<T, N>(conf, quantizer, SZ::HuffmanEncoder<int>(), SZ::Lossless_zstd());
+                for (int i=0;i<num_sampled_blocks;i++){
+                    size_t sampleOutSize;
+                    cur_block=sampled_blocks[i];
+                    auto cmprData = sz->compress(lorenzo_config, cur_block.data(), sampleOutSize,1);
+                    delete[]cmprData;
+                }
+                size_t sampleOutSize;
+                auto cmprData=sz->encoding_lossless(sampleOutSize);
+                //delete sz;
+                delete[]cmprData;
                 
-                printf("choose %s\n", useInterp ? "interp" : "Lorenzo");
+                best_lorenzo_ratio=ele_num * 1.0 * sizeof(T) / sampleOutSize;
+              
+
+                
             }
-            if (useInterp){
-                conf.cmprAlgo=SZ::ALGO_INTERP;
-            }
-            else{
-                conf.cmprAlgo=SZ::ALGO_LORENZO_REG;
-            }
-            if(conf.verbose)
-                timer.stop("oldtuning");
             
+                //double ratio = per_block_ele_num * 1.0 * sizeof(T) / sampleOutSize;
+
+      
+                //lorenzo_average_cr+=ratio/num_sampled_blocks;
+
             
-           //std::vector<T>().swap(sampling_data);
-            //std::vector<T>().swap(cur_sampling_data);
+
            
+
+            //best_lorenzo_ratio=lorenzo_average_cr;
+            if(conf.verbose)
+                std::cout << "lorenzo best cr = " << best_lorenzo_ratio << std::endl;
+        }
+        
+       
+        
+        if (conf.autoTuningRate>0){
+            double cur_alpha,cur_beta;
+            
+            if (rel_bound>=0.01){
+                cur_alpha=2;
+                cur_beta=2;
+            }
+            else if (rel_bound>=0.007){
+                cur_alpha=1.75;
+                cur_beta=2;
+            }
+            
+            else if (rel_bound>=0.004){
+                cur_alpha=1.5;
+                cur_beta=2;
+            }
+            
+            else if (rel_bound>0.001){
+                cur_alpha=1.25;
+                cur_beta=1.5;
+            }
+            else {
+                cur_alpha=1;
+                cur_beta=1;
+            }
+            
+            conf.alpha=cur_alpha;
+            conf.beta=cur_beta;
+        
+        }
+       
+        std::vector<int> interpAlgo_Candidates={SZ::INTERP_ALGO_LINEAR, SZ::INTERP_ALGO_CUBIC};
+        std::vector<int> interpDirection_Candidates={0, SZ::factorial(N) -1};
+        if(conf.multiDimInterp)
+            interpDirection_Candidates.push_back(SZ::factorial(N));
+        if(conf.levelwisePredictionSelection>0){
+           
+
+            std::vector<uint8_t> interpAlgo_list(conf.levelwisePredictionSelection,0);
+            std::vector<uint8_t> interpDirection_list(conf.levelwisePredictionSelection,0);
+            auto sz = SZ::SZInterpolationCompressor<T, N, SZ::LinearQuantizer<T>, SZ::HuffmanEncoder<int>, SZ::Lossless_zstd>(
+                                        SZ::LinearQuantizer<T>(conf.absErrorBound),
+                                        SZ::HuffmanEncoder<int>(),
+                                        SZ::Lossless_zstd());
+            
+            for(int level=conf.levelwisePredictionSelection;level>0;level--){
+                int start_level=(level==conf.levelwisePredictionSelection?9999:level);
+                int end_level=level-1;
+                uint8_t bestInterpAlgo = SZ::INTERP_ALGO_CUBIC;
+                uint8_t bestDirection = 0;
+                double best_interp_absloss=9999999999;
+                //conf.cmprAlgo = SZ::ALGO_INTERP;
+                
+                
+                
+                for (auto &interp_op: interpAlgo_Candidates) {
+                    for (auto &interp_direction: interpDirection_Candidates) {
+                        /*
+                        if (interp_direction==2 and level<=2)
+                            continue;
+                        */
+                        conf.interpAlgo=interp_op;
+                        conf.interpDirection=interp_direction;
+                        double cur_absloss=0;
+
+                        
+                        for (int i=0;i<num_sampled_blocks;i++){
+
+                            cur_block=sampled_blocks[i];
+                            
+
+                            size_t outSize=0;
+                           
+                            auto cmprData =sz.compress(conf, cur_block.data(), outSize,2,start_level,end_level);
+                            delete []cmprData;
+                            
+                            
+                            
+                            
+                            cur_absloss+=conf.decomp_square_error;
+
+                        }
+                      
+                        if (cur_absloss<best_interp_absloss){
+                            best_interp_absloss=cur_absloss;
+                            bestInterpAlgo=interp_op;
+                            bestDirection=interp_direction;
+                        }
+                    }
+                }
+                
+                interpAlgo_list[level-1]=bestInterpAlgo;
+                interpDirection_list[level-1]=bestDirection;
+
+
+
+
+            }
+            
+            
+            conf.interpAlgo_list=interpAlgo_list;
+            conf.interpDirection_list=interpDirection_list;
+            if(conf.autoTuningRate==0){
+           
+                std::vector<int> q_bins;
+
+                std::vector<std::vector<int> > block_q_bins;
+                    //block_q_bins.reverse(num_sampled_blocks);
+                std::vector<size_t> q_bin_counts;
+
+                q_bins.reserve(ele_num);
+                block_q_bins.reserve(num_sampled_blocks);
+
+
+
+                
+                for (int i=0;i<num_sampled_blocks;i++){
+                    size_t sampleOutSize;
+                    cur_block=sampled_blocks[i];
+                    
+                    auto cmprData = sz.compress(conf, cur_block.data(), sampleOutSize,1);
+                    delete []cmprData;
+                   
+                    block_q_bins.push_back(conf.quant_bins);
+                    
+                    //delete[]cmprData;
+                   
+                    //double ratio = per_block_ele_num * 1.0 * sizeof(T) / sampleOutSize;
+
+          
+                    //best_interp_cr+=ratio/num_sampled_blocks;
+
+                }
+                q_bin_counts=conf.quant_bin_counts;
+                    
+
+                size_t level_num=q_bin_counts.size();
+                   
+                size_t last_pos=0;
+                for(int k=level_num-1;k>=0;k--){
+                    for (size_t l =0;l<num_sampled_blocks;l++){
+                          
+                         for (size_t m=last_pos;m<q_bin_counts[k];m++){
+                            q_bins.push_back(block_q_bins[l][m]);
+                        }
+                    }
+                       
+                    last_pos=q_bin_counts[k];
+                       
+                }
+                    
+                    
+                size_t outSize=0;
+           
+                auto cmprData=sz.encoding_lossless(conf,q_bins,outSize);
+                
+                //delete sz;
+                delete []cmprData;
+                best_interp_cr=ele_num*1.0*sizeof(T)/outSize;
+                
+                //if (anchor_rate>0)
+                //  best_interp_cr=1/((1-anchor_rate)/best_interp_cr+anchor_rate);
+               
+                std::vector<int>().swap( q_bins);
+
+                std::vector<std::vector<int> >().swap( block_q_bins);
+                std::vector<size_t>().swap( q_bin_counts);
+            }
+
+
+          
+
+
 
         }
 
-        if (useInterp and conf.autoTuningRate>0){
+        else{
             
-            if(conf.verbose)
-                std::cout<<"Alpha beta tuning started."<<std::endl;
-           
+            uint8_t bestInterpAlgo = SZ::INTERP_ALGO_CUBIC;
+            uint8_t bestDirection = 0;
+            auto sz = SZ::SZInterpolationCompressor<T, N, SZ::LinearQuantizer<T>, SZ::HuffmanEncoder<int>, SZ::Lossless_zstd>(
+                                        SZ::LinearQuantizer<T>(conf.absErrorBound),
+                                        SZ::HuffmanEncoder<int>(),
+                                        SZ::Lossless_zstd());
             
-            std::vector<size_t> global_dims=conf.dims;
-            size_t global_num=conf.num;
-            
-           
-            
-            //int step_length=int(pow(sample_ratio,1.0/N));
-            //std::vector< std::vector<T> > sampled_blocks;
-            
-            if (conf.autoTuningRate!=conf.predictorTuningRate){
-              
-                for(int i=0;i<sampled_blocks.size();i++){
-                    std::vector< T >().swap(sampled_blocks[i]);
-           
-                }
-                std::vector< std::vector<T> >().swap(sampled_blocks);
+            //conf.cmprAlgo == SZ::ALGO_INTERP;
+            std::vector<int> q_bins;
+
+            std::vector<std::vector<int> > block_q_bins;
+            std::vector<size_t> q_bin_counts;
+            q_bins.reserve(ele_num);
+            block_q_bins.reserve(num_sampled_blocks);
+            for (auto &interp_op: interpAlgo_Candidates) {
+                for (auto &interp_direction: interpDirection_Candidates) {
+                    conf.interpAlgo=interp_op;
+                    conf.interpDirection=interp_direction;
+                    double cur_ratio=0;
+                    
+                    
+                    //block_q_bins.reverse(num_sampled_blocks);
+                    
+                    for (int i=0;i<num_sampled_blocks;i++){
+                        size_t sampleOutSize;
+                        std::vector<T> cur_block=sampled_blocks[i];
+                        auto cmprData = sz.compress(conf, cur_block.data(), sampleOutSize,1);
+                        delete []cmprData;
+
                 
-                if (totalblock_num==-1){
-                    totalblock_num=1;
-                    for(int i=0;i<N;i++){
-                        totalblock_num*=(int)((conf.dims[i]-1)/sampleBlockSize);
+                        block_q_bins.push_back(conf.quant_bins);
+
+      
+                       //cur_ratio+=ratio/num_sampled_blocks;
+
                     }
-
-
-                }
-                //sampled_blocks.resize( (int)((totalblock_num-1)/sample_ratio)+1 );
-                int idx=0,block_idx=0;
-
-                if(conf.profiling){
-                   
-                    int sample_ratio=int(num_blocks/(totalblock_num*conf.predictorTuningRate));
+                    q_bin_counts=conf.quant_bin_counts;
                     
 
-                    if(N==2){
-                        for(int i=0;i<num_blocks;i+=sample_ratio){
-                            std::vector<T> s_block;
-                            SZ::sample_block_2d<T,N>(data, s_block,conf.dims, starts[i],sampleBlockSize+1);
-                            sampled_blocks.push_back(s_block);
-
+                    size_t level_num=q_bin_counts.size();
+                        
+                    size_t last_pos=0;
+                    for(int k=level_num-1;k>=0;k--){
+                        for (size_t l =0;l<num_sampled_blocks;l++){
+                                
+                             for (size_t m=last_pos;m<q_bin_counts[k];m++){
+                                q_bins.push_back(block_q_bins[l][m]);
+                            }
                         }
+                           
+                        last_pos=q_bin_counts[k];
+                          
                     }
-                    else if(N==3){
-                        for(int i=0;i<num_blocks;i+=sample_ratio){
-                            std::vector<T> s_block;
-                            SZ::sample_block_3d<T,N>(data, s_block,conf.dims, starts[i],sampleBlockSize+1);
-                            sampled_blocks.push_back(s_block);
+                    
+                   
+                    size_t outSize=0;
+               
+                    auto cmprData=sz.encoding_lossless(conf,q_bins,outSize);
+                    
+                    delete []cmprData;
 
-                        }
+                    cur_ratio=ele_num*1.0*sizeof(T)/outSize;
+                    //cur_ratio=100;
+                    if (cur_ratio>best_interp_cr){
+                        best_interp_cr=cur_ratio;
+                        bestInterpAlgo=interp_op;
+                        bestDirection=interp_direction;
+
+
                     }
+                    std::vector<int>().swap( q_bins);
 
+                    std::vector<std::vector<int> >().swap( block_q_bins);
+                    std::vector<size_t>().swap( q_bin_counts);
 
 
 
                 }
 
+            }
+            //delete sz;
+            conf.interpAlgo=bestInterpAlgo;
+            conf.interpDirection=bestDirection;
+            
+         
+            
 
-                else{
-                    int sample_ratio=int(1.0/conf.autoTuningRate);
+        }
+        
+
+
+        
+
+
+        if(conf.verbose)
+        
+            printf("Predictor tuning finished.\n");
+        
+        conf.alpha=o_alpha;
+        conf.beta=o_beta;
+        conf.dims=global_dims;
+        conf.num=global_num;
+
+
+        //determine predictor
+        useInterp= (best_interp_cr>=best_lorenzo_ratio) or best_lorenzo_ratio>=80 or best_interp_cr>=80;//orig 0.95*lorenzo_ratio
+        
+        if(conf.verbose){
+    
+            if (conf.levelwisePredictionSelection<=0){
+                std::cout << "interp best interpAlgo = " << (conf.interpAlgo == 0 ? "LINEAR" : "CUBIC") << std::endl;
+                std::cout << "interp best direction = " << (unsigned) conf.interpDirection << std::endl;
                 
-                    if (N==2){
-                        
-                        //std::vector<size_t> sample_dims(2,sampleBlockSize+1);
+            }
+            else{
+                for(int level=conf.levelwisePredictionSelection;level>0;level--){
+                    std::cout << "Level: " << (unsigned) level<<std::endl;
+                    std::cout << "\tinterp best interpAlgo = " << (conf.interpAlgo_list[level-1] == 0 ? "LINEAR" : "CUBIC") << std::endl;
+                    std::cout << "\tinterp best direction = " << (unsigned) conf.interpDirection_list[level-1] << std::endl;
+                }
+            }
+            if(conf.autoTuningRate==0){
+                std::cout << "interp best cr = " << best_interp_cr << std::endl;
+                printf("choose %s\n", useInterp ? "interp" : "Lorenzo");
+            }
+        }
+            
+            
+            
+            
+          
 
-                        for (size_t x_start=0;x_start<conf.dims[0]-sampleBlockSize;x_start+=sampleBlockSize){
-                            
-                            for (size_t y_start=0;y_start<conf.dims[1]-sampleBlockSize;y_start+=sampleBlockSize){
+
+            
+
+
+
+
+    }
+    else{
+        SZ::Timer timer(true);
+        //size_t sampling_num, sampling_block;
+        //std::vector<size_t> sample_dims(N);
+        
+        sampling_data = SZ::sampling<T, N>(data, conf.dims, sampling_num, sample_dims, sampling_block);
+        //SZ::Config lorenzo_config = conf;
+        lorenzo_config.cmprAlgo = SZ::ALGO_LORENZO_REG;
+        lorenzo_config.setDims(sample_dims.begin(), sample_dims.end());
+        lorenzo_config.lorenzo = true;
+        lorenzo_config.lorenzo2 = true;
+        lorenzo_config.regression = false;
+        lorenzo_config.regression2 = false;
+        lorenzo_config.openmp = false;
+        lorenzo_config.blockSize = 5;//why?
+        lorenzo_config.quantbinCnt = 65536 * 2;
+        //SZ::writeTextFile<T>("sampled_data.dat", sampling_data.data(), lorenzo_config.num);
+        
+        size_t sampleOutSize;
+        std::vector<T> cur_sampling_data=sampling_data;
+        auto cmprData = SZ_compress_LorenzoReg<T, N>(lorenzo_config, cur_sampling_data.data(), sampleOutSize);
+        
+        delete[]cmprData;
+        double ratio = sampling_num * 1.0 * sizeof(T) / sampleOutSize;
+        if(conf.verbose)
+            printf("Lorenzo ratio = %.4f\n", ratio);
+
+        best_lorenzo_ratio = ratio;
+        double best_interp_ratio = 0;
+
+
+        for (auto &interp_op: {SZ::INTERP_ALGO_LINEAR, SZ::INTERP_ALGO_CUBIC}) {
+            //cur_sampling_data=sampling_data;
+            ratio = do_not_use_this_interp_compress_block_test<T, N>(sampling_data.data(), sample_dims, sampling_num, conf.absErrorBound,
+                                                                     interp_op, conf.interpDirection, sampling_block);
+            if (ratio > best_interp_ratio) {
+                best_interp_ratio = ratio;
+                conf.interpAlgo = interp_op;
+            }
+        }
+        if(conf.verbose)
+            std::cout << "interp best interpAlgo = " << (conf.interpAlgo == 0 ? "LINEAR" : "CUBIC") << std::endl;
+        
+        int direction_op = SZ::factorial(N) - 1;
+        //cur_sampling_data=sampling_data;
+        ratio = do_not_use_this_interp_compress_block_test<T, N>(sampling_data.data(), sample_dims, sampling_num, conf.absErrorBound,
+                                                                 conf.interpAlgo, direction_op, sampling_block);
+        if (ratio > best_interp_ratio * 1.02) {
+            best_interp_ratio = ratio;
+            conf.interpDirection = direction_op;
+        }
+        useInterp=!(best_lorenzo_ratio > best_interp_ratio && best_lorenzo_ratio < 80 && best_interp_ratio < 80);
+        if(conf.verbose){
+            std::cout << "interp best direction = " << (unsigned) conf.interpDirection << std::endl;
+        
+            printf("Interp ratio = %.4f\n", best_interp_ratio);
+            
+            printf("choose %s\n", useInterp ? "interp" : "Lorenzo");
+        }
+        if (useInterp){
+            conf.cmprAlgo=SZ::ALGO_INTERP;
+        }
+        else{
+            conf.cmprAlgo=SZ::ALGO_LORENZO_REG;
+        }
+        if(conf.verbose)
+            timer.stop("oldtuning");
+        
+        
+       //std::vector<T>().swap(sampling_data);
+        //std::vector<T>().swap(cur_sampling_data);
+       
+
+    }
+
+    if (useInterp and conf.autoTuningRate>0){
+        
+        if(conf.verbose)
+            std::cout<<"Alpha beta tuning started."<<std::endl;
+       
+        
+        std::vector<size_t> global_dims=conf.dims;
+        size_t global_num=conf.num;
+        
+       
+        
+        //int step_length=int(pow(sample_ratio,1.0/N));
+        //std::vector< std::vector<T> > sampled_blocks;
+            
+        if (conf.autoTuningRate!=conf.predictorTuningRate){
+          
+            for(int i=0;i<sampled_blocks.size();i++){
+                std::vector< T >().swap(sampled_blocks[i]);
+       
+            }
+            std::vector< std::vector<T> >().swap(sampled_blocks);
+            
+            if (totalblock_num==-1){
+                totalblock_num=1;
+                for(int i=0;i<N;i++){
+                    totalblock_num*=(int)((conf.dims[i]-1)/sampleBlockSize);
+                }
+
+
+            }
+            //sampled_blocks.resize( (int)((totalblock_num-1)/sample_ratio)+1 );
+            int idx=0,block_idx=0;
+
+            if(conf.profiling){
+               
+                int sample_ratio=int(num_blocks/(totalblock_num*conf.predictorTuningRate));
+                
+
+                if(N==2){
+                    for(int i=0;i<num_blocks;i+=sample_ratio){
+                        std::vector<T> s_block;
+                        SZ::sample_block_2d<T,N>(data, s_block,conf.dims, starts[i],sampleBlockSize+1);
+                        sampled_blocks.push_back(s_block);
+
+                    }
+                }
+                else if(N==3){
+                    for(int i=0;i<num_blocks;i+=sample_ratio){
+                        std::vector<T> s_block;
+                        SZ::sample_block_3d<T,N>(data, s_block,conf.dims, starts[i],sampleBlockSize+1);
+                        sampled_blocks.push_back(s_block);
+
+                    }
+                }
+
+
+
+
+            }
+
+
+            else{
+                int sample_ratio=int(1.0/conf.autoTuningRate);
+            
+                if (N==2){
+                    
+                    //std::vector<size_t> sample_dims(2,sampleBlockSize+1);
+
+                    for (size_t x_start=0;x_start<conf.dims[0]-sampleBlockSize;x_start+=sampleBlockSize){
+                        
+                        for (size_t y_start=0;y_start<conf.dims[1]-sampleBlockSize;y_start+=sampleBlockSize){
+                            if (idx%sample_ratio==0){
+                                std::vector<size_t> starts{x_start,y_start};
+                                std::vector<T> s_block;
+                                SZ::sample_block_2d<T,N>(data, s_block,conf.dims, starts,sampleBlockSize+1);
+                                sampled_blocks.push_back(s_block);
+                            }
+                            idx+=1;
+
+                        }
+                    }
+                }
+                else if (N==3){
+                    //std::vector<size_t> sample_dims(3,sampleBlockSize+1);
+                   
+                    for (size_t x_start=0;x_start<conf.dims[0]-sampleBlockSize;x_start+=sampleBlockSize){
+                        
+                        for (size_t y_start=0;y_start<conf.dims[1]-sampleBlockSize;y_start+=sampleBlockSize){
+                            for (size_t z_start=0;z_start<conf.dims[2]-sampleBlockSize;z_start+=sampleBlockSize){
                                 if (idx%sample_ratio==0){
-                                    std::vector<size_t> starts{x_start,y_start};
+                                    std::vector<size_t> starts{x_start,y_start,z_start};
                                     std::vector<T> s_block;
-                                    SZ::sample_block_2d<T,N>(data, s_block,conf.dims, starts,sampleBlockSize+1);
+                                    SZ::sample_block_3d<T,N>(data, s_block,conf.dims, starts,sampleBlockSize+1);
                                     sampled_blocks.push_back(s_block);
                                 }
                                 idx+=1;
 
-                            }
-                        }
-                    }
-                    else if (N==3){
-                        //std::vector<size_t> sample_dims(3,sampleBlockSize+1);
-                       
-                        for (size_t x_start=0;x_start<conf.dims[0]-sampleBlockSize;x_start+=sampleBlockSize){
-                            
-                            for (size_t y_start=0;y_start<conf.dims[1]-sampleBlockSize;y_start+=sampleBlockSize){
-                                for (size_t z_start=0;z_start<conf.dims[2]-sampleBlockSize;z_start+=sampleBlockSize){
-                                    if (idx%sample_ratio==0){
-                                        std::vector<size_t> starts{x_start,y_start,z_start};
-                                        std::vector<T> s_block;
-                                        SZ::sample_block_3d<T,N>(data, s_block,conf.dims, starts,sampleBlockSize+1);
-                                        sampled_blocks.push_back(s_block);
-                                    }
-                                    idx+=1;
 
-
-                                }
                             }
                         }
                     }
                 }
             }
+        }
 
-            
-            
-            
-            std::vector<double>alpha_list;
-            init_alphalist(alpha_list,rel_bound,conf);
-            size_t alpha_nums=alpha_list.size();
-            std::vector<double>beta_list;
-
-            init_betalist(beta_list,rel_bound,conf);
-            size_t beta_nums=beta_list.size();
-            
-            double bestalpha=1;
-            double bestbeta=1;
         
-            double bestb=9999;
         
-            double bestm=0;
-            size_t num_sampled_blocks=sampled_blocks.size();
-            size_t per_block_ele_num=pow(sampleBlockSize+1,N);
-            size_t ele_num=num_sampled_blocks*per_block_ele_num;
+        
+        std::vector<double>alpha_list;
+        init_alphalist(alpha_list,rel_bound,conf);
+        size_t alpha_nums=alpha_list.size();
+        std::vector<double>beta_list;
 
-            //vector<double> orig_sums(num_sampled_blocks,0);
-            //vector<double> orig_square_sums(num_sampled_blocks,0);
-            std::vector<double> orig_means;//(num_sampled_blocks,0);
-            std::vector<double> orig_sigma2s;//(num_sampled_blocks,0);
-            std::vector<double> orig_ranges;//(num_sampled_blocks,0);
-            conf.dims=std::vector<size_t>(N,sampleBlockSize+1);
-            conf.num=per_block_ele_num;
-            size_t ssim_size=0;
-            size_t ssim_block_num=0;
+        init_betalist(beta_list,rel_bound,conf);
+        size_t beta_nums=beta_list.size();
+        
+        double bestalpha=1;
+        double bestbeta=1;
+    
+        double bestb=9999;
+    
+        double bestm=0;
+        size_t num_sampled_blocks=sampled_blocks.size();
+        size_t per_block_ele_num=pow(sampleBlockSize+1,N);
+        size_t ele_num=num_sampled_blocks*per_block_ele_num;
+
+        //vector<double> orig_sums(num_sampled_blocks,0);
+        //vector<double> orig_square_sums(num_sampled_blocks,0);
+        std::vector<double> orig_means;//(num_sampled_blocks,0);
+        std::vector<double> orig_sigma2s;//(num_sampled_blocks,0);
+        std::vector<double> orig_ranges;//(num_sampled_blocks,0);
+        conf.dims=std::vector<size_t>(N,sampleBlockSize+1);
+        conf.num=per_block_ele_num;
+        size_t ssim_size=0;
+        size_t ssim_block_num=0;
 
 
-            
-            if(conf.tuningTarget==SZ::TUNING_TARGET_SSIM){
-                ssim_size=conf.SSIMBlockSize;
-                for (size_t k =0;k<num_sampled_blocks;k++){
-                        //cur_block=sampled_blocks[k];
-                        //std::cout<<cur_block.size()<<std::endl;
-                        double orig_mean=0,orig_sigma2=0,orig_range=0;
-                        
-                        if(N==2){
-                            for (size_t i=0;i+ssim_size<sampleBlockSize+1;i+=ssim_size){
-                                for (size_t j=0;j+ssim_size<sampleBlockSize+1;j+=ssim_size){
-                                    std::vector<size_t> starts{i,j};
+        
+        if(conf.tuningTarget==SZ::TUNING_TARGET_SSIM){
+            ssim_size=conf.SSIMBlockSize;
+            for (size_t k =0;k<num_sampled_blocks;k++){
+                    //cur_block=sampled_blocks[k];
+                    //std::cout<<cur_block.size()<<std::endl;
+                    double orig_mean=0,orig_sigma2=0,orig_range=0;
+                    
+                    if(N==2){
+                        for (size_t i=0;i+ssim_size<sampleBlockSize+1;i+=ssim_size){
+                            for (size_t j=0;j+ssim_size<sampleBlockSize+1;j+=ssim_size){
+                                std::vector<size_t> starts{i,j};
+                                SZ::blockwise_profiling<T>(sampled_blocks[k].data(),conf.dims,starts,ssim_size,orig_mean,orig_sigma2,orig_range);
+                                orig_means.push_back(orig_mean);
+                                orig_sigma2s.push_back(orig_sigma2);
+                                orig_ranges.push_back(orig_range);
+
+
+                            }
+                        }
+                    }
+
+                    else if(N==3){
+                        for (size_t i=0;i+ssim_size<sampleBlockSize+1;i+=ssim_size){
+                            for (size_t j=0;j+ssim_size<sampleBlockSize+1;j+=ssim_size){
+                                for (size_t kk=0;kk+ssim_size<sampleBlockSize+1;kk+=ssim_size){
+                                    std::vector<size_t> starts{i,j,kk};
                                     SZ::blockwise_profiling<T>(sampled_blocks[k].data(),conf.dims,starts,ssim_size,orig_mean,orig_sigma2,orig_range);
                                     orig_means.push_back(orig_mean);
                                     orig_sigma2s.push_back(orig_sigma2);
                                     orig_ranges.push_back(orig_range);
+                                }
+
+
+                            }
+                        }
+                    }
+
+
+                    
+
+
+
+                    
+                  
+                   
+                   
+
+            }
+            ssim_block_num=orig_means.size();
+
+        }
+       
+       
+        
+        std::vector<T> cur_block(per_block_ele_num,0);
+          
+        
+        
+        auto sz =  SZ::SZInterpolationCompressor<T, N, SZ::LinearQuantizer<T>, SZ::HuffmanEncoder<int>, SZ::Lossless_zstd>(
+                        SZ::LinearQuantizer<T>(conf.absErrorBound),
+                        SZ::HuffmanEncoder<int>(),
+                        SZ::Lossless_zstd());
+
+        std::vector<double> flattened_sampled_data;
+       
+        if (conf.tuningTarget==SZ::TUNING_TARGET_AC){
+
+            for(int i=0;i<num_sampled_blocks;i++)
+                flattened_sampled_data.insert(flattened_sampled_data.end(),sampled_blocks[i].begin(),sampled_blocks[i].end());
+
+        }
+      
+        std::vector<double> flattened_cur_blocks;
+        for (size_t i=0;i<alpha_nums;i++){
+            for (size_t j=0;j<beta_nums;j++){
+                double alpha=alpha_list[i];
+                double beta=beta_list[j];
+                if ((alpha>=1 and alpha>beta) or (alpha<0 and beta!=-1))
+                    continue;
+                std::vector<int> q_bins;
+
+                std::vector<std::vector<int> > block_q_bins;
+                        //block_q_bins.reverse(num_sampled_blocks);
+                std::vector<size_t> q_bin_counts;
+                
+                conf.alpha=alpha;
+                conf.beta=beta;
+                
+               
+                
+                double square_error=0.0;
+                double metric=0;
+
+                size_t idx=0;
+                for (size_t k =0;k<num_sampled_blocks;k++){
+                    cur_block=sampled_blocks[k];
+                   
+
+                    
+
+                    size_t outSize=0;
+                    auto cmprData = sz.compress(conf, cur_block.data(), outSize,1);
+                    delete []cmprData;
+                    
+                   
+                    block_q_bins.push_back(conf.quant_bins);
+                    square_error+=conf.decomp_square_error;
+
+                    if (conf.tuningTarget==SZ::TUNING_TARGET_SSIM){
+                        
+                        double mean=0,sigma2=0,cov=0,range=0;
+
+                        double orig_mean=0,orig_sigma2=0,orig_range=0;
+                    
+                        if(N==2){
+                            for (size_t i=0;i+ssim_size<sampleBlockSize+1;i+=ssim_size){
+                                for (size_t j=0;j+ssim_size<sampleBlockSize+1;j+=ssim_size){
+                                    orig_mean=orig_means[idx];
+                                    orig_sigma2=orig_sigma2s[idx];
+                                    orig_range=orig_ranges[idx];
+                                    std::vector<size_t> starts{i,j};
+                                    SZ::blockwise_profiling<T>(cur_block.data(),conf.dims,starts,ssim_size,mean,sigma2,range);
+                                    cov=SZ::blockwise_cov<T>(sampled_blocks[k].data(),cur_block.data(),conf.dims,starts,ssim_size,orig_mean,mean);
+                                    metric+=SZ::SSIM(orig_range,orig_mean,orig_sigma2,mean,sigma2,cov)/ssim_block_num;
+                                    idx++;
 
 
                                 }
@@ -1202,11 +1137,16 @@ double Tuning(SZ::Config &conf, T *data){
                             for (size_t i=0;i+ssim_size<sampleBlockSize+1;i+=ssim_size){
                                 for (size_t j=0;j+ssim_size<sampleBlockSize+1;j+=ssim_size){
                                     for (size_t kk=0;kk+ssim_size<sampleBlockSize+1;kk+=ssim_size){
+                                        orig_mean=orig_means[idx];
+                                        orig_sigma2=orig_sigma2s[idx];
+                                        orig_range=orig_ranges[idx];
                                         std::vector<size_t> starts{i,j,kk};
-                                        SZ::blockwise_profiling<T>(sampled_blocks[k].data(),conf.dims,starts,ssim_size,orig_mean,orig_sigma2,orig_range);
-                                        orig_means.push_back(orig_mean);
-                                        orig_sigma2s.push_back(orig_sigma2);
-                                        orig_ranges.push_back(orig_range);
+                                        SZ::blockwise_profiling<T>(cur_block.data(),conf.dims,starts,ssim_size,mean,sigma2,range);
+                                        
+                                        cov=SZ::blockwise_cov<T>(sampled_blocks[k].data(),cur_block.data(),conf.dims,starts,ssim_size,orig_mean,mean);
+                                        //printf("%.8f %.8f %.8f %.8f %.8f %.8f %.8f\n",orig_range,orig_sigma2,orig_mean,range,sigma2,mean,cov);
+                                        metric+=SZ::SSIM(orig_range,orig_mean,orig_sigma2,mean,sigma2,cov)/ssim_block_num;
+                                        idx++;
                                     }
 
 
@@ -1215,82 +1155,132 @@ double Tuning(SZ::Config &conf, T *data){
                         }
 
 
-                        
 
-
-
-                        
-                      
-                       
-                       
+                    }
+                    else if (conf.tuningTarget==SZ::TUNING_TARGET_AC){
+                        flattened_cur_blocks.insert(flattened_cur_blocks.end(),cur_block.begin(),cur_block.end());
+                    }
+                   
 
                 }
-                ssim_block_num=orig_means.size();
+               
 
-            }
-           
-           
-            
-            std::vector<T> cur_block(per_block_ele_num,0);
-              
-            
-            
-            auto sz =  SZ::SZInterpolationCompressor<T, N, SZ::LinearQuantizer<T>, SZ::HuffmanEncoder<int>, SZ::Lossless_zstd>(
-                            SZ::LinearQuantizer<T>(conf.absErrorBound),
-                            SZ::HuffmanEncoder<int>(),
-                            SZ::Lossless_zstd());
+               
+                q_bin_counts=conf.quant_bin_counts;
+                
 
-            std::vector<double> flattened_sampled_data;
-           
-            if (conf.tuningTarget==SZ::TUNING_TARGET_AC){
-
-                for(int i=0;i<num_sampled_blocks;i++)
-                    flattened_sampled_data.insert(flattened_sampled_data.end(),sampled_blocks[i].begin(),sampled_blocks[i].end());
-
-            }
-          
-            std::vector<double> flattened_cur_blocks;
-            for (size_t i=0;i<alpha_nums;i++){
-                for (size_t j=0;j<beta_nums;j++){
-                    double alpha=alpha_list[i];
-                    double beta=beta_list[j];
-                    if ((alpha>=1 and alpha>beta) or (alpha<0 and beta!=-1))
-                        continue;
-                    std::vector<int> q_bins;
-
-                    std::vector<std::vector<int> > block_q_bins;
-                            //block_q_bins.reverse(num_sampled_blocks);
-                    std::vector<size_t> q_bin_counts;
+                size_t level_num=q_bin_counts.size();
+             
+                size_t last_pos=0;
+                for(int k=level_num-1;k>=0;k--){
+                    for (size_t l =0;l<num_sampled_blocks;l++){
+                        //std::cout<<block_q_bins[l].size()<<std::endl;
+                        //std::cout<<q_bin_counts[k]<<std::endl;
+                        for (size_t m=last_pos;m<q_bin_counts[k];m++){
+                            q_bins.push_back(block_q_bins[l][m]);
+                        }
+                    }
                     
-                    conf.alpha=alpha;
-                    conf.beta=beta;
-                    
+                    last_pos=q_bin_counts[k];
+                  
+                }
+                
+             
+                size_t outSize=0;
+                
+       
+                auto cmprData=sz.encoding_lossless(conf,q_bins,outSize);
+                
+                delete []cmprData;
+               
+
+               
+
+                double bitrate=8*double(outSize)/ele_num;
+                if(conf.profiling){
+                    bitrate*=((double)num_blocks)/(totalblock_num);
+                }
+                //bitrate+=8*sizeof(T)*anchor_rate;//added
+                /*
+                if (conf.tuningTarget==SZ::TUNING_TARGET_SSIM){
+                    mean=sum/ele_num;
+                    sigma=sqrt((square_sum/ele_num)-(mean*mean));
+                    cov=(covsum/ele_num)-mean*orig_mean;
+
+                    printf("%.4f %.8f %.8f %.8f %.8f %.8f\n",rng,orig_mean,orig_sigma,mean,sigma,cov);
+
+
+                  
+                    metric=SZ::SSIM(rng,rng,orig_mean,orig_sigma,mean,sigma,cov);
+
+
+                }
+
+                */
+
+                if(conf.tuningTarget==SZ::TUNING_TARGET_RD){
+                    double mse=square_error/ele_num;
+                    if(conf.profiling){
+                        mse*=((double)num_blocks)/(totalblock_num);
+                     }
+                     metric=SZ::PSNR(rng,mse);
+                }
+                else if (conf.tuningTarget==SZ::TUNING_TARGET_AC){
                    
+                    metric=1-SZ::autocorrelation(flattened_sampled_data.data(),flattened_cur_blocks.data(),ele_num);
+                    std::vector<double>().swap(flattened_cur_blocks);
                     
-                    double square_error=0.0;
-                    double metric=0;
+                }
+                
+                //printf("%.2f %.2f %.4f %.2f\n",alpha,beta,bitrate,metric);
 
+                std::vector<std::vector<int> >().swap( block_q_bins);
+                std::vector<size_t>().swap( q_bin_counts);
+
+                if ( (conf.tuningTarget!=SZ::TUNING_TARGET_CR and metric>=bestm and bitrate<=bestb) or (conf.tuningTarget==SZ::TUNING_TARGET_CR and bitrate<=bestb ) ){
+                    bestalpha=alpha;
+                    bestbeta=beta;
+                    bestb=bitrate;
+                    bestm=metric;
+                    //printf("Best: %.2f %.2f %.4f %.2f\n",bestalpha,bestbeta,bestb,bestm);
+                }
+                else if ( (conf.tuningTarget!=SZ::TUNING_TARGET_CR and metric<=bestm and bitrate>=bestb) or (conf.tuningTarget==SZ::TUNING_TARGET_CR and bitrate>bestb) ){
+                    if ( (alpha>=1 and pow(alpha,level_num-1)<=beta) or (alpha<1 and alpha*(level_num-1)<=beta) )
+                        break;
+
+                    continue;
+                }
+                else{
+                    q_bins.clear();
+                    block_q_bins.clear();
+
+
+                    double eb_fixrate;
+                    if (metric>bestm)
+                        eb_fixrate=rel_bound>1e-4?1.2:1.1;
+                    else
+                        eb_fixrate=rel_bound>1e-4?0.8:0.9;
+                    sz.set_eb(conf.absErrorBound*eb_fixrate);
+                    
+                    square_error=0.0;
+                    double metric_r=0.0;
                     size_t idx=0;
                     for (size_t k =0;k<num_sampled_blocks;k++){
                         cur_block=sampled_blocks[k];
-                       
 
                         
 
                         size_t outSize=0;
                         auto cmprData = sz.compress(conf, cur_block.data(), outSize,1);
                         delete []cmprData;
-                        
                        
                         block_q_bins.push_back(conf.quant_bins);
                         square_error+=conf.decomp_square_error;
-
-                        if (conf.tuningTarget==SZ::TUNING_TARGET_SSIM){
-                            
+                        
+                         if (conf.tuningTarget==SZ::TUNING_TARGET_SSIM){
                             double mean=0,sigma2=0,cov=0,range=0;
 
                             double orig_mean=0,orig_sigma2=0,orig_range=0;
-                        
                             if(N==2){
                                 for (size_t i=0;i+ssim_size<sampleBlockSize+1;i+=ssim_size){
                                     for (size_t j=0;j+ssim_size<sampleBlockSize+1;j+=ssim_size){
@@ -1300,7 +1290,7 @@ double Tuning(SZ::Config &conf, T *data){
                                         std::vector<size_t> starts{i,j};
                                         SZ::blockwise_profiling<T>(cur_block.data(),conf.dims,starts,ssim_size,mean,sigma2,range);
                                         cov=SZ::blockwise_cov<T>(sampled_blocks[k].data(),cur_block.data(),conf.dims,starts,ssim_size,orig_mean,mean);
-                                        metric+=SZ::SSIM(orig_range,orig_mean,orig_sigma2,mean,sigma2,cov)/ssim_block_num;
+                                        metric_r+=SZ::SSIM(orig_range,orig_mean,orig_sigma2,mean,sigma2,cov)/ssim_block_num;
                                         idx++;
 
 
@@ -1317,10 +1307,8 @@ double Tuning(SZ::Config &conf, T *data){
                                             orig_range=orig_ranges[idx];
                                             std::vector<size_t> starts{i,j,kk};
                                             SZ::blockwise_profiling<T>(cur_block.data(),conf.dims,starts,ssim_size,mean,sigma2,range);
-                                            
                                             cov=SZ::blockwise_cov<T>(sampled_blocks[k].data(),cur_block.data(),conf.dims,starts,ssim_size,orig_mean,mean);
-                                            //printf("%.8f %.8f %.8f %.8f %.8f %.8f %.8f\n",orig_range,orig_sigma2,orig_mean,range,sigma2,mean,cov);
-                                            metric+=SZ::SSIM(orig_range,orig_mean,orig_sigma2,mean,sigma2,cov)/ssim_block_num;
+                                            metric_r+=SZ::SSIM(orig_range,orig_mean,orig_sigma2,mean,sigma2,cov)/ssim_block_num;
                                             idx++;
                                         }
 
@@ -1335,278 +1323,345 @@ double Tuning(SZ::Config &conf, T *data){
                         else if (conf.tuningTarget==SZ::TUNING_TARGET_AC){
                             flattened_cur_blocks.insert(flattened_cur_blocks.end(),cur_block.begin(),cur_block.end());
                         }
-                       
+
+                        
 
                     }
-                   
-
-                   
+                  
                     q_bin_counts=conf.quant_bin_counts;
-                    
-
-                    size_t level_num=q_bin_counts.size();
-                 
-                    size_t last_pos=0;
+                    level_num=q_bin_counts.size();
+                    last_pos=0;
                     for(int k=level_num-1;k>=0;k--){
                         for (size_t l =0;l<num_sampled_blocks;l++){
-                            //std::cout<<block_q_bins[l].size()<<std::endl;
-                            //std::cout<<q_bin_counts[k]<<std::endl;
                             for (size_t m=last_pos;m<q_bin_counts[k];m++){
                                 q_bins.push_back(block_q_bins[l][m]);
                             }
                         }
-                        
                         last_pos=q_bin_counts[k];
-                      
                     }
                     
-                 
-                    size_t outSize=0;
+                    outSize=0;
                     
-           
+
                     auto cmprData=sz.encoding_lossless(conf,q_bins,outSize);
-                    
+                    sz.set_eb(conf.absErrorBound);
                     delete []cmprData;
-                   
+                    
 
-                   
 
-                    double bitrate=8*double(outSize)/ele_num;
+                    
+                    double bitrate_r=8*double(outSize)/ele_num;
                     if(conf.profiling){
-                        bitrate*=((double)num_blocks)/(totalblock_num);
+                        bitrate_r*=((double)num_blocks)/(totalblock_num);
                     }
-                    //bitrate+=8*sizeof(T)*anchor_rate;//added
-                    /*
-                    if (conf.tuningTarget==SZ::TUNING_TARGET_SSIM){
-                        mean=sum/ele_num;
-                        sigma=sqrt((square_sum/ele_num)-(mean*mean));
-                        cov=(covsum/ele_num)-mean*orig_mean;
+                    //bitrate_r+=8*sizeof(T)*anchor_rate;//added
+                    
+                   
 
-                        printf("%.4f %.8f %.8f %.8f %.8f %.8f\n",rng,orig_mean,orig_sigma,mean,sigma,cov);
-
-
-                      
-                        metric=SZ::SSIM(rng,rng,orig_mean,orig_sigma,mean,sigma,cov);
-
-
-                    }
- 
-                    */
 
                     if(conf.tuningTarget==SZ::TUNING_TARGET_RD){
                         double mse=square_error/ele_num;
                         if(conf.profiling){
                             mse*=((double)num_blocks)/(totalblock_num);
                          }
-                         metric=SZ::PSNR(rng,mse);
+                         metric_r=SZ::PSNR(rng,mse);
                     }
                     else if (conf.tuningTarget==SZ::TUNING_TARGET_AC){
                        
-                        metric=1-SZ::autocorrelation(flattened_sampled_data.data(),flattened_cur_blocks.data(),ele_num);
+
+                        metric_r=1-SZ::autocorrelation(flattened_sampled_data.data(),flattened_cur_blocks.data(),ele_num);
                         std::vector<double>().swap(flattened_cur_blocks);
-                        
+                       
                     }
+                    double a=(metric-metric_r)/(bitrate-bitrate_r);
+                    double b=metric-a*bitrate;
+                    double reg=a*bestb+b;
+                   // printf("%.2f %.2f %.4f %.2f\n",alpha,beta,bitrate_r,metric_r);
+                   // printf("%.2f %.2f %.4f %.2f\n",alpha,beta,bestb,reg);
                     
-                    //printf("%.2f %.2f %.4f %.2f\n",alpha,beta,bitrate,metric);
+                    //conf.absErrorBound=orig_eb;
 
-                    std::vector<std::vector<int> >().swap( block_q_bins);
-                    std::vector<size_t>().swap( q_bin_counts);
-
-                    if ( (conf.tuningTarget!=SZ::TUNING_TARGET_CR and metric>=bestm and bitrate<=bestb) or (conf.tuningTarget==SZ::TUNING_TARGET_CR and bitrate<=bestb ) ){
+                    if (reg>bestm){
                         bestalpha=alpha;
                         bestbeta=beta;
+                   
                         bestb=bitrate;
                         bestm=metric;
                         //printf("Best: %.2f %.2f %.4f %.2f\n",bestalpha,bestbeta,bestb,bestm);
                     }
-                    else if ( (conf.tuningTarget!=SZ::TUNING_TARGET_CR and metric<=bestm and bitrate>=bestb) or (conf.tuningTarget==SZ::TUNING_TARGET_CR and bitrate>bestb) ){
-                        if ( (alpha>=1 and pow(alpha,level_num-1)<=beta) or (alpha<1 and alpha*(level_num-1)<=beta) )
-                            break;
+                    std::vector<int>().swap( q_bins);
 
-                        continue;
-                    }
-                    else{
-                        q_bins.clear();
-                        block_q_bins.clear();
-
-
-                        double eb_fixrate;
-                        if (metric>bestm)
-                            eb_fixrate=rel_bound>1e-4?1.2:1.1;
-                        else
-                            eb_fixrate=rel_bound>1e-4?0.8:0.9;
-                        sz.set_eb(conf.absErrorBound*eb_fixrate);
-                        
-                        square_error=0.0;
-                        double metric_r=0.0;
-                        size_t idx=0;
-                        for (size_t k =0;k<num_sampled_blocks;k++){
-                            cur_block=sampled_blocks[k];
-
-                            
-
-                            size_t outSize=0;
-                            auto cmprData = sz.compress(conf, cur_block.data(), outSize,1);
-                            delete []cmprData;
-                           
-                            block_q_bins.push_back(conf.quant_bins);
-                            square_error+=conf.decomp_square_error;
-                            
-                             if (conf.tuningTarget==SZ::TUNING_TARGET_SSIM){
-                                double mean=0,sigma2=0,cov=0,range=0;
-
-                                double orig_mean=0,orig_sigma2=0,orig_range=0;
-                                if(N==2){
-                                    for (size_t i=0;i+ssim_size<sampleBlockSize+1;i+=ssim_size){
-                                        for (size_t j=0;j+ssim_size<sampleBlockSize+1;j+=ssim_size){
-                                            orig_mean=orig_means[idx];
-                                            orig_sigma2=orig_sigma2s[idx];
-                                            orig_range=orig_ranges[idx];
-                                            std::vector<size_t> starts{i,j};
-                                            SZ::blockwise_profiling<T>(cur_block.data(),conf.dims,starts,ssim_size,mean,sigma2,range);
-                                            cov=SZ::blockwise_cov<T>(sampled_blocks[k].data(),cur_block.data(),conf.dims,starts,ssim_size,orig_mean,mean);
-                                            metric_r+=SZ::SSIM(orig_range,orig_mean,orig_sigma2,mean,sigma2,cov)/ssim_block_num;
-                                            idx++;
-
-
-                                        }
-                                    }
-                                }
-
-                                else if(N==3){
-                                    for (size_t i=0;i+ssim_size<sampleBlockSize+1;i+=ssim_size){
-                                        for (size_t j=0;j+ssim_size<sampleBlockSize+1;j+=ssim_size){
-                                            for (size_t kk=0;kk+ssim_size<sampleBlockSize+1;kk+=ssim_size){
-                                                orig_mean=orig_means[idx];
-                                                orig_sigma2=orig_sigma2s[idx];
-                                                orig_range=orig_ranges[idx];
-                                                std::vector<size_t> starts{i,j,kk};
-                                                SZ::blockwise_profiling<T>(cur_block.data(),conf.dims,starts,ssim_size,mean,sigma2,range);
-                                                cov=SZ::blockwise_cov<T>(sampled_blocks[k].data(),cur_block.data(),conf.dims,starts,ssim_size,orig_mean,mean);
-                                                metric_r+=SZ::SSIM(orig_range,orig_mean,orig_sigma2,mean,sigma2,cov)/ssim_block_num;
-                                                idx++;
-                                            }
-
-
-                                        }
-                                    }
-                                }
-
-
-
-                            }
-                            else if (conf.tuningTarget==SZ::TUNING_TARGET_AC){
-                                flattened_cur_blocks.insert(flattened_cur_blocks.end(),cur_block.begin(),cur_block.end());
-                            }
-
-                            
-
-                        }
-                      
-                        q_bin_counts=conf.quant_bin_counts;
-                        level_num=q_bin_counts.size();
-                        last_pos=0;
-                        for(int k=level_num-1;k>=0;k--){
-                            for (size_t l =0;l<num_sampled_blocks;l++){
-                                for (size_t m=last_pos;m<q_bin_counts[k];m++){
-                                    q_bins.push_back(block_q_bins[l][m]);
-                                }
-                            }
-                            last_pos=q_bin_counts[k];
-                        }
-                        
-                        outSize=0;
-                        
-
-                        auto cmprData=sz.encoding_lossless(conf,q_bins,outSize);
-                        sz.set_eb(conf.absErrorBound);
-                        delete []cmprData;
-                        
-
-
-                        
-                        double bitrate_r=8*double(outSize)/ele_num;
-                        if(conf.profiling){
-                            bitrate_r*=((double)num_blocks)/(totalblock_num);
-                        }
-                        //bitrate_r+=8*sizeof(T)*anchor_rate;//added
-                        
-                       
-
-
-                        if(conf.tuningTarget==SZ::TUNING_TARGET_RD){
-                            double mse=square_error/ele_num;
-                            if(conf.profiling){
-                                mse*=((double)num_blocks)/(totalblock_num);
-                             }
-                             metric_r=SZ::PSNR(rng,mse);
-                        }
-                        else if (conf.tuningTarget==SZ::TUNING_TARGET_AC){
-                           
-
-                            metric_r=1-SZ::autocorrelation(flattened_sampled_data.data(),flattened_cur_blocks.data(),ele_num);
-                            std::vector<double>().swap(flattened_cur_blocks);
-                           
-                        }
-                        double a=(metric-metric_r)/(bitrate-bitrate_r);
-                        double b=metric-a*bitrate;
-                        double reg=a*bestb+b;
-                       // printf("%.2f %.2f %.4f %.2f\n",alpha,beta,bitrate_r,metric_r);
-                       // printf("%.2f %.2f %.4f %.2f\n",alpha,beta,bestb,reg);
-                        
-                        //conf.absErrorBound=orig_eb;
-
-                        if (reg>bestm){
-                            bestalpha=alpha;
-                            bestbeta=beta;
-                       
-                            bestb=bitrate;
-                            bestm=metric;
-                            //printf("Best: %.2f %.2f %.4f %.2f\n",bestalpha,bestbeta,bestb,bestm);
-                        }
-                        std::vector<int>().swap( q_bins);
-
-                        std::vector<std::vector<int> >().swap( block_q_bins);
-                        std::vector<size_t>().swap( q_bin_counts);
-
-
-                    }
-                    if ( (alpha>=1 and pow(alpha,level_num-1)<=beta) or (alpha<1 and alpha*(level_num-1)<=beta) )
-                        break;
-
-
+                    std::vector<std::vector<int> >().swap( block_q_bins);
+                    std::vector<size_t>().swap( q_bin_counts);
 
 
                 }
+                if ( (alpha>=1 and pow(alpha,level_num-1)<=beta) or (alpha<1 and alpha*(level_num-1)<=beta) )
+                    break;
+
+
+
+
             }
-           // delete sz;
-            
+        }
+       // delete sz;
+        
 
-            
+        
 
 
-            //add lorenzo
-            if(conf.testLorenzo){
-                lorenzo_config.cmprAlgo = SZ::ALGO_LORENZO_REG;
-                lorenzo_config.dims=conf.dims;
-                lorenzo_config.num=conf.num;
-                //lorenzo_config.setDims(sample_dims.begin(), sample_dims.end());
-                lorenzo_config.lorenzo = true;
-                lorenzo_config.lorenzo2 = true;
-                lorenzo_config.regression = false;
-                lorenzo_config.regression2 = false;
-                lorenzo_config.openmp = false;
-                lorenzo_config.blockSize = 5;//why?
-                lorenzo_config.quantbinCnt = 65536 * 2;
-                double square_error=0.0;
-                double bitrate=0.0;
-                double metric=0.0;
+        //add lorenzo
+        if(conf.testLorenzo){
+            double lorenzoBrFix=1.0;
+            double e1=1e-5;
+            double e2=1e-4;
+            double e3=1e-3;
+            double f1=1;
+            double f2=1.2; 
+       
+            double f3=1.3;
+            if(rel_bound<=e1)
+                lorenzoBrFix=f1;
+            else if(rel_bound<=e2)
+                lorenzoBrFix=f1-(f1-f2)*(rel_bound-e1)/(e2-e1);
+            else if (rel_bound<=e3)
+                lorenzoBrFix=f2-(f2-f3)*(rel_bound-e2)/(e3-e2);
+            else 
+                lorenzoBrFix=f3;
+            lorenzo_config.cmprAlgo = SZ::ALGO_LORENZO_REG;
+            lorenzo_config.dims=conf.dims;
+            lorenzo_config.num=conf.num;
+            //lorenzo_config.setDims(sample_dims.begin(), sample_dims.end());
+            lorenzo_config.lorenzo = true;
+            lorenzo_config.lorenzo2 = true;
+            lorenzo_config.regression = false;
+            lorenzo_config.regression2 = false;
+            lorenzo_config.openmp = false;
+            lorenzo_config.blockSize = 5;//why?
+            lorenzo_config.quantbinCnt = 65536 * 2;
+            double square_error=0.0;
+            double bitrate=0.0;
+            double metric=0.0;
+
+            //char *cmpData;
+            auto quantizer = SZ::LinearQuantizer<T>(conf.absErrorBound, conf.quantbinCnt / 2);
+            size_t idx=0;
+            if (0){//(N == 3 && !conf.regression2) {
+                // use fast version for 3D
+                auto sz = SZ::make_sz_general_compressor<T, N>(SZ::make_sz_fast_frontend<T, N>(conf, quantizer), SZ::HuffmanEncoder<int>(),
+                                                               SZ::Lossless_zstd());
+                for (int k=0;k<num_sampled_blocks;k++){
+                    size_t sampleOutSize;
+                    cur_block=sampled_blocks[k];
+                    auto cmprData = sz->compress(lorenzo_config, cur_block.data(), sampleOutSize,1);
+                    delete[]cmprData;
+                    if(conf.tuningTarget==SZ::TUNING_TARGET_RD){
+                        for(size_t j=0;j<per_block_ele_num;j++){
+                            T value=sampled_blocks[k][j]-cur_block[j];
+                            square_error+=value*value;
+                        }
+                    }
+
+                    else if (conf.tuningTarget==SZ::TUNING_TARGET_SSIM){
+                        
+                        double mean=0,sigma2=0,cov=0,range=0;
+
+                        double orig_mean=0,orig_sigma2=0,orig_range=0;
+                    
+                        if(N==2){
+                            for (size_t i=0;i+ssim_size<sampleBlockSize+1;i+=ssim_size){
+                                for (size_t j=0;j+ssim_size<sampleBlockSize+1;j+=ssim_size){
+                                    orig_mean=orig_means[idx];
+                                    orig_sigma2=orig_sigma2s[idx];
+                                    orig_range=orig_ranges[idx];
+                                    std::vector<size_t> starts{i,j};
+                                    SZ::blockwise_profiling<T>(cur_block.data(),conf.dims,starts,ssim_size,mean,sigma2,range);
+                                    cov=SZ::blockwise_cov<T>(sampled_blocks[k].data(),cur_block.data(),conf.dims,starts,ssim_size,orig_mean,mean);
+                                    metric+=SZ::SSIM(orig_range,orig_mean,orig_sigma2,mean,sigma2,cov)/ssim_block_num;
+                                    idx++;
+
+
+                                }
+                            }
+                        }
+
+                        else if(N==3){
+                            for (size_t i=0;i+ssim_size<sampleBlockSize+1;i+=ssim_size){
+                                for (size_t j=0;j+ssim_size<sampleBlockSize+1;j+=ssim_size){
+                                    for (size_t kk=0;kk+ssim_size<sampleBlockSize+1;kk+=ssim_size){
+                                        orig_mean=orig_means[idx];
+                                        orig_sigma2=orig_sigma2s[idx];
+                                        orig_range=orig_ranges[idx];
+                                        std::vector<size_t> starts{i,j,kk};
+                                        SZ::blockwise_profiling<T>(cur_block.data(),conf.dims,starts,ssim_size,mean,sigma2,range);
+                                        
+                                        cov=SZ::blockwise_cov<T>(sampled_blocks[k].data(),cur_block.data(),conf.dims,starts,ssim_size,orig_mean,mean);
+                                        //printf("%.8f %.8f %.8f %.8f %.8f %.8f %.8f\n",orig_range,orig_sigma2,orig_mean,range,sigma2,mean,cov);
+                                        metric+=SZ::SSIM(orig_range,orig_mean,orig_sigma2,mean,sigma2,cov)/ssim_block_num;
+                                        idx++;
+                                    }
+
+
+                                }
+                            }
+                        }
+
+
+
+                    }
+                    else if (conf.tuningTarget==SZ::TUNING_TARGET_AC){
+                        flattened_cur_blocks.insert(flattened_cur_blocks.end(),cur_block.begin(),cur_block.end());
+                    }
+                    
+                   
+                }
+                size_t sampleOutSize;
+                auto cmprData=sz->encoding_lossless(sampleOutSize);
+               
+                delete[]cmprData;
+                //delete sz;
+                bitrate=8*double(sampleOutSize)/ele_num*lorenzoBrFix;
+
+               
+            } else {
+                auto sz = make_lorenzo_regression_compressor<T, N>(conf, quantizer, SZ::HuffmanEncoder<int>(), SZ::Lossless_zstd());
+                for (int k=0;k<num_sampled_blocks;k++){
+                    size_t sampleOutSize;
+                    cur_block=sampled_blocks[k];
+                    auto cmprData = sz->compress(lorenzo_config, cur_block.data(), sampleOutSize,1);
+                    delete[]cmprData;
+                    if(conf.tuningTarget==SZ::TUNING_TARGET_RD){
+                        for(size_t j=0;j<per_block_ele_num;j++){
+                            T value=sampled_blocks[k][j]-cur_block[j];
+                            square_error+=value*value;
+                        }
+                    }
+
+                    else if (conf.tuningTarget==SZ::TUNING_TARGET_SSIM){
+                        
+                        double mean=0,sigma2=0,cov=0,range=0;
+
+                        double orig_mean=0,orig_sigma2=0,orig_range=0;
+                    
+                        if(N==2){
+                            for (size_t i=0;i+ssim_size<sampleBlockSize+1;i+=ssim_size){
+                                for (size_t j=0;j+ssim_size<sampleBlockSize+1;j+=ssim_size){
+                                    orig_mean=orig_means[idx];
+                                    orig_sigma2=orig_sigma2s[idx];
+                                    orig_range=orig_ranges[idx];
+                                    std::vector<size_t> starts{i,j};
+                                    SZ::blockwise_profiling<T>(cur_block.data(),conf.dims,starts,ssim_size,mean,sigma2,range);
+                                    cov=SZ::blockwise_cov<T>(sampled_blocks[k].data(),cur_block.data(),conf.dims,starts,ssim_size,orig_mean,mean);
+                                    metric+=SZ::SSIM(orig_range,orig_mean,orig_sigma2,mean,sigma2,cov)/ssim_block_num;
+                                    idx++;
+
+
+                                }
+                            }
+                        }
+
+                        else if(N==3){
+                            for (size_t i=0;i+ssim_size<sampleBlockSize+1;i+=ssim_size){
+                                for (size_t j=0;j+ssim_size<sampleBlockSize+1;j+=ssim_size){
+                                    for (size_t kk=0;kk+ssim_size<sampleBlockSize+1;kk+=ssim_size){
+                                        orig_mean=orig_means[idx];
+                                        orig_sigma2=orig_sigma2s[idx];
+                                        orig_range=orig_ranges[idx];
+                                        std::vector<size_t> starts{i,j,kk};
+                                        SZ::blockwise_profiling<T>(cur_block.data(),conf.dims,starts,ssim_size,mean,sigma2,range);
+                                        
+                                        cov=SZ::blockwise_cov<T>(sampled_blocks[k].data(),cur_block.data(),conf.dims,starts,ssim_size,orig_mean,mean);
+                                        //printf("%.8f %.8f %.8f %.8f %.8f %.8f %.8f\n",orig_range,orig_sigma2,orig_mean,range,sigma2,mean,cov);
+                                        metric+=SZ::SSIM(orig_range,orig_mean,orig_sigma2,mean,sigma2,cov)/ssim_block_num;
+                                        idx++;
+                                    }
+
+
+                                }
+                            }
+                        }
+
+
+
+                    }
+                    else if (conf.tuningTarget==SZ::TUNING_TARGET_AC){
+                        flattened_cur_blocks.insert(flattened_cur_blocks.end(),cur_block.begin(),cur_block.end());
+                    }
+                }
+                size_t sampleOutSize;
+                auto cmprData=sz->encoding_lossless(sampleOutSize);
+                delete[]cmprData;
+                //delete sz;
+                bitrate=8*double(sampleOutSize)/ele_num*lorenzoBrFix;
+              
+
+                
+            }
+
+        
+            if(conf.profiling){
+                bitrate*=((double)num_blocks)/(totalblock_num);
+            }
+                //bitrate+=8*sizeof(T)*anchor_rate;//added
+                /*
+                if (conf.tuningTarget==SZ::TUNING_TARGET_SSIM){
+                    mean=sum/ele_num;
+                    sigma=sqrt((square_sum/ele_num)-(mean*mean));
+                    cov=(covsum/ele_num)-mean*orig_mean;
+
+                    printf("%.4f %.8f %.8f %.8f %.8f %.8f\n",rng,orig_mean,orig_sigma,mean,sigma,cov);
+
+
+                  
+                    metric=SZ::SSIM(rng,rng,orig_mean,orig_sigma,mean,sigma,cov);
+
+
+                }
+
+                */
+
+            if(conf.tuningTarget==SZ::TUNING_TARGET_RD){
+                //std::cout<<square_error<<std::endl;
+                double mse=square_error/ele_num;
+                if(conf.profiling){
+                    mse*=((double)num_blocks)/(totalblock_num);
+                }
+                metric=SZ::PSNR(rng,mse);
+            }
+            else if (conf.tuningTarget==SZ::TUNING_TARGET_AC){
+                   
+                metric=1-SZ::autocorrelation(flattened_sampled_data.data(),flattened_cur_blocks.data(),ele_num);
+                std::vector<double>().swap(flattened_cur_blocks);
+                    
+            }
+            //printf("%.4f %.2f\n",bitrate,metric);
+                
+
+            if ( (conf.tuningTarget!=SZ::TUNING_TARGET_CR and metric>=bestm and bitrate<=bestb) or (conf.tuningTarget==SZ::TUNING_TARGET_CR and bitrate<=bestb ) ){
+                
+                bestb=bitrate;
+                bestm=metric;
+                useInterp=false;
+               
+            }
+            else if ( (conf.tuningTarget!=SZ::TUNING_TARGET_CR and metric<=bestm and bitrate>=bestb) or (conf.tuningTarget==SZ::TUNING_TARGET_CR and bitrate>bestb) ){
+                useInterp=true;
+            }
+            else{
+                double eb_fixrate;
+                if (metric>bestm)
+                    eb_fixrate=rel_bound>1e-4?1.2:1.1;
+                else
+                    eb_fixrate=rel_bound>1e-4?0.8:0.9;
+                square_error=0.0;
+                double bitrate_r=0.0;
+                double metric_r=0.0;
 
                 //char *cmpData;
-                auto quantizer = SZ::LinearQuantizer<T>(conf.absErrorBound, conf.quantbinCnt / 2);
+                auto quantizer = SZ::LinearQuantizer<T>(conf.absErrorBound*eb_fixrate, conf.quantbinCnt / 2);
                 size_t idx=0;
                 if (0){//(N == 3 && !conf.regression2) {
-                    // use fast version for 3D
+                // use fast version for 3D
                     auto sz = SZ::make_sz_general_compressor<T, N>(SZ::make_sz_fast_frontend<T, N>(conf, quantizer), SZ::HuffmanEncoder<int>(),
                                                                    SZ::Lossless_zstd());
                     for (int k=0;k<num_sampled_blocks;k++){
@@ -1636,7 +1691,7 @@ double Tuning(SZ::Config &conf, T *data){
                                         std::vector<size_t> starts{i,j};
                                         SZ::blockwise_profiling<T>(cur_block.data(),conf.dims,starts,ssim_size,mean,sigma2,range);
                                         cov=SZ::blockwise_cov<T>(sampled_blocks[k].data(),cur_block.data(),conf.dims,starts,ssim_size,orig_mean,mean);
-                                        metric+=SZ::SSIM(orig_range,orig_mean,orig_sigma2,mean,sigma2,cov)/ssim_block_num;
+                                        metric_r+=SZ::SSIM(orig_range,orig_mean,orig_sigma2,mean,sigma2,cov)/ssim_block_num;
                                         idx++;
 
 
@@ -1656,7 +1711,7 @@ double Tuning(SZ::Config &conf, T *data){
                                             
                                             cov=SZ::blockwise_cov<T>(sampled_blocks[k].data(),cur_block.data(),conf.dims,starts,ssim_size,orig_mean,mean);
                                             //printf("%.8f %.8f %.8f %.8f %.8f %.8f %.8f\n",orig_range,orig_sigma2,orig_mean,range,sigma2,mean,cov);
-                                            metric+=SZ::SSIM(orig_range,orig_mean,orig_sigma2,mean,sigma2,cov)/ssim_block_num;
+                                            metric_r+=SZ::SSIM(orig_range,orig_mean,orig_sigma2,mean,sigma2,cov)/ssim_block_num;
                                             idx++;
                                         }
 
@@ -1679,7 +1734,7 @@ double Tuning(SZ::Config &conf, T *data){
                    
                     delete[]cmprData;
                     //delete sz;
-                    bitrate=8*double(sampleOutSize)/ele_num;
+                    bitrate_r=8*double(sampleOutSize)/ele_num*lorenzoBrFix;
 
                    
                 } else {
@@ -1711,7 +1766,7 @@ double Tuning(SZ::Config &conf, T *data){
                                         std::vector<size_t> starts{i,j};
                                         SZ::blockwise_profiling<T>(cur_block.data(),conf.dims,starts,ssim_size,mean,sigma2,range);
                                         cov=SZ::blockwise_cov<T>(sampled_blocks[k].data(),cur_block.data(),conf.dims,starts,ssim_size,orig_mean,mean);
-                                        metric+=SZ::SSIM(orig_range,orig_mean,orig_sigma2,mean,sigma2,cov)/ssim_block_num;
+                                        metric_r+=SZ::SSIM(orig_range,orig_mean,orig_sigma2,mean,sigma2,cov)/ssim_block_num;
                                         idx++;
 
 
@@ -1731,7 +1786,7 @@ double Tuning(SZ::Config &conf, T *data){
                                             
                                             cov=SZ::blockwise_cov<T>(sampled_blocks[k].data(),cur_block.data(),conf.dims,starts,ssim_size,orig_mean,mean);
                                             //printf("%.8f %.8f %.8f %.8f %.8f %.8f %.8f\n",orig_range,orig_sigma2,orig_mean,range,sigma2,mean,cov);
-                                            metric+=SZ::SSIM(orig_range,orig_mean,orig_sigma2,mean,sigma2,cov)/ssim_block_num;
+                                            metric_r+=SZ::SSIM(orig_range,orig_mean,orig_sigma2,mean,sigma2,cov)/ssim_block_num;
                                             idx++;
                                         }
 
@@ -1751,7 +1806,7 @@ double Tuning(SZ::Config &conf, T *data){
                     auto cmprData=sz->encoding_lossless(sampleOutSize);
                     delete[]cmprData;
                     //delete sz;
-                    bitrate=8*double(sampleOutSize)/ele_num;
+                    bitrate_r=8*double(sampleOutSize)/ele_num*lorenzoBrFix;
                   
 
                     
@@ -1759,7 +1814,7 @@ double Tuning(SZ::Config &conf, T *data){
 
             
                 if(conf.profiling){
-                    bitrate*=((double)num_blocks)/(totalblock_num);
+                    bitrate_r*=((double)num_blocks)/(totalblock_num);
                 }
                     //bitrate+=8*sizeof(T)*anchor_rate;//added
                     /*
@@ -1780,310 +1835,95 @@ double Tuning(SZ::Config &conf, T *data){
                     */
 
                 if(conf.tuningTarget==SZ::TUNING_TARGET_RD){
-                    //std::cout<<square_error<<std::endl;
                     double mse=square_error/ele_num;
                     if(conf.profiling){
                         mse*=((double)num_blocks)/(totalblock_num);
                     }
-                    metric=SZ::PSNR(rng,mse);
+                    metric_r=SZ::PSNR(rng,mse);
                 }
                 else if (conf.tuningTarget==SZ::TUNING_TARGET_AC){
                        
-                    metric=1-SZ::autocorrelation(flattened_sampled_data.data(),flattened_cur_blocks.data(),ele_num);
+                    metric_r=1-SZ::autocorrelation(flattened_sampled_data.data(),flattened_cur_blocks.data(),ele_num);
                     std::vector<double>().swap(flattened_cur_blocks);
                         
                 }
-                //printf("%.4f %.2f\n",bitrate,metric);
+
+                double a=(metric-metric_r)/(bitrate-bitrate_r);
+                double b=metric-a*bitrate;
+                double reg=a*bestb+b;
+                  //  printf("%.4f %.2f\n",bitrate_r,metric_r);
+                   //printf("%.4f %.2f\n",bestb,reg);
                     
+                    //conf.absErrorBound=orig_eb;
 
-                if ( (conf.tuningTarget!=SZ::TUNING_TARGET_CR and metric>=bestm and bitrate<=bestb) or (conf.tuningTarget==SZ::TUNING_TARGET_CR and bitrate<=bestb ) ){
-                    
-                    bestb=bitrate;
-                    bestm=metric;
-                    useInterp=false;
+                    if (reg>bestm){
+                       // bestalpha=alpha;
+                        //bestbeta=beta;
                    
-                }
-                else if ( (conf.tuningTarget!=SZ::TUNING_TARGET_CR and metric<=bestm and bitrate>=bestb) or (conf.tuningTarget==SZ::TUNING_TARGET_CR and bitrate>bestb) ){
-                    useInterp=true;
-                }
-                else{
-                    double eb_fixrate;
-                    if (metric>bestm)
-                        eb_fixrate=rel_bound>1e-4?1.2:1.1;
-                    else
-                        eb_fixrate=rel_bound>1e-4?0.8:0.9;
-                    square_error=0.0;
-                    double bitrate_r=0.0;
-                    double metric_r=0.0;
-
-                    //char *cmpData;
-                    auto quantizer = SZ::LinearQuantizer<T>(conf.absErrorBound*eb_fixrate, conf.quantbinCnt / 2);
-                    size_t idx=0;
-                    if (0){//(N == 3 && !conf.regression2) {
-                    // use fast version for 3D
-                        auto sz = SZ::make_sz_general_compressor<T, N>(SZ::make_sz_fast_frontend<T, N>(conf, quantizer), SZ::HuffmanEncoder<int>(),
-                                                                       SZ::Lossless_zstd());
-                        for (int k=0;k<num_sampled_blocks;k++){
-                            size_t sampleOutSize;
-                            cur_block=sampled_blocks[k];
-                            auto cmprData = sz->compress(lorenzo_config, cur_block.data(), sampleOutSize,1);
-                            delete[]cmprData;
-                            if(conf.tuningTarget==SZ::TUNING_TARGET_RD){
-                                for(size_t j=0;j<per_block_ele_num;j++){
-                                    T value=sampled_blocks[k][j]-cur_block[j];
-                                    square_error+=value*value;
-                                }
-                            }
-
-                            else if (conf.tuningTarget==SZ::TUNING_TARGET_SSIM){
-                                
-                                double mean=0,sigma2=0,cov=0,range=0;
-
-                                double orig_mean=0,orig_sigma2=0,orig_range=0;
-                            
-                                if(N==2){
-                                    for (size_t i=0;i+ssim_size<sampleBlockSize+1;i+=ssim_size){
-                                        for (size_t j=0;j+ssim_size<sampleBlockSize+1;j+=ssim_size){
-                                            orig_mean=orig_means[idx];
-                                            orig_sigma2=orig_sigma2s[idx];
-                                            orig_range=orig_ranges[idx];
-                                            std::vector<size_t> starts{i,j};
-                                            SZ::blockwise_profiling<T>(cur_block.data(),conf.dims,starts,ssim_size,mean,sigma2,range);
-                                            cov=SZ::blockwise_cov<T>(sampled_blocks[k].data(),cur_block.data(),conf.dims,starts,ssim_size,orig_mean,mean);
-                                            metric_r+=SZ::SSIM(orig_range,orig_mean,orig_sigma2,mean,sigma2,cov)/ssim_block_num;
-                                            idx++;
-
-
-                                        }
-                                    }
-                                }
-
-                                else if(N==3){
-                                    for (size_t i=0;i+ssim_size<sampleBlockSize+1;i+=ssim_size){
-                                        for (size_t j=0;j+ssim_size<sampleBlockSize+1;j+=ssim_size){
-                                            for (size_t kk=0;kk+ssim_size<sampleBlockSize+1;kk+=ssim_size){
-                                                orig_mean=orig_means[idx];
-                                                orig_sigma2=orig_sigma2s[idx];
-                                                orig_range=orig_ranges[idx];
-                                                std::vector<size_t> starts{i,j,kk};
-                                                SZ::blockwise_profiling<T>(cur_block.data(),conf.dims,starts,ssim_size,mean,sigma2,range);
-                                                
-                                                cov=SZ::blockwise_cov<T>(sampled_blocks[k].data(),cur_block.data(),conf.dims,starts,ssim_size,orig_mean,mean);
-                                                //printf("%.8f %.8f %.8f %.8f %.8f %.8f %.8f\n",orig_range,orig_sigma2,orig_mean,range,sigma2,mean,cov);
-                                                metric_r+=SZ::SSIM(orig_range,orig_mean,orig_sigma2,mean,sigma2,cov)/ssim_block_num;
-                                                idx++;
-                                            }
-
-
-                                        }
-                                    }
-                                }
-
-
-
-                            }
-                            else if (conf.tuningTarget==SZ::TUNING_TARGET_AC){
-                                flattened_cur_blocks.insert(flattened_cur_blocks.end(),cur_block.begin(),cur_block.end());
-                            }
-                            
-                           
-                        }
-                        size_t sampleOutSize;
-                        auto cmprData=sz->encoding_lossless(sampleOutSize);
-                       
-                        delete[]cmprData;
-                        //delete sz;
-                        bitrate_r=8*double(sampleOutSize)/ele_num;
-
-                       
-                    } else {
-                        auto sz = make_lorenzo_regression_compressor<T, N>(conf, quantizer, SZ::HuffmanEncoder<int>(), SZ::Lossless_zstd());
-                        for (int k=0;k<num_sampled_blocks;k++){
-                            size_t sampleOutSize;
-                            cur_block=sampled_blocks[k];
-                            auto cmprData = sz->compress(lorenzo_config, cur_block.data(), sampleOutSize,1);
-                            delete[]cmprData;
-                            if(conf.tuningTarget==SZ::TUNING_TARGET_RD){
-                                for(size_t j=0;j<per_block_ele_num;j++){
-                                    T value=sampled_blocks[k][j]-cur_block[j];
-                                    square_error+=value*value;
-                                }
-                            }
-
-                            else if (conf.tuningTarget==SZ::TUNING_TARGET_SSIM){
-                                
-                                double mean=0,sigma2=0,cov=0,range=0;
-
-                                double orig_mean=0,orig_sigma2=0,orig_range=0;
-                            
-                                if(N==2){
-                                    for (size_t i=0;i+ssim_size<sampleBlockSize+1;i+=ssim_size){
-                                        for (size_t j=0;j+ssim_size<sampleBlockSize+1;j+=ssim_size){
-                                            orig_mean=orig_means[idx];
-                                            orig_sigma2=orig_sigma2s[idx];
-                                            orig_range=orig_ranges[idx];
-                                            std::vector<size_t> starts{i,j};
-                                            SZ::blockwise_profiling<T>(cur_block.data(),conf.dims,starts,ssim_size,mean,sigma2,range);
-                                            cov=SZ::blockwise_cov<T>(sampled_blocks[k].data(),cur_block.data(),conf.dims,starts,ssim_size,orig_mean,mean);
-                                            metric_r+=SZ::SSIM(orig_range,orig_mean,orig_sigma2,mean,sigma2,cov)/ssim_block_num;
-                                            idx++;
-
-
-                                        }
-                                    }
-                                }
-
-                                else if(N==3){
-                                    for (size_t i=0;i+ssim_size<sampleBlockSize+1;i+=ssim_size){
-                                        for (size_t j=0;j+ssim_size<sampleBlockSize+1;j+=ssim_size){
-                                            for (size_t kk=0;kk+ssim_size<sampleBlockSize+1;kk+=ssim_size){
-                                                orig_mean=orig_means[idx];
-                                                orig_sigma2=orig_sigma2s[idx];
-                                                orig_range=orig_ranges[idx];
-                                                std::vector<size_t> starts{i,j,kk};
-                                                SZ::blockwise_profiling<T>(cur_block.data(),conf.dims,starts,ssim_size,mean,sigma2,range);
-                                                
-                                                cov=SZ::blockwise_cov<T>(sampled_blocks[k].data(),cur_block.data(),conf.dims,starts,ssim_size,orig_mean,mean);
-                                                //printf("%.8f %.8f %.8f %.8f %.8f %.8f %.8f\n",orig_range,orig_sigma2,orig_mean,range,sigma2,mean,cov);
-                                                metric_r+=SZ::SSIM(orig_range,orig_mean,orig_sigma2,mean,sigma2,cov)/ssim_block_num;
-                                                idx++;
-                                            }
-
-
-                                        }
-                                    }
-                                }
-
-
-
-                            }
-                            else if (conf.tuningTarget==SZ::TUNING_TARGET_AC){
-                                flattened_cur_blocks.insert(flattened_cur_blocks.end(),cur_block.begin(),cur_block.end());
-                            }
-                        }
-                        size_t sampleOutSize;
-                        auto cmprData=sz->encoding_lossless(sampleOutSize);
-                        delete[]cmprData;
-                        //delete sz;
-                        bitrate_r=8*double(sampleOutSize)/ele_num;
-                      
-
-                        
+                        bestb=bitrate;
+                        bestm=metric;
+                        useInterp=false;
+                        //printf("Best: %.4f %.2f\n",bestb,bestm);
                     }
 
-                
-                    if(conf.profiling){
-                        bitrate_r*=((double)num_blocks)/(totalblock_num);
-                    }
-                        //bitrate+=8*sizeof(T)*anchor_rate;//added
-                        /*
-                        if (conf.tuningTarget==SZ::TUNING_TARGET_SSIM){
-                            mean=sum/ele_num;
-                            sigma=sqrt((square_sum/ele_num)-(mean*mean));
-                            cov=(covsum/ele_num)-mean*orig_mean;
-
-                            printf("%.4f %.8f %.8f %.8f %.8f %.8f\n",rng,orig_mean,orig_sigma,mean,sigma,cov);
-
-
-                          
-                            metric=SZ::SSIM(rng,rng,orig_mean,orig_sigma,mean,sigma,cov);
-
-
-                        }
-     
-                        */
-
-                    if(conf.tuningTarget==SZ::TUNING_TARGET_RD){
-                        double mse=square_error/ele_num;
-                        if(conf.profiling){
-                            mse*=((double)num_blocks)/(totalblock_num);
-                        }
-                        metric_r=SZ::PSNR(rng,mse);
-                    }
-                    else if (conf.tuningTarget==SZ::TUNING_TARGET_AC){
-                           
-                        metric_r=1-SZ::autocorrelation(flattened_sampled_data.data(),flattened_cur_blocks.data(),ele_num);
-                        std::vector<double>().swap(flattened_cur_blocks);
-                            
-                    }
-
-                    double a=(metric-metric_r)/(bitrate-bitrate_r);
-                    double b=metric-a*bitrate;
-                    double reg=a*bestb+b;
-                      //  printf("%.4f %.2f\n",bitrate_r,metric_r);
-                       //printf("%.4f %.2f\n",bestb,reg);
-                        
-                        //conf.absErrorBound=orig_eb;
-
-                        if (reg>bestm){
-                           // bestalpha=alpha;
-                            //bestbeta=beta;
-                       
-                            bestb=bitrate;
-                            bestm=metric;
-                            useInterp=false;
-                            //printf("Best: %.4f %.2f\n",bestb,bestm);
-                        }
 
 
 
-
-                }
-
-
-            
             }
 
 
-            if(conf.tuningTarget==SZ::TUNING_TARGET_AC){
-                    bestm=1-bestm;
-            }
-            std::string metric_name="no";
-            if (conf.tuningTarget==SZ::TUNING_TARGET_RD ){
-                metric_name="PSNR";
-            }
-            else if (conf.tuningTarget==SZ::TUNING_TARGET_SSIM ){
-                metric_name="SSIM";
-            }
-            else if (conf.tuningTarget==SZ::TUNING_TARGET_AC ){
-                metric_name="AutoCorrelation";
-            }
-
-
-            if(conf.verbose){
-                if (useInterp)
-                    printf("Autotuning finished. Selected alpha: %f. Selected beta: %f. Best bitrate: %f. Best %s: %f.\n", bestalpha,bestbeta,bestb, const_cast<char*>(metric_name.c_str()),bestm);
-                
-                else
-                    printf("Lorenzo selected. Best bitrate: %f. Best %s: %f.\n",bestb, const_cast<char*>(metric_name.c_str()),bestm);
-
-            }
-
-            conf.alpha=bestalpha;
-            conf.beta=bestbeta;
-            conf.dims=global_dims;
-            conf.num=global_num;
-            
-            
-        }
-
-        if (useInterp){
-            conf.cmprAlgo=SZ::ALGO_INTERP;
-        }
-        else{
-            conf.cmprAlgo=SZ::ALGO_LORENZO_REG;
-        } 
-
-        for(int i=0;i<sampled_blocks.size();i++){
-                    std::vector< T >().swap(sampled_blocks[i]);
-                   
-                }
-                std::vector< std::vector<T> >().swap(sampled_blocks);
-         
         
-        return best_lorenzo_ratio;
-       
+        }
 
+
+        if(conf.tuningTarget==SZ::TUNING_TARGET_AC){
+                bestm=1-bestm;
+        }
+        std::string metric_name="no";
+        if (conf.tuningTarget==SZ::TUNING_TARGET_RD ){
+            metric_name="PSNR";
+        }
+        else if (conf.tuningTarget==SZ::TUNING_TARGET_SSIM ){
+            metric_name="SSIM";
+        }
+        else if (conf.tuningTarget==SZ::TUNING_TARGET_AC ){
+            metric_name="AutoCorrelation";
+        }
+
+
+        if(conf.verbose){
+            if (useInterp)
+                printf("Autotuning finished. Selected alpha: %f. Selected beta: %f. Best bitrate: %f. Best %s: %f.\n", bestalpha,bestbeta,bestb, const_cast<char*>(metric_name.c_str()),bestm);
+            
+            else
+                printf("Lorenzo selected. Best bitrate: %f. Best %s: %f.\n",bestb, const_cast<char*>(metric_name.c_str()),bestm);
+
+        }
+
+        conf.alpha=bestalpha;
+        conf.beta=bestbeta;
+        conf.dims=global_dims;
+        conf.num=global_num;
+        
+        
+    }
+
+    if (useInterp){
+        conf.cmprAlgo=SZ::ALGO_INTERP;
+    }
+    else{
+        conf.cmprAlgo=SZ::ALGO_LORENZO_REG;
+    } 
+
+    for(int i=0;i<sampled_blocks.size();i++){
+                std::vector< T >().swap(sampled_blocks[i]);
+               
+            }
+            std::vector< std::vector<T> >().swap(sampled_blocks);
+     
+    
+    return best_lorenzo_ratio;
+       
 
 }
 
@@ -2133,45 +1973,8 @@ char *SZ_compress_Interp_lorenzo(SZ::Config &conf, T *data, size_t &outSize) {
         if(conf.verbose){
             std::cout << "Tuning time = " << tuning_time << "s" << std::endl;
             std::cout << "====================================== END TUNING ======================================" << std::endl;
-        }
-        /*
-        for(int i=0;i<sampled_blocks.size();i++){
-            std::vector< T >().swap(sampled_blocks[i]);
-           
-        }
-        std::vector< std::vector<T> >().swap(sampled_blocks);
-        */
-
-       /*
-        std::cout<<conf.alpha<<std::endl;
-        std::cout<<conf.beta<<std::endl;
-        if (conf.levelwisePredictionSelection<=1){
-            std::cout<<int(conf.interpAlgo)<<std::endl;
-            std::cout<<int(conf.interpDirection)<<std::endl;
-
-        }
-        else{
-            for(int i=conf.levelwisePredictionSelection;i>0;i-- ){
-                std::cout<<int(conf.interpAlgo_list[i-1])<<std::endl;
-                std::cout<<int(conf.interpDirection_list[i-1])<<std::endl;
-            }
-        }
-        */
-
-
-        if (conf.predictorTuningRate<1){
-           
-   
-   
-            
-            
-            return SZ_compress_Interp<T, N>(conf, data, outSize);
-        }
-        else {
-            std::vector<int> op_candidates={SZ::INTERP_ALGO_LINEAR,SZ::INTERP_ALGO_CUBIC};
-            std::vector<int> dir_candidates={0,SZ::factorial(N)-1};
-            return SZ_compress_AutoSelectiveInterp<T,N>(conf,data,outSize,op_candidates,dir_candidates,0);
-        }
+        }     
+        return SZ_compress_Interp<T, N>(conf, data, outSize);
     } 
     else {
         SZ::Config lorenzo_config = conf;
@@ -2299,648 +2102,6 @@ char *SZ_compress_Interp_lorenzo(SZ::Config &conf, T *data, size_t &outSize) {
 
 
 
-template<class T, SZ::uint N>
-char *SZ_compress_Interp_blocked(SZ::Config &conf, T *data, size_t &outSize) {
-    assert(conf.cmprAlgo == SZ::ALGO_INTERP_BLOCKED);
-   
-    conf.cmprAlgo=SZ::ALGO_INTERP;
 
-    
-    SZ::Timer timer(true);
-    //std::cout<<conf.alpha<<std::endl;
-    //std::cout<<conf.beta<<std::endl;
-    SZ::calAbsErrorBound(conf, data);
-    T rng=SZ::data_range<T>(data,conf.num);
-    double rel_bound=conf.absErrorBound/rng;
-    
-    size_t sampling_num, sampling_block;
-    double best_lorenzo_ratio=0.0;
-    
-    
-    std::vector<T> sampling_data;
-    std::vector< std::vector<T> > sampled_blocks;
-    std::vector< std::vector<size_t> > starts;
-    int totalblock_num=-1;
-    if (conf.interpBlockSize<=0){
-            conf.interpBlockSize = (N==2?64:32);
-    }
-
-            
-    size_t sampleBlockSize=conf.sampleBlockSize;
-    if (sampleBlockSize<=0)
-        sampleBlockSize=conf.interpBlockSize;
-    conf.fixBlockSize=conf.interpBlockSize;
-
-    size_t num_blocks=0;
-    if(conf.autoTuningRate>0  and conf.profiling){
-        if(N==2){
-            SZ::profiling_block_2d<T,N>(data,conf.dims,starts,sampleBlockSize,conf.absErrorBound);
-        }
-        else if (N==3){
-            SZ::profiling_block_3d<T,N>(data,conf.dims,starts,sampleBlockSize,conf.absErrorBound);
-        }
-
-    }
-    num_blocks=starts.size();
-    /*
-    std::vector<T> orig_data(conf.num,0);
-    for(int i=0;i<conf.num;i++)
-        orig_data[i]=data[i];
-    */
-    
-
-    
-//    printf("%lu %lu %lu %lu %lu\n", sampling_data.size(), sampling_num, sample_dims[0], sample_dims[1], sample_dims[2]);
-
-    
-    
-
-    {
-        //tune interp
-        if ( conf.autoTuningRate>0 ){
-            std::vector<size_t> global_dims=conf.dims;
-            //size_t orig_maxStep=conf.maxStep;
-            //conf.maxStep=conf.dims[0]-1;
-            size_t global_num=conf.num;
-            
-            
-            
-            
-            if (totalblock_num==-1){
-                    totalblock_num=1;
-                    for(int i=0;i<N;i++){
-                        totalblock_num*=(int)((conf.dims[i]-1)/sampleBlockSize);
-                    }
-
-
-                }
-                //sampled_blocks.resize( (int)((totalblock_num-1)/sample_ratio)+1 );
-                
-            int idx=0,block_idx=0;
-            //int step_length=int(pow(sample_ratio,1.0/N));
-            
-            //std::cout<<"step 1"<<std::endl;
-            if(conf.profiling){
-                    
-                    int sample_ratio=int(num_blocks/(totalblock_num*conf.predictorTuningRate));
-                    
-
-                    if(N==2){
-                        for(int i=0;i<num_blocks;i+=sample_ratio){
-                            std::vector<T> s_block;
-                            SZ::sample_block_2d<T,N>(data, s_block,conf.dims, starts[i],sampleBlockSize+1);
-                            sampled_blocks.push_back(s_block);
-
-                        }
-                    }
-                    else if(N==3){
-                        for(int i=0;i<num_blocks;i+=sample_ratio){
-                            std::vector<T> s_block;
-                            SZ::sample_block_3d<T,N>(data, s_block,conf.dims, starts[i],sampleBlockSize+1);
-                            sampled_blocks.push_back(s_block);
-
-                        }
-                    }
-
-
-
-
-            }
-            else{
-                int sample_ratio=int(1.0/conf.autoTuningRate);
-                if (N==2){
-                    
-                    //std::vector<size_t> sample_dims(2,sampleBlockSize+1);
-
-                    for (size_t x_start=0;x_start<conf.dims[0]-sampleBlockSize;x_start+=sampleBlockSize){
-                        
-                        for (size_t y_start=0;y_start<conf.dims[1]-sampleBlockSize;y_start+=sampleBlockSize){
-                            if (idx%sample_ratio==0){
-                                std::vector<size_t> starts{x_start,y_start};
-                                std::vector<T> s_block;
-                                SZ::sample_block_2d<T,N>(data, s_block,conf.dims, starts,sampleBlockSize+1);
-                                sampled_blocks.push_back(s_block);
-                            }
-                            idx+=1;
-
-                        }
-                    }
-                }
-                else if (N==3){
-                    //std::vector<size_t> sample_dims(3,sampleBlockSize+1);
-                    
-                    for (size_t x_start=0;x_start<conf.dims[0]-sampleBlockSize;x_start+=sampleBlockSize){
-                        
-                        for (size_t y_start=0;y_start<conf.dims[1]-sampleBlockSize;y_start+=sampleBlockSize){
-                            for (size_t z_start=0;z_start<conf.dims[2]-sampleBlockSize;z_start+=sampleBlockSize){
-                                if (idx%sample_ratio==0){
-                                    std::vector<size_t> starts{x_start,y_start,z_start};
-                                    std::vector<T> s_block;
-                                    SZ::sample_block_3d<T,N>(data, s_block,conf.dims, starts,sampleBlockSize+1);
-                                    sampled_blocks.push_back(s_block);
-                                }
-                                idx+=1;
-
-
-                            }
-                        }
-                    }
-                }
-            }
-            double anchor_rate=0;
-            if (conf.maxStep>0){
-                anchor_rate=1/(pow(conf.maxStep,N));
-            }
-
-            //std::cout<<"step 2"<<std::endl;
-            std::vector<double>alpha_list;
-            init_alphalist(alpha_list,rel_bound,conf);
-            size_t alpha_nums=alpha_list.size();
-            std::vector<double>beta_list;
-
-            init_betalist(beta_list,rel_bound,conf);
-            size_t beta_nums=beta_list.size();
-            
-            double bestalpha=1;
-            double bestbeta=1;
-        
-            double bestb=9999;
-        
-            double bestm=0;
-
-            size_t num_sampled_blocks=sampled_blocks.size();
-            size_t per_block_ele_num=pow(sampleBlockSize+1,N);
-            size_t ele_num=num_sampled_blocks*per_block_ele_num;
-            std::vector<T> cur_block(per_block_ele_num,0);
-            std::vector<int> op_candidates={SZ::INTERP_ALGO_LINEAR,SZ::INTERP_ALGO_CUBIC};
-            std::vector<int> dir_candidates={0,SZ::factorial(N)-1};
-            std::vector<double> orig_means;//(num_sampled_blocks,0);
-            std::vector<double> orig_sigma2s;//(num_sampled_blocks,0);
-            std::vector<double> orig_ranges;//(num_sampled_blocks,0);
-            conf.dims=std::vector<size_t>(N,sampleBlockSize+1);
-            conf.num=per_block_ele_num;
-            size_t ssim_size=0;
-            size_t ssim_block_num=0;
-
-
-            
-            if(conf.tuningTarget==SZ::TUNING_TARGET_SSIM){
-                ssim_size=conf.SSIMBlockSize;
-                for (size_t k =0;k<num_sampled_blocks;k++){
-                        //cur_block=sampled_blocks[k];
-                        //std::cout<<cur_block.size()<<std::endl;
-                        double orig_mean=0,orig_sigma2=0,orig_range=0;
-                        
-                        if(N==2){
-                            for (size_t i=0;i+ssim_size<sampleBlockSize+1;i+=ssim_size){
-                                for (size_t j=0;j+ssim_size<sampleBlockSize+1;j+=ssim_size){
-                                    std::vector<size_t> starts{i,j};
-                                    SZ::blockwise_profiling<T>(sampled_blocks[k].data(),conf.dims,starts,ssim_size,orig_mean,orig_sigma2,orig_range);
-                                    orig_means.push_back(orig_mean);
-                                    orig_sigma2s.push_back(orig_sigma2);
-                                    orig_ranges.push_back(orig_range);
-
-
-                                }
-                            }
-                        }
-
-                        else if(N==3){
-                            for (size_t i=0;i+ssim_size<sampleBlockSize+1;i+=ssim_size){
-                                for (size_t j=0;j+ssim_size<sampleBlockSize+1;j+=ssim_size){
-                                    for (size_t kk=0;kk+ssim_size<sampleBlockSize+1;kk+=ssim_size){
-                                        std::vector<size_t> starts{i,j,kk};
-                                        SZ::blockwise_profiling<T>(sampled_blocks[k].data(),conf.dims,starts,ssim_size,orig_mean,orig_sigma2,orig_range);
-                                        orig_means.push_back(orig_mean);
-                                        orig_sigma2s.push_back(orig_sigma2);
-                                        orig_ranges.push_back(orig_range);
-                                    }
-
-
-                                }
-                            }
-                        }
-
-
-                        
-
-
-
-                        
-                        //std::cout<<"step 3.5"<<std::endl;
-                        //std::cout<<conf.quant_bins.size()<<std::endl;
-                        //std::cout<<conf.decomp_square_error<<std::endl;
-                       
-                       
-
-                }
-                ssim_block_num=orig_means.size();
-
-            }
-
-
-
-            //std::cout<<num_sampled_blocks<<std::endl;
-            //std::cout<<per_block_ele_num<<std::endl;
-            //std::cout<<ele_num<<std::endl;
-            
-            
-              
-            //std::cout<<"step 3"<<std::endl;
-
-          
-              
-           
-            std::vector<double> flattened_sampled_data;
-           
-            if (conf.tuningTarget==SZ::TUNING_TARGET_AC){
-
-                for(int i=0;i<num_sampled_blocks;i++)
-                    flattened_sampled_data.insert(flattened_sampled_data.end(),sampled_blocks[i].begin(),sampled_blocks[i].end());
-
-            }
-          
-            std::vector<double> flattened_cur_blocks;
-
-
-            auto sz = SZ::SZInterpolationCompressor<T, N, SZ::LinearQuantizer<T>, SZ::HuffmanEncoder<int>, SZ::Lossless_zstd>(
-                            SZ::LinearQuantizer<T>(conf.absErrorBound),
-                            SZ::HuffmanEncoder<int>(),
-                            SZ::Lossless_zstd());
-        
-            for (size_t i=0;i<alpha_nums;i++){
-                for (size_t j=0;j<beta_nums;j++){
-                    double alpha=alpha_list[i];
-                    double beta=beta_list[j];
-                    if ((alpha>=1 and alpha>beta) or (alpha<0 and beta!=-1))
-                        continue;
-                    
-                    conf.alpha=alpha;
-                    conf.beta=beta;
-                    
-                    std::vector<int> q_bins;
-
-                    std::vector<std::vector<int> > block_q_bins;
-                    //block_q_bins.reverse(num_sampled_blocks);
-                    std::vector<size_t> q_bin_counts;
-                    double square_error=0.0;
-                    double metric=0;
-
-                    size_t idx=0;
-
-
-                    for (size_t k = 0;k<num_sampled_blocks;k++){
-                        cur_block=sampled_blocks[k];
-                        //std::cout<<cur_block.size()<<std::endl;
-                        size_t tempsize;
-                        SZ_compress_AutoSelectiveInterp<T,N>(conf,cur_block.data(),tempsize,op_candidates,dir_candidates,1);
-                        //std::cout<<"step 3.5"<<std::endl;
-                        //std::cout<<conf.quant_bins.size()<<std::endl;
-                        //std::cout<<conf.decomp_square_error<<std::endl;
-                        block_q_bins.push_back(conf.quant_bins);
-                        square_error+=conf.decomp_square_error;
-
-                        if (conf.tuningTarget==SZ::TUNING_TARGET_SSIM){
-                            
-                            double mean=0,sigma2=0,cov=0,range=0;
-
-                            double orig_mean=0,orig_sigma2=0,orig_range=0;
-                        
-                            if(N==2){
-                                for (size_t i=0;i+ssim_size<sampleBlockSize+1;i+=ssim_size){
-                                    for (size_t j=0;j+ssim_size<sampleBlockSize+1;j+=ssim_size){
-                                        orig_mean=orig_means[idx];
-                                        orig_sigma2=orig_sigma2s[idx];
-                                        orig_range=orig_ranges[idx];
-                                        std::vector<size_t> starts{i,j};
-                                        SZ::blockwise_profiling<T>(cur_block.data(),conf.dims,starts,ssim_size,mean,sigma2,range);
-                                        cov=SZ::blockwise_cov<T>(sampled_blocks[k].data(),cur_block.data(),conf.dims,starts,ssim_size,orig_mean,mean);
-                                        metric+=SZ::SSIM(orig_range,orig_mean,orig_sigma2,mean,sigma2,cov)/ssim_block_num;
-                                        idx++;
-
-
-                                    }
-                                }
-                            }
-
-                            else if(N==3){
-                                for (size_t i=0;i+ssim_size<sampleBlockSize+1;i+=ssim_size){
-                                    for (size_t j=0;j+ssim_size<sampleBlockSize+1;j+=ssim_size){
-                                        for (size_t kk=0;kk+ssim_size<sampleBlockSize+1;kk+=ssim_size){
-                                            orig_mean=orig_means[idx];
-                                            orig_sigma2=orig_sigma2s[idx];
-                                            orig_range=orig_ranges[idx];
-                                            std::vector<size_t> starts{i,j,kk};
-                                            SZ::blockwise_profiling<T>(cur_block.data(),conf.dims,starts,ssim_size,mean,sigma2,range);
-                                            
-                                            cov=SZ::blockwise_cov<T>(sampled_blocks[k].data(),cur_block.data(),conf.dims,starts,ssim_size,orig_mean,mean);
-                                            //printf("%.8f %.8f %.8f %.8f %.8f %.8f %.8f\n",orig_range,orig_sigma2,orig_mean,range,sigma2,mean,cov);
-                                            metric+=SZ::SSIM(orig_range,orig_mean,orig_sigma2,mean,sigma2,cov)/ssim_block_num;
-                                            idx++;
-                                        }
-
-
-                                    }
-                                }
-                            }
-
-
-
-                        }
-                        else if (conf.tuningTarget==SZ::TUNING_TARGET_AC){
-                            flattened_cur_blocks.insert(flattened_cur_blocks.end(),cur_block.begin(),cur_block.end());
-                        }
-
-                       
-
-                    }
-                    //std::cout<<square_error<<std::endl;
-                    q_bin_counts=conf.quant_bin_counts;
-                    //std::cout<<"step 4"<<std::endl;
-
-                    size_t level_num=q_bin_counts.size();
-                    //std::cout<<level_num<<std::endl;
-                    size_t last_pos=0;
-                    for(int k=level_num-1;k>=0;k--){
-                        for (size_t l =0;l<num_sampled_blocks;l++){
-                            //std::cout<<block_q_bins[l].size()<<std::endl;
-                            //std::cout<<q_bin_counts[k]<<std::endl;
-                            for (size_t m=last_pos;m<q_bin_counts[k];m++){
-                                q_bins.push_back(block_q_bins[l][m]);
-                            }
-                        }
-                       
-                        last_pos=q_bin_counts[k];
-                       // std::cout<<last_pos<<std::endl;
-                    }
-                    
-                    
-                    //std::cout<<ele_num<<std::endl;
-                   
-                    //std::cout<<q_bins.size()<<std::endl;
-                    size_t outSize=0;
-                    
-           
-                    auto cmprData=sz.encoding_lossless(conf,q_bins,outSize);
-                    delete []cmprData;
-                    
-                    
-
-
-                    //std::cout<<"step 5"<<std::endl;
-                    //std::cout<<outSize<<std::endl;
-
-                    double bitrate=8*double(outSize)/ele_num;
-                    bitrate+=8*sizeof(T)*anchor_rate;
-                    if(conf.profiling){
-                            bitrate*=((double)num_blocks)/(totalblock_num);
-                        }
-
-                    if(conf.tuningTarget==SZ::TUNING_TARGET_RD){
-                        double mse=square_error/ele_num;
-                        if(conf.profiling){
-                            mse*=((double)num_blocks)/(totalblock_num);
-                         }
-                         metric=SZ::PSNR(rng,mse);
-                    }
-                    else if (conf.tuningTarget==SZ::TUNING_TARGET_AC){
-                       
-                        metric=1-SZ::autocorrelation(flattened_sampled_data.data(),flattened_cur_blocks.data(),ele_num);
-                        std::vector<double>().swap(flattened_cur_blocks);
-                        
-                    }
-                  
-                   std::vector<std::vector<int> >().swap( block_q_bins);
-                    std::vector<size_t>().swap( q_bin_counts);
-
-                    if ( (conf.tuningTarget!=SZ::TUNING_TARGET_CR and metric>=bestm and bitrate<=bestb) or (conf.tuningTarget==SZ::TUNING_TARGET_CR and bitrate<=bestb ) ){
-                        bestalpha=alpha;
-                        bestbeta=beta;
-                        bestb=bitrate;
-                        bestm=metric;
-                        //printf("Best: %.2f %.2f %.4f %.2f\n",bestalpha,bestbeta,bestb,bestm);
-                    }
-                    else if ( (conf.tuningTarget!=SZ::TUNING_TARGET_CR and metric<=bestm and bitrate>=bestb) or (conf.tuningTarget==SZ::TUNING_TARGET_CR and bitrate>bestb) ){
-                        if ( (alpha>=1 and pow(alpha,level_num-1)<=beta) or (alpha<1 and alpha*(level_num-1)<=beta) )
-                            break;
-
-                        continue;
-                    }
-
-                    else{
-                        double orig_eb=conf.absErrorBound;
-                        double eb_fixrate;
-                        if (metric>bestm)
-                            eb_fixrate=1.2;
-                            
-                        else
-                            eb_fixrate=0.8;
-                        conf.absErrorBound=orig_eb*eb_fixrate;
-                        q_bins.clear();
-                        block_q_bins.clear();
-                        square_error=0.0;
-                        double metric_r=0.0;
-                        size_t idx=0;
-                        for (size_t k =0;k<num_sampled_blocks;k++){
-                            cur_block=sampled_blocks[k];
-                            size_t tempsize;
-
-                            SZ_compress_AutoSelectiveInterp<T,N>(conf,cur_block.data(),tempsize,op_candidates,dir_candidates,1);
-                            block_q_bins.push_back(conf.quant_bins);
-                            square_error+=conf.decomp_square_error;
-
-                            if (conf.tuningTarget==SZ::TUNING_TARGET_SSIM){
-                                double mean=0,sigma2=0,cov=0,range=0;
-
-                                double orig_mean=0,orig_sigma2=0,orig_range=0;
-                                if(N==2){
-                                    for (size_t i=0;i+ssim_size<sampleBlockSize+1;i+=ssim_size){
-                                        for (size_t j=0;j+ssim_size<sampleBlockSize+1;j+=ssim_size){
-                                            orig_mean=orig_means[idx];
-                                            orig_sigma2=orig_sigma2s[idx];
-                                            orig_range=orig_ranges[idx];
-                                            std::vector<size_t> starts{i,j};
-                                            SZ::blockwise_profiling<T>(cur_block.data(),conf.dims,starts,ssim_size,mean,sigma2,range);
-                                            cov=SZ::blockwise_cov<T>(sampled_blocks[k].data(),cur_block.data(),conf.dims,starts,ssim_size,orig_mean,mean);
-                                            metric_r+=SZ::SSIM(orig_range,orig_mean,orig_sigma2,mean,sigma2,cov)/ssim_block_num;
-                                            idx++;
-
-
-                                        }
-                                    }
-                                }
-
-                                else if(N==3){
-                                    for (size_t i=0;i+ssim_size<sampleBlockSize+1;i+=ssim_size){
-                                        for (size_t j=0;j+ssim_size<sampleBlockSize+1;j+=ssim_size){
-                                            for (size_t kk=0;kk+ssim_size<sampleBlockSize+1;kk+=ssim_size){
-                                                orig_mean=orig_means[idx];
-                                                orig_sigma2=orig_sigma2s[idx];
-                                                orig_range=orig_ranges[idx];
-                                                std::vector<size_t> starts{i,j,kk};
-                                                SZ::blockwise_profiling<T>(cur_block.data(),conf.dims,starts,ssim_size,mean,sigma2,range);
-                                                cov=SZ::blockwise_cov<T>(sampled_blocks[k].data(),cur_block.data(),conf.dims,starts,ssim_size,orig_mean,mean);
-                                                metric_r+=SZ::SSIM(orig_range,orig_mean,orig_sigma2,mean,sigma2,cov)/ssim_block_num;
-                                                idx++;
-                                            }
-
-
-                                        }
-                                    }
-                                }
-
-
-
-                            }
-                            else if (conf.tuningTarget==SZ::TUNING_TARGET_AC){
-                                flattened_cur_blocks.insert(flattened_cur_blocks.end(),cur_block.begin(),cur_block.end());
-                            }
-
-
-                            
-
-                        }
-                        conf.absErrorBound=orig_eb;
-                        q_bin_counts=conf.quant_bin_counts;
-                        level_num=q_bin_counts.size();
-                        last_pos=0;
-                        for(int k=level_num-1;k>=0;k--){
-                            for (size_t l =0;l<num_sampled_blocks;l++){
-                                for (size_t m=last_pos;m<q_bin_counts[k];m++){
-                                    q_bins.push_back(block_q_bins[l][m]);
-                                }
-                            }
-                            last_pos=q_bin_counts[k];
-                        }
-                        
-                        outSize=0;
-                        
-
-                        auto cmprData=sz.encoding_lossless(conf,q_bins,outSize);
-                        //delete sz;
-                        delete []cmprData;
-                        
-
-                        
-                        double bitrate_r=8*double(outSize)/ele_num;
-                        bitrate_r+=8*sizeof(T)*anchor_rate;
-                        if(conf.profiling){
-                            bitrate_r*=((double)num_blocks)/(totalblock_num);
-                        }
-
-
-                        if(conf.tuningTarget==SZ::TUNING_TARGET_RD){
-                            double mse=square_error/ele_num;
-                            if(conf.profiling){
-                                mse*=((double)num_blocks)/(totalblock_num);
-                             }
-                             metric_r=SZ::PSNR(rng,mse);
-                        }
-                        else if (conf.tuningTarget==SZ::TUNING_TARGET_AC){
-                       
-                            metric=1-SZ::autocorrelation(flattened_sampled_data.data(),flattened_cur_blocks.data(),ele_num);
-                            std::vector<double>().swap(flattened_cur_blocks);
-                            
-                        }
-                       
-
-
-                        double a=(metric-metric_r)/(bitrate-bitrate_r);
-                        double b=metric-a*bitrate;
-                        double reg=a*bestb+b;
-                        //printf("%.2f %.2f %.4f %.2f\n",alpha,beta,bitrate_r,metric_r);
-                        //printf("%.2f %.2f %.4f %.2f\n",alpha,beta,bestb,reg);
-                        
-                        //conf.absErrorBound=orig_eb;
-
-                        if (reg>bestm){
-                            bestalpha=alpha;
-                            bestbeta=beta;
-                       
-                            bestb=bitrate;
-                            bestm=metric;
-                            //printf("Best: %.2f %.2f %.4f %.2f\n",bestalpha,bestbeta,bestb,bestm);
-                        }
-                        std::vector<int>().swap( q_bins);
-
-                        std::vector<std::vector<int> >().swap( block_q_bins);
-                        std::vector<size_t>().swap( q_bin_counts);
-
-
-                    }
-
-
-                    if ( (alpha>=1 and pow(alpha,level_num-1)<=beta) or (alpha<1 and alpha*(level_num-1)<=beta) )
-                        break;
-
-
-
-
-                }
-            }
-
-            conf.alpha=bestalpha;
-            conf.beta=bestbeta;
-            conf.dims=global_dims;
-            conf.num=global_num;
-            conf.interpAlgo_list.clear();
-            conf.interpDirection_list.clear();
-            //delete sz;
-            
-           
-
-            if(conf.tuningTarget==SZ::TUNING_TARGET_AC){
-                bestm=1-bestm;
-            }
-            std::string metric_name="no";
-            if (conf.tuningTarget==SZ::TUNING_TARGET_RD ){
-                metric_name="PSNR";
-            }
-            else if (conf.tuningTarget==SZ::TUNING_TARGET_SSIM ){
-                metric_name="SSIM";
-            }
-            else if (conf.tuningTarget==SZ::TUNING_TARGET_AC ){
-                metric_name="AutoCorrelation";
-            }
-            if(conf.verbose)
-                printf("Autotuning finished. Selected alpha: %f. Selected beta: %f. Best bitrate: %f. Best %s: %f.\n", bestalpha,bestbeta,bestb, const_cast<char*>(metric_name.c_str()),bestm);
-            /*
-            for(int i=0;i<conf.num;i++)
-                data[i]=orig_data[i];
-              */  
-
-        }   
-
-    }
-
-   // bool useInterp = !(best_lorenzo_ratio > best_interp_ratio && best_lorenzo_ratio < 80 && best_interp_ratio < 80);
-    
-//    printf("\nLorenzo compression ratio = %.2f\n", best_lorenzo_ratio);
-//    printf("Interp compression ratio = %.2f\n", best_interp_ratio);
-    
-
-     {
-        //conf.cmprAlgo = SZ::ALGO_INTERP;
-        //double tuning_time = timer.stop();
-        conf.blockwiseTuning=1;
-
-//        std::cout << "Tuning time = " << tuning_time << "s" << std::endl;
-        auto sz = SZ::SZInterpolationCompressor<T, N, SZ::LinearQuantizer<T>, SZ::HuffmanEncoder<int>, SZ::Lossless_zstd>(
-            SZ::LinearQuantizer<T>(conf.absErrorBound),
-            SZ::HuffmanEncoder<int>(),
-            SZ::Lossless_zstd());
-
-        char *cmpData = (char *) sz.compress(conf, data, outSize);
-        return cmpData;
-        
-        
-
-
-       
-        
-    } 
-
-
-}
 
 #endif

@@ -52,17 +52,26 @@ void usage() {
 //    printf("		-P <point-wise relative error bound>: specifying point-wise relative error bound\n");
     printf("		-S <PSNR>: specifying PSNR\n");
     printf("		-N <normErr>: specifying normErr\n");
+    printf("    -q: activate qoz features or not (default activated. set -q 0 to use sz3 based compression.)");
+    printf("    -T <QoZ tuning target> \n");
+    printf("    tuning targets as follows: \n");
+    printf("        PSNR (peak signal-to-noise ratio)\n");
+    printf("        CR (compression ratio)\n");
+    printf("        SSIM (structural similarity)\n");
+    printf("        AC (autocorrelation)\n");
+    printf("    -l: activate Lorenzo tuning (default deactivated. Feature in test.)");
     printf("* dimensions: \n");
     printf("	-1 <nx> : dimension for 1D data such as data[nx]\n");
     printf("	-2 <nx> <ny> : dimensions for 2D data such as data[ny][nx]\n");
     printf("	-3 <nx> <ny> <nz> : dimensions for 3D data such as data[nz][ny][nx] \n");
     printf("	-4 <nx> <ny> <nz> <np>: dimensions for 4D data such as data[np][nz][ny][nx] \n");
-    printf("* examples: \n");
-    printf("	qoz -f -i test.dat    -z test.dat.qoz     -3 8 8 128 -M ABS 1e-3 \n");
-    printf("	qoz -f -z test.dat.qoz -o test.dat.qoz.out -3 8 8 128 -M REL 1e-3 -a \n");
-    printf("	qoz -f -i test.dat    -o test.dat.qoz.out -3 8 8 128 -M ABS_AND_REL -A 1 -R 1e-3 -a \n");
-    printf("	qoz -f -i test.dat    -o test.dat.qoz.out -3 8 8 128 -c qoz.config \n");
-    printf("	qoz -f -i test.dat    -o test.dat.qoz.out -3 8 8 128 -c qoz.config -M ABS 1e-3 -a\n");
+    printf("* Wxamples: \n");
+    printf("    qoz -z -f -c qoz.config -i testdata/x86/testfloat_8_8_128.dat -3 8 8 128\n");
+    printf("    qoz -z -f -c qoz.config -M ABS -A 1E-3 -i testdata/x86/testfloat_8_8_128.dat -3 8 8 128\n");
+    printf("    qoz -x -f -s testdata/x86/testfloat_8_8_128.dat.qoz -3 8 8 128\n");
+    printf("    qoz -x -f -s testdata/x86/testfloat_8_8_128.dat.qoz -i testdata/x86/testfloat_8_8_128.dat -3 8 8 128 -a\n");
+    printf("    qoz -z -d -c qoz.config -i testdata/x86/testdouble_8_8_128.dat -3 8 8 128\n");
+    printf("    qoz -x -d -s testdata/x86/testdouble_8_8_128.dat.qoz -3 8 8 128\n");
     exit(0);
 }
 
@@ -118,6 +127,7 @@ void usage_sz2() {
     printf("        CR (compression ratio)\n");
     printf("        SSIM (structural similarity)\n");
     printf("        AC (autocorrelation)\n");
+    printf("    -l: activate Lorenzo tuning (default deactivated. Feature in test.)");
     printf("* examples: \n");
     printf("	qoz -z -f -c qoz.config -i testdata/x86/testfloat_8_8_128.dat -3 8 8 128\n");
     printf("	qoz -z -f -c qoz.config -M ABS -A 1E-3 -i testdata/x86/testfloat_8_8_128.dat -3 8 8 128\n");
@@ -125,7 +135,6 @@ void usage_sz2() {
     printf("	qoz -x -f -s testdata/x86/testfloat_8_8_128.dat.qoz -i testdata/x86/testfloat_8_8_128.dat -3 8 8 128 -a\n");
     printf("	qoz -z -d -c qoz.config -i testdata/x86/testdouble_8_8_128.dat -3 8 8 128\n");
     printf("	qoz -x -d -s testdata/x86/testdouble_8_8_128.dat.qoz -3 8 8 128\n");
-    printf("	qoz -p -s testdata/x86/testdouble_8_8_128.dat.qoz\n");
     exit(0);
 }
 
@@ -215,6 +224,7 @@ int main(int argc, char *argv[]) {
     char *tuningTarget = nullptr;
 
     bool sz2mode = false;
+    int testLorenzo=0;
 
     size_t r4 = 0;
     size_t r3 = 0;
@@ -250,6 +260,9 @@ int main(int argc, char *argv[]) {
                 break;
             case 'a':
                 printCmpResults = 1;
+                break;
+            case 'l':
+                testLorenzo = 1;
                 break;
             case 'z':
                 compression = true;
@@ -426,6 +439,8 @@ int main(int argc, char *argv[]) {
     if (qoz>=0){
         conf.QoZ=qoz;
     }
+    if(testLorenzo)
+        conf.testLorenzo=testLorenzo;
 
     if (errBoundMode != nullptr) {
         {

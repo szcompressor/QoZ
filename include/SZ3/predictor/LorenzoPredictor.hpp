@@ -31,19 +31,7 @@ namespace SZ {
             if(the_coeffs.size()>0){
                 this->coeffs=the_coeffs;
                 useCoeff=true;
-                std::cout<<"Coeffs:"<<std::endl;
-                for(int i=0;i<this->coeffs.size();i++)
-
-                    std::cout<<this->coeffs[i]<<std::endl;
-                /*
-                if(coeffs.size()==3){
-                    coeffs={-1.0,1,1};
-
-                }
-                else if (coeffs.size()==8){
-                    coeffs={-1.0,2,-1,2,-4,2,-1,2};
-                }
-                */
+               
             }
             if (L == 1) {
                 if (N == 1) {
@@ -123,10 +111,6 @@ namespace SZ {
 
                 coeffs=std::vector<double>(coeff_num,0.0);
                 read(coeffs.data(),coeff_num,c,remaining_length);
-                std::cout<<"Coeffs:"<<std::endl;
-                for(int i=0;i<coeffs.size();i++)
-
-                    std::cout<<coeffs[i]<<std::endl;
 
             }
         }
