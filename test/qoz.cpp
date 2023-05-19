@@ -52,7 +52,7 @@ void usage() {
 //    printf("		-P <point-wise relative error bound>: specifying point-wise relative error bound\n");
     printf("		-S <PSNR>: specifying PSNR\n");
     printf("		-N <normErr>: specifying normErr\n");
-    printf("    -q: activate qoz features or not (default activated. set -q 0 to use sz3 based compression.)");
+    printf("    -q: activate qoz features or not (default activated. set -q 0 to use sz3 based compression.)\n");
     printf("    -T <QoZ tuning target> \n");
     printf("    tuning targets as follows: \n");
     printf("        PSNR (peak signal-to-noise ratio)\n");
