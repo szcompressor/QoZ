@@ -40,7 +40,7 @@ you can create some examples of the configuration file. The qoz-related paramete
 
 ## Version History
 
-* QoZ 1.1: Minor improvments over 1.0.
+* QoZ 1.1: Minor improvements over 1.0.
 * QoZ 1.0: The SC '22 Version.
 
 ## Bug Report
