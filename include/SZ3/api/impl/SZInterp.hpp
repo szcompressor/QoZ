@@ -184,7 +184,7 @@ double Tuning(SZ::Config &conf, T *data){
         if (conf.sampleBlockSize<=0){
                 conf.sampleBlockSize = (N==2?64:32);
         }
-        conf.profiling=1//added.
+        conf.profiling=1;//added.
     }  
     if(N!=2&&N!=3){
         conf.autoTuningRate=0;

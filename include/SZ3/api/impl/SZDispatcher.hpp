@@ -23,15 +23,8 @@ char *SZ_compress_dispatcher(SZ::Config &conf, T *data, size_t &outSize) {
     } else if (conf.cmprAlgo == SZ::ALGO_INTERP_LORENZO) {
         cmpData = (char *) SZ_compress_Interp_lorenzo<T, N>(conf, data, outSize);
     }
-    /*
-    else if (conf.cmprAlgo == SZ::ALGO_NEWINTERP) {
-        cmpData = (char *) SZ_compress_NewInterp<T, N>(conf, data, outSize);
-    }
-    */
-    else if (conf.cmprAlgo == SZ::ALGO_INTERP_BLOCKED) {
-        //std::cout<<"111"<<std::endl;
-        cmpData = (char *) SZ_compress_Interp_blocked<T, N>(conf, data, outSize);
-    }
+   
+   
     return cmpData;
 }
 
