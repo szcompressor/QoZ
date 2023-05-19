@@ -1,11 +1,11 @@
 #ifndef _meta_regression_hpp
 #define _meta_regression_hpp
 
-#include "SZ3/utils/MetaDef.hpp"
-#include "SZ3/encoder/HuffmanEncoder.hpp"
-#include "SZ3/utils/MemoryUtil.hpp"
+#include "QoZ/utils/MetaDef.hpp"
+#include "QoZ/encoder/HuffmanEncoder.hpp"
+#include "QoZ/utils/MemoryUtil.hpp"
 
-namespace QoZQoZ {
+namespace QoZMETA {
 
     template<typename T>
     inline int
