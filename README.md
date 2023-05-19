@@ -38,5 +38,18 @@ By running
 
 you can create some examples of the configuration file. The qoz-related parameters are on the line 14-20 of generate_config.py.
 
+## Version History
+
+* QoZ 1.1: Minor improvments over 1.0.
+* QoZ 1.0: The SC '22 Version.
+
+## Bug Report
+
+The current version of QoZ may have unexpected and unfound bugs. If you have met errors or abnormal results when using QoZ, feel free to raise issues or contact me via jliu447@ucr.edu. 
+
+
+
+
+
 
 
