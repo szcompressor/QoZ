@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This is the source code of the QoZ data compression introduced in the paper: QoZ: Dynamic Quality Metric Oriented Error Bounded Lossy Compression for Scientific Datasets ([paper link](https://www.computer.org/csdl/proceedings-article/sc/2022/544400a892/1I0bT6kfcas)). QoZ can be regarded as an extension of ([SZ3]https://github.com/szcompressor/SZ3) which has multiple quality optimization targets and achieves better rate-distortion than SZ3 in most cases.
+This is the source code of the QoZ data compression introduced in the paper: QoZ: Dynamic Quality Metric Oriented Error Bounded Lossy Compression for Scientific Datasets ([paper link](https://www.computer.org/csdl/proceedings-article/sc/2022/544400a892/1I0bT6kfcas)). QoZ can be regarded as an extension of ([SZ3](https://github.com/szcompressor/SZ3)) which has multiple quality optimization targets and achieves better rate-distortion than SZ3 in most cases.
 
 ## Dependencies
 
