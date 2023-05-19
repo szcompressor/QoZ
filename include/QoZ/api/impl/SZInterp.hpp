@@ -263,11 +263,12 @@ double Tuning(QoZ::Config &conf, T *data){
     size_t num_blocks=0;
     std::vector<std::vector<size_t> >starts;
     if((conf.autoTuningRate>0 or conf.predictorTuningRate>0) and conf.profiling){
+        size_t profStride=sampleBlockSize/4;
         if(N==2){
-            QoZ::profiling_block_2d<T,N>(data,conf.dims,starts,sampleBlockSize,conf.absErrorBound);
+            QoZ::profiling_block_2d<T,N>(data,conf.dims,starts,sampleBlockSize,conf.absErrorBound,profStride);
         }
         else if (N==3){
-            QoZ::profiling_block_3d<T,N>(data,conf.dims,starts,sampleBlockSize,conf.absErrorBound);
+            QoZ::profiling_block_3d<T,N>(data,conf.dims,starts,sampleBlockSize,conf.absErrorBound,profStride);
         }
         num_blocks=starts.size();
 
