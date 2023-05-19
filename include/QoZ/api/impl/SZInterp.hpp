@@ -9,7 +9,7 @@
 #include "QoZ/utils/Sample.hpp"
 #include "QoZ/utils/Statistic.hpp"
 #include "QoZ/utils/Extraction.hpp"
-#include "QoZ/utils/QuantOptimizatioin.hpp"
+#include "QoZ/utils/QuantOptimization.hpp"
 #include "QoZ/utils/Config.hpp"
 #include "QoZ/utils/Metrics.hpp"
 #include "QoZ/utils/CoeffRegression.hpp"
