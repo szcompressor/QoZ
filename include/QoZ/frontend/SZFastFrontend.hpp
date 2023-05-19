@@ -96,7 +96,7 @@ namespace QoZ {
             size_t r1 = conf.dims[0];
             size_t r2 = conf.dims[1];
             size_t r3 = conf.dims[2];
-            size = SZMETA::DSize_3d(r1, r2, r3, params.block_size);
+            size = QoZMETA::DSize_3d(r1, r2, r3, params.block_size);
             // prepare unpred buffer for vectorization
             est_unpred_count_per_index = size.num_blocks * size.block_size * 1;
             // if(!params.block_independant) est_unpred_count_per_index /= 20;
@@ -171,14 +171,14 @@ namespace QoZ {
     private:
         //        unsigned char *
 //        compress_3d(const T *data, size_t r1, size_t r2, size_t r3, double precision, size_t &compressed_size,
-//                    const SZMETA::meta_params &params, SZMETA::CompressStats &compress_info) {
+//                    const QoZMETA::meta_params &params, QoZMETA::CompressStats &compress_info) {
         std::vector<int> compress_3d(const T *data) {
             clear();
 
             size_t r1 = conf.dims[0];
             size_t r2 = conf.dims[1];
             size_t r3 = conf.dims[2];
-            size = SZMETA::DSize_3d(r1, r2, r3, conf.blockSize);
+            size = QoZMETA::DSize_3d(r1, r2, r3, conf.blockSize);
 
 //            capacity = 0; // num of quant intervals
 //            mean_info = optimize_quant_invl_3d(data, r1, r2, r3, conf.absErrorBound, capacity);
@@ -518,7 +518,7 @@ namespace QoZ {
         }
 
         meta_params params;
-        SZMETA::DSize_3d size;
+        QoZMETA::DSize_3d size;
         double precision;
         size_t reg_count = 0;
         std::vector<int> indicator;
@@ -527,7 +527,7 @@ namespace QoZ {
         float *reg_params = nullptr;
         float *reg_unpredictable_data_pos;
 
-        SZMETA::meanInfo<T> mean_info;  // not used
+        QoZMETA::meanInfo<T> mean_info;  // not used
         int capacity = 0; // not used, capacity is controlled by quantizer
         int intv_radius = 0; //not used, capacity is controlled by quantizer
         int est_unpred_count_per_index = 0; // not used, unpredictable data is controlled by quantizer
