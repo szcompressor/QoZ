@@ -8,9 +8,6 @@ This is the source code of the QoZ data compression introduced in the paper: QoZ
 
 Please Install the following dependencies before running the artiact evaluation experiments:
 
-
-* numpy >= 1.21.2
-* pandas >= 1.4.1
 * cmake>=3.13
 * gcc>=6.0
 
