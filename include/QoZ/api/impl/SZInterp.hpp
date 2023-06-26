@@ -276,7 +276,7 @@ double Tuning(QoZ::Config &conf, T *data){
 
     if(num_blocks<=(int)(0.3*conf.predictorTuningRate))//temp. to refine
         conf.profiling=0;
-
+    std::cout<<conf.profiling<<std::endl;
     if (conf.predictorTuningRate>0 and conf.predictorTuningRate<1){
         if (conf.verbose)
             std::cout<<"Predictor tuning started."<<std::endl;
@@ -395,6 +395,7 @@ double Tuning(QoZ::Config &conf, T *data){
         
         
         num_sampled_blocks=sampled_blocks.size();
+        std::cout<<num_sampled_blocks<<std::endl;
         per_block_ele_num=pow(sampleBlockSize+1,N);
         ele_num=num_sampled_blocks*per_block_ele_num;
         conf.dims=std::vector<size_t>(N,sampleBlockSize+1);
