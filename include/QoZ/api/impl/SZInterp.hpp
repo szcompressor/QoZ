@@ -322,6 +322,8 @@ double Tuning(QoZ::Config &conf, T *data){
             if(conf.profiling){
                 
                 int sample_ratio=int(num_blocks/(totalblock_num*conf.predictorTuningRate));
+                if(sample_ratio<=0)
+                    sample_ratio=1;
                
                 
 
@@ -350,6 +352,8 @@ double Tuning(QoZ::Config &conf, T *data){
             
             else{
                 int sample_ratio=int(1.0/conf.predictorTuningRate);
+                if(sample_ratio<=0)
+                    sample_ratio=1;
                 if (N==2){
                     
                     //std::vector<size_t> sample_dims(2,sampleBlockSize+1);
@@ -901,6 +905,8 @@ double Tuning(QoZ::Config &conf, T *data){
             if(conf.profiling){
                
                 int sample_ratio=int(num_blocks/(totalblock_num*conf.predictorTuningRate));
+                if(sample_ratio<=0)
+                    sample_ratio=1;
                 
 
                 if(N==2){
@@ -928,6 +934,8 @@ double Tuning(QoZ::Config &conf, T *data){
 
             else{
                 int sample_ratio=int(1.0/conf.autoTuningRate);
+                if(sample_ratio<=0)
+                    sample_ratio=1;
             
                 if (N==2){
                     
