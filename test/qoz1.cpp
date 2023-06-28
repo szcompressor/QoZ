@@ -445,17 +445,19 @@ int main(int argc, char *argv[]) {
     } else {
         conf = QoZ::Config(r4, r3, r2, r1);
     }
-    if (compression && conPath != nullptr) {
-        conf.loadcfg(conPath);
-    }
     if (qoz>=0){
         conf.QoZ=qoz;
     }
     if(testLorenzo)
         conf.testLorenzo=testLorenzo;
-
-    conf.maxStep=maxStep;
-    conf.sampleBlockSize=sampleBlockSize;
+    if(maxStep>0)
+        conf.maxStep=maxStep;
+    if(sampleBlockSize>0)
+        conf.sampleBlockSize=sampleBlockSize;
+    if (compression && conPath != nullptr) {
+        conf.loadcfg(conPath);
+    }
+    
     if (errBoundMode != nullptr) {
         {
             // backward compatible with SZ2
