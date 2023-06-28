@@ -29,6 +29,7 @@ Before you proceed to the following evaluations, please add the installation pat
 
 You can use the executable 'qoz' command to do the compression/decompression. Just run "qoz" command without any argument to check the instructions for its arguments.
 The qoz executable includes the SZ3.1 compression, but the qoz features are automatically involved. You can add argument "-q 0" to disable them for comparing the compression results with SZ3-based compression (adding -q 0 will make qoz command perform the same as SZ3.1).
+Notice: Currently the QoZ features only support 2D and 3D input data. QoZ will use SZ 3.1 to compress input data in other dimensions.
 
 ## Version History
 
