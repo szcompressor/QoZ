@@ -190,7 +190,7 @@ namespace QoZ {
                     cur_blocksize=blocksize*stride;
                 }
                 
-                //std::cout<<cur_blocksize<<std::endl;
+               
 
                 auto inter_block_range = std::make_shared<
                         QoZ::multi_dimensional_range<T, N>>(decData,
@@ -228,7 +228,6 @@ namespace QoZ {
                 }
                 
                 
-                //std::cout<<count<<std::endl;
             }
             quantizer.postdecompress_data();
            
@@ -531,9 +530,9 @@ namespace QoZ {
                 
                 return buffer;
             }
-            //std::cout<<"predict_ended"<<std::endl;
-            if(conf.verbose)
-                timer.stop("prediction");
+           
+            //if(conf.verbose)
+            //    timer.stop("prediction");
            
             //assert(quant_inds.size() == num_elements);
 
@@ -710,7 +709,7 @@ namespace QoZ {
                 return;
             /*
             else if(tuning==1 and conf.sampleBlockSize<conf.maxStep and conf.tuningTarget==QoZ::TUNING_TARGET_RD){
-                //std::cout<<"dd"<<std::endl;
+                
                 quantizer.insert_unpred(*data);
                 return;
 

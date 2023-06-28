@@ -795,7 +795,7 @@ double Tuning(QoZ::Config &conf, T *data){
 
     }
     else{
-        QoZ::Timer timer(true);
+        //QoZ::Timer timer(true);
         //size_t sampling_num, sampling_block;
         //std::vector<size_t> sample_dims(N);
         
@@ -859,8 +859,8 @@ double Tuning(QoZ::Config &conf, T *data){
         else{
             conf.cmprAlgo=QoZ::ALGO_LORENZO_REG;
         }
-        if(conf.verbose)
-            timer.stop("oldtuning");
+        //if(conf.verbose)
+        //    timer.stop("oldtuning");
         
         
        //std::vector<T>().swap(sampling_data);
