@@ -59,6 +59,8 @@ void usage() {
     printf("        CR (compression ratio)\n");
     printf("        SSIM (structural similarity)\n");
     printf("        AC (autocorrelation)\n");
+    printf("    -C <anchor stride> : stride of anchor points.\n");
+    printf("    -B <sampling block size> : block size of sampled data block for auto-tuning.\n");
     printf("    -l: activate Lorenzo tuning (default deactivated. Feature in test.)");
     printf("* dimensions: \n");
     printf("	-1 <nx> : dimension for 1D data such as data[nx]\n");
@@ -222,6 +224,8 @@ int main(int argc, char *argv[]) {
     char *psnrErrorBound = nullptr;
     char *normErrorBound = nullptr;
     char *tuningTarget = nullptr;
+    int maxStep=0;
+    int sampleBlockSize=0;
 
     bool sz2mode = false;
     int testLorenzo=0;
@@ -389,6 +393,14 @@ int main(int argc, char *argv[]) {
                     usage();
                 tuningTarget = argv[i];
                 break;
+            case 'C':
+                if (++i == argc || sscanf(argv[i], "%d", &maxStep) != 1)
+                        usage();
+                break;
+            case 'B':
+                if (++i == argc || sscanf(argv[i], "%d", &sampleBlockSize) != 1)
+                        usage();
+                break;
             default:
                 usage();
                 break;
@@ -442,6 +454,8 @@ int main(int argc, char *argv[]) {
     if(testLorenzo)
         conf.testLorenzo=testLorenzo;
 
+    conf.maxStep=maxStep;
+    conf.sampleBlockSize=sampleBlockSize;
     if (errBoundMode != nullptr) {
         {
             // backward compatible with SZ2

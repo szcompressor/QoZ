@@ -182,7 +182,7 @@ double Tuning(QoZ::Config &conf, T *data){
         if (conf.levelwisePredictionSelection<=0)
             conf.levelwisePredictionSelection = (N==2?6:4);
         if (conf.sampleBlockSize<=0){
-                conf.sampleBlockSize = (N==2?64:32);
+            conf.sampleBlockSize = (N==2?64:32);
         }
         conf.profiling=1;//added.
     }  
