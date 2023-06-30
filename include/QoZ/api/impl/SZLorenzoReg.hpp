@@ -86,7 +86,7 @@ char *SZ_compress_LorenzoReg(QoZ::Config &conf, T *data, size_t &outSize) {
 
     char *cmpData;
     auto quantizer = QoZ::LinearQuantizer<T>(conf.absErrorBound, conf.quantbinCnt / 2);
-    if (N == 3 and !conf.regression2 and !conf.useCoeff) {
+    if (N == 3 and !conf.regression2) {
         // use fast version for 3D
         auto sz = QoZ::make_sz_general_compressor<T, N>(QoZ::make_sz_fast_frontend<T, N>(conf, quantizer), QoZ::HuffmanEncoder<int>(),
                                                        QoZ::Lossless_zstd());
@@ -106,7 +106,7 @@ void SZ_decompress_LorenzoReg(const QoZ::Config &conf, char *cmpData, size_t cmp
 
     QoZ::uchar const *cmpDataPos = (QoZ::uchar *) cmpData;
     QoZ::LinearQuantizer<T> quantizer;
-    if (N == 3 and !conf.regression2 and !conf.useCoeff) {
+    if (N == 3 and !conf.regression2) {
         // use fast version for 3D
         auto sz = QoZ::make_sz_general_compressor<T, N>(QoZ::make_sz_fast_frontend<T, N>(conf, quantizer),
                                                        QoZ::HuffmanEncoder<int>(), QoZ::Lossless_zstd());
