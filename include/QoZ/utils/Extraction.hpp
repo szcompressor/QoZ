@@ -6,7 +6,7 @@
 #define SZ_EXTRACTION_HPP
 
 
-namespace SZ {
+namespace QoZ {
 
     template<uint N>
     float cal_sampling_ratio(size_t block, size_t n, size_t dmin, std::vector<size_t> dims) {
