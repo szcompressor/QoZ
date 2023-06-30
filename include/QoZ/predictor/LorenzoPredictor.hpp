@@ -17,22 +17,14 @@ namespace QoZ {
         using Range = multi_dimensional_range<T, N>;
         using iterator = typename multi_dimensional_range<T, N>::iterator;
 
-        LorenzoPredictor(const std::vector<double> &the_coeffs=std::vector<double>()) {
+        LorenzoPredictor() {
             this->noise = 0;
-            if(the_coeffs.size()>0){
-                useCoeff=true;
-                this->coeffs=the_coeffs;
-
-            }
+            
         }
 
-        LorenzoPredictor(double eb,const std::vector<double> &the_coeffs=std::vector<double>()) {
+        LorenzoPredictor(double eb) {
             this->noise = 0;
-            if(the_coeffs.size()>0){
-                this->coeffs=the_coeffs;
-                useCoeff=true;
-               
-            }
+            
             if (L == 1) {
                 if (N == 1) {
                     this->noise = 0.5 * eb;
@@ -80,11 +72,7 @@ namespace QoZ {
             //c[0] = predictor_id;
             //c += sizeof(uint8_t);
             write(predictor_id, c);
-            write(useCoeff,c);
-            if(useCoeff){
-                write(coeffs.data(),coeffs.size(),c);
-
-            }
+           
         }
 
         /*
@@ -104,15 +92,7 @@ namespace QoZ {
             remaining_length-=sizeof(uint8_t);
 
             
-            read(useCoeff,c,remaining_length);
-            std::cout<<useCoeff<<std::endl;
-            if (useCoeff){
-                int coeff_num=int(pow(L+1,N)-1);
-
-                coeffs=std::vector<double>(coeff_num,0.0);
-                read(coeffs.data(),coeff_num,c,remaining_length);
-
-            }
+            
         }
 
         void print() const {
@@ -131,7 +111,6 @@ namespace QoZ {
 
     protected:
         T noise = 0;
-        bool useCoeff=false;
         std::vector<double> coeffs;
 
     private:
@@ -165,27 +144,10 @@ namespace QoZ {
 
         template<uint NN = N, uint LL = L>
         inline typename std::enable_if<NN == 3 && LL == 1, T>::type do_predict(const iterator &iter) const noexcept {
-            if (coeffs.size()==0)
-                return iter.prev(0, 0, 1) + iter.prev(0, 1, 0) + iter.prev(1, 0, 0)
-                       - iter.prev(0, 1, 1) - iter.prev(1, 0, 1) - iter.prev(1, 1, 0)
-                       + iter.prev(1, 1, 1);
-            else{
-                T value=0;
-                size_t idx=0;
-                for(int i=1;i>=0;i--){
-                    for(int j=1;j>=0;j--){
-                        for(int k=1;k>=0;k--){
-                            if(i==0 and j==0 and k==0)
-                                break;
-                            value+=iter.prev(i,j,k)*coeffs[idx++];
-                        }
-
-                    }
-
-                }
-                return value;
-
-            }
+           
+            return iter.prev(0, 0, 1) + iter.prev(0, 1, 0) + iter.prev(1, 0, 0)
+                    - iter.prev(0, 1, 1) - iter.prev(1, 0, 1) - iter.prev(1, 1, 0)
+                    + iter.prev(1, 1, 1);
 
 
 
@@ -206,62 +168,24 @@ namespace QoZ {
 
         template<uint NN = N, uint LL = L>
         inline typename std::enable_if<NN == 2 && LL == 2, T>::type do_predict(const iterator &iter) const noexcept {
-            if(coeffs.size()==0)
-                return 2 * iter.prev(0, 1) - iter.prev(0, 2) + 2 * iter.prev(1, 0)
-                       - 4 * iter.prev(1, 1) + 2 * iter.prev(1, 2) - iter.prev(2, 0)
-                       + 2 * iter.prev(2, 1) - iter.prev(2, 2);
-            else{
-                
-                T value=0;
-                size_t idx=0;
-                for(int i=2;i>=0;i--){
-                    for(int j=2;j>=0;j--){
-                        if(i==0 and j==0)
-                            break;
-                        value+=iter.prev(i,j)*coeffs[idx++];
-
-                    }
-
-                }
-                return value;
-                
-                /*
-                return (int)coeffs[7] * iter.prev(0, 1) + (int)coeffs[6]*iter.prev(0, 2) + (int)coeffs[5] * iter.prev(1, 0)
-                       + (int)coeffs[4] * iter.prev(1, 1) + (int)coeffs[3] * iter.prev(1, 2) + (int)coeffs[2]*iter.prev(2, 0)
-                       + (int)coeffs[1] * iter.prev(2, 1) + (int)coeffs[0]*iter.prev(2, 2);
-                       */
-            }
+           
+            return 2 * iter.prev(0, 1) - iter.prev(0, 2) + 2 * iter.prev(1, 0)
+                    - 4 * iter.prev(1, 1) + 2 * iter.prev(1, 2) - iter.prev(2, 0)
+                    + 2 * iter.prev(2, 1) - iter.prev(2, 2);
         }
 
         template<uint NN = N, uint LL = L>
         inline typename std::enable_if<NN == 3 && LL == 2, T>::type do_predict(const iterator &iter) const noexcept {
-            if (coeffs.size()==0)
-                return 2 * iter.prev(0, 0, 1) - iter.prev(0, 0, 2) + 2 * iter.prev(0, 1, 0)
-                       - 4 * iter.prev(0, 1, 1) + 2 * iter.prev(0, 1, 2) - iter.prev(0, 2, 0)
-                       + 2 * iter.prev(0, 2, 1) - iter.prev(0, 2, 2) + 2 * iter.prev(1, 0, 0)
-                       - 4 * iter.prev(1, 0, 1) + 2 * iter.prev(1, 0, 2) - 4 * iter.prev(1, 1, 0)
-                       + 8 * iter.prev(1, 1, 1) - 4 * iter.prev(1, 1, 2) + 2 * iter.prev(1, 2, 0)
-                       - 4 * iter.prev(1, 2, 1) + 2 * iter.prev(1, 2, 2) - iter.prev(2, 0, 0)
-                       + 2 * iter.prev(2, 0, 1) - iter.prev(2, 0, 2) + 2 * iter.prev(2, 1, 0)
-                       - 4 * iter.prev(2, 1, 1) + 2 * iter.prev(2, 1, 2) - iter.prev(2, 2, 0)
-                       + 2 * iter.prev(2, 2, 1) - iter.prev(2, 2, 2);
-            else{
-                T value=0;
-                size_t idx=0;
-                for(int i=2;i>=0;i--){
-                    for(int j=2;j>=0;j--){
-                        for(int k=2;k>=0;k--){
-                            if(i==0 and j==0 and k==0)
-                                break;
-                            value+=iter.prev(i,j,k)*coeffs[idx++];
-                        }
-
-                    }
-
-                }
-                return value;
-
-            }
+            
+            return 2 * iter.prev(0, 0, 1) - iter.prev(0, 0, 2) + 2 * iter.prev(0, 1, 0)
+                   - 4 * iter.prev(0, 1, 1) + 2 * iter.prev(0, 1, 2) - iter.prev(0, 2, 0)
+                   + 2 * iter.prev(0, 2, 1) - iter.prev(0, 2, 2) + 2 * iter.prev(1, 0, 0)
+                   - 4 * iter.prev(1, 0, 1) + 2 * iter.prev(1, 0, 2) - 4 * iter.prev(1, 1, 0)
+                   + 8 * iter.prev(1, 1, 1) - 4 * iter.prev(1, 1, 2) + 2 * iter.prev(1, 2, 0)
+                   - 4 * iter.prev(1, 2, 1) + 2 * iter.prev(1, 2, 2) - iter.prev(2, 0, 0)
+                   + 2 * iter.prev(2, 0, 1) - iter.prev(2, 0, 2) + 2 * iter.prev(2, 1, 0)
+                   - 4 * iter.prev(2, 1, 1) + 2 * iter.prev(2, 1, 2) - iter.prev(2, 2, 0)
+                   + 2 * iter.prev(2, 2, 1) - iter.prev(2, 2, 2);
         
         }
     };

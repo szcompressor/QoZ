@@ -150,12 +150,9 @@ namespace QoZ {
             maxStep=cfg.GetInteger("AlgoSettings", "maxStep", maxStep);
             sampleBlockSize=cfg.GetInteger("AlgoSettings", "sampleBlockSize", sampleBlockSize);
             levelwisePredictionSelection=cfg.GetInteger("AlgoSettings", "levelwisePredictionSelection", levelwisePredictionSelection);
-            exhaustiveTuning=cfg.GetInteger("AlgoSettings", "exhaustiveTuning", exhaustiveTuning);
             testLorenzo=cfg.GetInteger("AlgoSettings", "testLorenzo", testLorenzo);
             linearReduce=cfg.GetInteger("AlgoSettings", "linearReduce", linearReduce);
             train=cfg.GetInteger("AlgoSettings", "train", train);
-            useCoeff=cfg.GetInteger("AlgoSettings", "useCoeff", useCoeff);
-            regSampleStep=cfg.GetInteger("AlgoSettings", "regSampleStep", regSampleStep);
             multiDimInterp=cfg.GetInteger("AlgoSettings", "multiDimInterp", multiDimInterp);
             profiling=cfg.GetInteger("AlgoSettings", "profiling", profiling);
             SSIMBlockSize=cfg.GetInteger("AlgoSettings", "SSIMBlockSize", SSIMBlockSize);
@@ -269,7 +266,6 @@ namespace QoZ {
         int interpBlockSize = 32;
         int quantbinCnt = 65536;
         int blockSize;
-        int exhaustiveTuning=0;
         int testLorenzo=0;
         std::vector<int> quant_bins;
         //double pred_square_error;
@@ -281,14 +277,10 @@ namespace QoZ {
         int pred_dim; // not used now
         int linearReduce=0;
         int train=0;
-        int useCoeff=0;
-        int regSampleStep=6;
-        int multiDimInterp=0;
+       // int multiDimInterp=0;
         int profiling=0;
         int SSIMBlockSize=8;
         int fixBlockSize=0;
-        std::vector<double> lorenzo1_coeffs;
-        std::vector<double> lorenzo2_coeffs;
         int verbose=1;
         int QoZ=1;
         
