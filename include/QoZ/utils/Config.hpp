@@ -153,7 +153,6 @@ namespace QoZ {
             testLorenzo=cfg.GetInteger("AlgoSettings", "testLorenzo", testLorenzo);
             linearReduce=cfg.GetInteger("AlgoSettings", "linearReduce", linearReduce);
             train=cfg.GetInteger("AlgoSettings", "train", train);
-            multiDimInterp=cfg.GetInteger("AlgoSettings", "multiDimInterp", multiDimInterp);
             profiling=cfg.GetInteger("AlgoSettings", "profiling", profiling);
             SSIMBlockSize=cfg.GetInteger("AlgoSettings", "SSIMBlockSize", SSIMBlockSize);
             fixBlockSize=cfg.GetInteger("AlgoSettings", "fixBlockSize", fixBlockSize);
