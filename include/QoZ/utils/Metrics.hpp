@@ -37,7 +37,7 @@ namespace QoZ {
                     sum+=value;
                     
                     max=value>max?value:max;
-                    min=value<max?value:min;
+                    min=value<min?value:min;
 
                 }
 
@@ -74,7 +74,7 @@ namespace QoZ {
                         sum+=value;
                        
                         max=value>max?value:max;
-                        min=value<max?value:min;
+                        min=value<min?value:min;
                     }
 
                 }
