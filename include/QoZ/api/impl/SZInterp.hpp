@@ -2026,7 +2026,7 @@ char *SZ_compress_Interp_lorenzo(QoZ::Config &conf, T *data, size_t &outSize) {
        
         
         //further tune lorenzo
-        if (N == 3 and !conf.useCoeff) {
+        if (N == 3) {
             lorenzo_config.quantbinCnt = QoZ::optimize_quant_invl_3d<T>(data, conf.dims[0], conf.dims[1], conf.dims[2], conf.absErrorBound);
             lorenzo_config.pred_dim = 2;
             auto cmprData = SZ_compress_LorenzoReg<T, N>(lorenzo_config, sampling_data.data(), sampleOutSize);
@@ -2059,44 +2059,6 @@ char *SZ_compress_Interp_lorenzo(QoZ::Config &conf, T *data, size_t &outSize) {
         lorenzo_config.setDims(conf.dims.begin(), conf.dims.end());
         conf = lorenzo_config;
 
-        if(conf.useCoeff){
-            
-            if (conf.lorenzo){
-                size_t num_coeff=int(pow(2,N)-1);
-                std::vector <double> A;
-                std::vector<double> b;
-                if(N==2)
-                    QoZ::extract_lorenzoreg_2d<T,N>(data, A, b, conf.dims,1,conf.regSampleStep);
-                else if (N==3)
-                    QoZ::extract_lorenzoreg_3d<T,N>(data, A, b, conf.dims,1,conf.regSampleStep);
-                //std::cout<<"step1"<<std::endl;
-                size_t num_points=b.size();
-                double * coeff_array=QoZ::Regression(A.data(),num_points,num_coeff,b.data());
-                //std::cout<<"step2"<<std::endl;
-                conf.lorenzo1_coeffs=std::vector<double>(coeff_array,coeff_array+num_coeff);
-                delete [] coeff_array;
-
-            }
-            if (conf.lorenzo2){
-                size_t num_coeff=int(pow(3,N)-1);
-                std::vector <double> A;
-                std::vector<double> b;
-                if(N==2)
-                    QoZ::extract_lorenzoreg_2d<T,N>(data, A, b, conf.dims,2,conf.regSampleStep);
-                else if (N==3)
-                    QoZ::extract_lorenzoreg_3d<T,N>(data, A, b, conf.dims,2,conf.regSampleStep);
-                //std::cout<<"step3"<<std::endl;
-                size_t num_points=b.size();
-                double * coeff_array=QoZ::Regression(A.data(),num_points,num_coeff,b.data());
-                //std::cout<<"step4"<<std::endl;
-                conf.lorenzo2_coeffs=std::vector<double>(coeff_array,coeff_array+num_coeff);
-                delete [] coeff_array;
-
-            }
-
-            
-
-        }
         //std::cout<<conf.quantbinCnt<<std::endl;
         double tuning_time = timer.stop();
         if(conf.verbose){
