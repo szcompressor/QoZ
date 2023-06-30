@@ -109,6 +109,7 @@ namespace QoZ {
 
         //save the huffman Tree in the compressed data
         uint save(uchar *&c) {
+            auto cc=c;
             write(offset, c);
             int32ToBytes_bigEndian(c, nodeCount);
             c += sizeof(int);
@@ -124,7 +125,12 @@ namespace QoZ {
                 totalSize = convert_HuffTree_to_bytes_anyStates<unsigned int>(nodeCount, c);
             // printf("1\n");
             c += totalSize;
-            return totalSize + sizeof(int) + sizeof(int);
+             return c - cc;
+        }
+
+        size_t size_est() {
+            size_t b = (nodeCount <= 256) ? sizeof(unsigned char) : ((nodeCount <= 65536) ? sizeof(unsigned short) : sizeof(unsigned int));
+            return 1 + 2 * nodeCount * b + nodeCount * sizeof(unsigned char) + nodeCount * sizeof(T) + sizeof(int) + sizeof(int) + sizeof(T);
         }
 
         //perform encoding

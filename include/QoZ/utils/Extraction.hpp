@@ -6,7 +6,7 @@
 #define SZ_EXTRACTION_HPP
 
 
-namespace QoZ {
+namespace SZ {
 
     template<uint N>
     float cal_sampling_ratio(size_t block, size_t n, size_t dmin, std::vector<size_t> dims) {
@@ -23,7 +23,7 @@ namespace QoZ {
     sampling(T *data, std::vector<size_t> dims, size_t &sample_num, std::vector<size_t> &sample_dims, size_t &sampling_block) {
         assert(dims.size() == N);
         assert(sample_dims.size() == N);
-        QoZ::Timer timer(true);
+        SZ::Timer timer(true);
         size_t num = std::accumulate(dims.begin(), dims.end(), (size_t) 1, std::multiplies<size_t>());
 
         size_t dmin = *std::min_element(dims.begin(), dims.end());
@@ -36,10 +36,8 @@ namespace QoZ {
         }
         if (sampling_block < 9) {
             sample_dims = dims;
-            sampling_block = dmin;
             sample_num = num;
-            std::vector<T> sampling_data(data, data + num);
-            return sampling_data;
+            return std::vector<T>();
         }
         size_t b0 = dims[0] / dmin;
         size_t b1 = dims[1] / dmin;
@@ -106,10 +104,8 @@ namespace QoZ {
         }
         if (sampling_block < 9) {
             sample_dims = dims;
-            sampling_block = dmin;
             sample_num = num;
-            std::vector<T> sampling_data(data, data + num);
-            return sampling_data;
+            return std::vector<T>();
         }
         size_t b0 = dims[0] / dmin;
         size_t b1 = dims[1] / dmin;
@@ -147,16 +143,12 @@ namespace QoZ {
         return sampling_data;
     }
 
-
-    
- 
-
     template<class T, uint N>
     inline typename std::enable_if<N == 2, std::vector<T>>::type
     sampling(T *data, std::vector<size_t> dims, size_t &sample_num, std::vector<size_t> &sample_dims, size_t &sampling_block) {
         assert(dims.size() == N);
         assert(sample_dims.size() == N);
-        QoZ::Timer timer(true);
+        SZ::Timer timer(true);
         size_t num = std::accumulate(dims.begin(), dims.end(), (size_t) 1, std::multiplies<size_t>());
 
         size_t dmin = *std::min_element(dims.begin(), dims.end());
@@ -169,10 +161,8 @@ namespace QoZ {
         }
         if (sampling_block < 9) {
             sample_dims = dims;
-            sampling_block = dmin;
             sample_num = num;
-            std::vector<T> sampling_data(data, data + num);
-            return sampling_data;
+            return std::vector<T>();
         }
         size_t b0 = dims[0] / dmin;
         size_t b1 = dims[1] / dmin;
@@ -201,14 +191,12 @@ namespace QoZ {
         return sampling_data;
     }
 
-    
-
     template<class T, uint N>
     inline typename std::enable_if<N == 1, std::vector<T>>::type
     sampling(T *data, std::vector<size_t> dims, size_t &sample_num, std::vector<size_t> &sample_dims, size_t &sampling_block) {
         assert(dims.size() == N);
         assert(sample_dims.size() == N);
-        QoZ::Timer timer(true);
+        SZ::Timer timer(true);
         size_t num = std::accumulate(dims.begin(), dims.end(), (size_t) 1, std::multiplies<size_t>());
 
         size_t dmin = *std::min_element(dims.begin(), dims.end());
@@ -221,10 +209,8 @@ namespace QoZ {
         }
         if (sampling_block < 9) {
             sample_dims = dims;
-            sampling_block = dmin;
             sample_num = num;
-            std::vector<T> sampling_data(data, data + num);
-            return sampling_data;
+            return std::vector<T>();
         }
         size_t b0 = dims[0] / dmin;
         sample_dims[0] = b0 * 2 * sampling_block;
@@ -244,8 +230,6 @@ namespace QoZ {
 //               sampling_time);
         return sampling_data;
     }
-
-    
 };
 
 

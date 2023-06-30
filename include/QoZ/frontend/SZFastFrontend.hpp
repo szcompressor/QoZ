@@ -151,11 +151,12 @@ namespace QoZ {
                 free(reg_params);
                 reg_params = nullptr;
             }
+             quantizer.clear();
         }
 
         size_t size_est() {
             return quantizer.size_est() //unpred
-                   + sizeof(T) * size.num_elements//quantbin
+                  // + sizeof(T) * size.num_elements//quantbin
                    + indicator.size() * sizeof(int) //loren or reg indicator
                    + RegCoeffNum3d * reg_count * sizeof(int) // reg coeff quant
                    + (reg_unpredictable_data_pos - reg_unpredictable_data) * sizeof(float); //reg coeff unpred
