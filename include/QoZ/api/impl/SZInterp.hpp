@@ -254,9 +254,7 @@ double Tuning(QoZ::Config &conf, T *data){
 
     std::vector<int> op_candidates={QoZ::INTERP_ALGO_LINEAR,QoZ::INTERP_ALGO_CUBIC};
     std::vector<int> dir_candidates={0,QoZ::factorial(N)-1};
-    if(conf.multiDimInterp){
-        dir_candidates.push_back(QoZ::factorial(N));
-    }
+    
            
 
     
@@ -510,8 +508,6 @@ double Tuning(QoZ::Config &conf, T *data){
        
         std::vector<int> interpAlgo_Candidates={QoZ::INTERP_ALGO_LINEAR, QoZ::INTERP_ALGO_CUBIC};
         std::vector<int> interpDirection_Candidates={0, QoZ::factorial(N) -1};
-        if(conf.multiDimInterp)
-            interpDirection_Candidates.push_back(QoZ::factorial(N));
         if(conf.levelwisePredictionSelection>0){
            
 

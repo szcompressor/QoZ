@@ -457,10 +457,6 @@ int main(int argc, char *argv[]) {
     if (compression && conPath != nullptr) {
         conf.loadcfg(conPath);
     }
-<<<<<<< HEAD:test/qoz.cpp
-=======
-    
->>>>>>> icde_test:test/qoz1.cpp
     if (errBoundMode != nullptr) {
         {
             // backward compatible with SZ2
