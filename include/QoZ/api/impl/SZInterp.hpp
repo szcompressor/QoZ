@@ -474,7 +474,7 @@ double Tuning(QoZ::Config &conf, T *data){
         }
         
        
-        QoZ::Timer timer;
+        QoZ::Timer timer(true);
         if (conf.autoTuningRate>0){
             double cur_alpha,cur_beta;
             
