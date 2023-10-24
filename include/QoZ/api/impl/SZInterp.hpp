@@ -474,7 +474,7 @@ double Tuning(QoZ::Config &conf, T *data){
         }
         
        
-        
+        QoZ::Timer timer;
         if (conf.autoTuningRate>0){
             double cur_alpha,cur_beta;
             
@@ -741,7 +741,7 @@ double Tuning(QoZ::Config &conf, T *data){
         }
         
 
-
+        timer.stop("Pd Tuning");
         
 
 
