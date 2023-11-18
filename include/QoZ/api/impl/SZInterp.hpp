@@ -108,6 +108,81 @@ double do_not_use_this_interp_compress_block_test(T *data, std::vector<size_t> d
     return compression_ratio;
 }
 
+std::pair <double,double> setABwithRelBound(double rel_bound,int configuration=0){
+
+    double cur_alpha=-1,cur_beta=-1;
+    if(configuration==0){              
+        if (rel_bound>=0.01){
+            cur_alpha=2;
+            cur_beta=2;
+        }
+        else if (rel_bound>=0.007){
+            cur_alpha=1.75;
+            cur_beta=2;
+        }                 
+        else if (rel_bound>=0.004){
+            cur_alpha=1.5;
+            cur_beta=2;
+        }                   
+        else if (rel_bound>0.001){
+            cur_alpha=1.25;
+            cur_beta=1.5;
+        }
+        else {
+            cur_alpha=1;
+            cur_beta=1;
+        }
+    }
+    else if(configuration==1){                
+        if (rel_bound>=0.01){
+            cur_alpha=2;
+            cur_beta=4;
+        }
+        else if (rel_bound>=0.007){
+            cur_alpha=1.75;
+            cur_beta=3;
+        }
+        else if (rel_bound>=0.004){
+            cur_alpha=1.5;
+            cur_beta=2;
+        }           
+        else if (rel_bound>0.001){
+            cur_alpha=1.25;
+            cur_beta=1.5;
+        }
+        else {
+                cur_alpha=1;
+                cur_beta=1;
+            }
+    }
+    else if(configuration==2){                
+        if (rel_bound>=0.01){
+            cur_alpha=2;
+            cur_beta=4;
+        }
+        else if (rel_bound>=0.007){
+            cur_alpha=1.75;
+            cur_beta=3;
+        }                    
+        else if (rel_bound>=0.004){
+            cur_alpha=1.5;
+            cur_beta=2;
+        }
+        else if (rel_bound>0.001){
+            cur_alpha=1.5;
+            cur_beta=1.5;
+        }
+        else if (rel_bound>0.0005){
+            cur_alpha=1.25;
+            cur_beta=1.5;
+        }
+        else {
+            cur_alpha=1;
+            cur_beta=1;
+        }
+    }
+    return std::pair<double,double>(cur_alpha,cur_beta);
+}
 
 
 inline void init_alphalist(std::vector<double> &alpha_list,const double &rel_bound, QoZ::Config &conf){
@@ -180,7 +255,7 @@ double Tuning(QoZ::Config &conf, T *data){
         if (conf.maxStep<=0)
             conf.maxStep = (N==2?64:32);
         if (conf.levelwisePredictionSelection<=0)
-            conf.levelwisePredictionSelection = (N==2?6:4);
+            conf.levelwisePredictionSelection = (N==2?5:4);
         if (conf.sampleBlockSize<=0){
             conf.sampleBlockSize = (N==2?64:32);
         }
@@ -235,14 +310,26 @@ double Tuning(QoZ::Config &conf, T *data){
         conf.sampleBlockSize = (N==2?64:32);
     }
     
-    size_t minimum_sbs=16;
+    size_t minimum_sbs=8;
     if (conf.sampleBlockSize<minimum_sbs)
         conf.sampleBlockSize=minimum_sbs;
 
 
     while(conf.sampleBlockSize>=shortest_edge)
         conf.sampleBlockSize/=2;
-        
+
+    if (conf.sampleBlockSize<minimum_sbs){
+        conf.predictorTuningRate=0.0;
+        conf.autoTuningRate=0.0;
+
+
+    }
+    else{
+        int max_lps_level=(uint)log2(conf.sampleBlockSize);//to be catious: the max_interp_level is different from the ones in szinterpcompressor, which includes the level of anchor grid.
+
+        if (conf.levelwisePredictionSelection>max_lps_level)
+            conf.levelwisePredictionSelection=max_lps_level;
+    }
     
        
     std::vector< std::vector<T> > sampled_blocks;
@@ -476,33 +563,10 @@ double Tuning(QoZ::Config &conf, T *data){
        
         
         if (conf.autoTuningRate>0){
-            double cur_alpha,cur_beta;
-            
-            if (rel_bound>=0.01){
-                cur_alpha=2;
-                cur_beta=2;
-            }
-            else if (rel_bound>=0.007){
-                cur_alpha=1.75;
-                cur_beta=2;
-            }
-            
-            else if (rel_bound>=0.004){
-                cur_alpha=1.5;
-                cur_beta=2;
-            }
-            
-            else if (rel_bound>0.001){
-                cur_alpha=1.25;
-                cur_beta=1.5;
-            }
-            else {
-                cur_alpha=1;
-                cur_beta=1;
-            }
-            
-            conf.alpha=cur_alpha;
-            conf.beta=cur_beta;
+
+            std::pair<double,double> ab=setABwithRelBound(rel_bound,0);//ori pdtuningqabconf
+            conf.alpha=ab.first;
+            conf.beta=ab.second;
         
         }
        
@@ -1887,6 +1951,7 @@ double Tuning(QoZ::Config &conf, T *data){
         }
 
 
+
         if(conf.tuningTarget==QoZ::TUNING_TARGET_AC){
                 bestm=1-bestm;
         }
@@ -1917,6 +1982,13 @@ double Tuning(QoZ::Config &conf, T *data){
         conf.num=global_num;
         
         
+    }
+    else if(useInterp and conf.QoZ){
+        std::pair<double,double> ab=setABwithRelBound(rel_bound,2);
+        conf.alpha=ab.first;
+        conf.beta=ab.second;
+
+
     }
 
     if (useInterp){
