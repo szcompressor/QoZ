@@ -769,9 +769,8 @@ namespace QoZ {
             assert(maxStep>0);
             if (N==1){
                 for (size_t x=0;x<global_dimensions[0];x+=maxStep){
-                        decData[x]=quantizer.recover_unpred();
-                        //quant_index++;
-                    }
+                    decData[x]=quantizer.recover_unpred();
+                    //quant_index++;
                 }
             }
             else if (N==2){
