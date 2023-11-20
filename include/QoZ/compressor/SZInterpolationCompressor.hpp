@@ -718,8 +718,7 @@ namespace QoZ {
             */
             if (N==1){
                 for (size_t x=maxStep*(tuning==1);x<conf.dims[0];x+=maxStep){
-                        quantizer.insert_unpred(*(data+x));
-                    }
+                    quantizer.insert_unpred(*(data+x));
                 }
             }
             else if (N==2){
