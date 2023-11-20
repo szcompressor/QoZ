@@ -264,7 +264,7 @@ double Tuning(QoZ::Config &conf, T *data){
     if(N!=2&&N!=3){
         conf.autoTuningRate=0;
         conf.predictorTuningRate=0;
-        conf.maxStep=0;
+        //conf.maxStep=0;
         conf.levelwisePredictionSelection=0;
         conf.profiling=0;
     }

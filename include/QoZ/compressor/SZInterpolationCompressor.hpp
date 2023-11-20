@@ -716,11 +716,17 @@ namespace QoZ {
 
             }
             */
-            if (N==2){
+            if (N==1){
+                for (size_t x=maxStep*(tuning==1);x<conf.dims[0];x+=maxStep){
+                        quantizer.insert_unpred(*(data+x));
+                    }
+                }
+            }
+            else if (N==2){
                 for (size_t x=maxStep*(tuning==1);x<conf.dims[0];x+=maxStep){
                     for (size_t y=maxStep*(tuning==1);y<conf.dims[1];y+=maxStep){
 
-                        quantizer.insert_unpred(*(data+x*conf.dims[1]+y));
+                        quantizer.insert_unpred(*(data+x*dimension_offsets[0]+y));
                         //quant_inds.push_back(0);
                     }
                 }
@@ -729,8 +735,24 @@ namespace QoZ {
                 for (size_t x=maxStep*(tuning==1);x<conf.dims[0];x+=maxStep){
                     for (size_t y=maxStep*(tuning==1);y<conf.dims[1];y+=maxStep){
                         for(size_t z=maxStep*(tuning==1);z<conf.dims[2];z+=maxStep){
-                            quantizer.insert_unpred(*(data+x*conf.dims[1]*conf.dims[2]+y*conf.dims[2]+z) );
+                            quantizer.insert_unpred(*(data+x*dimension_offsets[0]+y*dimension_offsets[1]+z) );
+
                             //quant_inds.push_back(0);
+
+                        }
+
+                        
+                    }
+                }
+
+            }
+            else if(N==4){
+                for (size_t x=maxStep*(tuning==1);x<conf.dims[0];x+=maxStep){
+                    for (size_t y=maxStep*(tuning==1);y<conf.dims[1];y+=maxStep){
+                        for(size_t z=maxStep*(tuning==1);z<conf.dims[2];z+=maxStep){
+                            for(size_t w=maxStep*(tuning==1);w<conf.dims[3];w+=maxStep){
+                                quantizer.insert_unpred(*(data+x*dimension_offsets[0]+y*dimension_offsets[1]+z*dimension_offsets[2]+w) );
+                            }
 
                         }
 
@@ -746,11 +768,18 @@ namespace QoZ {
         void recover_grid(T *decData,const std::array<size_t,N>& global_dimensions,size_t maxStep){
             
             assert(maxStep>0);
-            if (N==2){
+            if (N==1){
+                for (size_t x=0;x<global_dimensions[0];x+=maxStep){
+                        decData[x]=quantizer.recover_unpred();
+                        //quant_index++;
+                    }
+                }
+            }
+            else if (N==2){
                 for (size_t x=0;x<global_dimensions[0];x+=maxStep){
                     for (size_t y=0;y<global_dimensions[1];y+=maxStep){
 
-                        decData[x*global_dimensions[1]+y]=quantizer.recover_unpred();
+                        decData[x*dimension_offsets[0]+y]=quantizer.recover_unpred();
                         //quant_index++;
                     }
                 }
@@ -759,15 +788,25 @@ namespace QoZ {
                 for (size_t x=0;x<global_dimensions[0];x+=maxStep){
                     for (size_t y=0;y<global_dimensions[1];y+=maxStep){
                         for(size_t z=0;z<global_dimensions[2];z+=maxStep){
-                            decData[x*global_dimensions[1]*global_dimensions[2]+y*global_dimensions[2]+z]=quantizer.recover_unpred();
+                            decData[x*dimension_offsets[0]+y*dimension_offsets[1]+z]=quantizer.recover_unpred();
                             //quant_index++;
 
-                        }
-
-                        
+                        }                    
                     }
                 }
+            }
+            else if(N==4){
+                for (size_t x=0;x<global_dimensions[0];x+=maxStep){
+                    for (size_t y=0;y<global_dimensions[1];y+=maxStep){
+                        for(size_t z=0;z<global_dimensions[2];z+=maxStep){
+                            for(size_t w=0;w<global_dimensions[3];w+=maxStep){
+                                decData[x*dimension_offsets[0]+y*dimension_offsets[1]+z*dimension_offsets[2]+w]=quantizer.recover_unpred();
+                                //quant_index++;
+                            }
 
+                        }                    
+                    }
+                }
             }
 
         }
