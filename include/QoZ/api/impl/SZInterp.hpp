@@ -249,15 +249,18 @@ double Tuning(QoZ::Config &conf, T *data){
 
     if(conf.QoZ){
         if(conf.autoTuningRate<=0)
-            conf.autoTuningRate = (N==2?0.01:0.005);
+            conf.autoTuningRate = (N<=2?0.01:0.005);
         if(conf.predictorTuningRate<=0)
-            conf.predictorTuningRate = (N==2?0.01:0.005);
-        if (conf.maxStep<=0)
-            conf.maxStep = (N==2?64:32);
+            conf.predictorTuningRate = (N<=2?0.01:0.005);
+        if (conf.maxStep<=0){
+            std::array<size_t,4> anchor_strides={256,64,32,16};
+            conf.maxStep = anchor_strides[N-1];
+        }
         if (conf.levelwisePredictionSelection<=0)
-            conf.levelwisePredictionSelection = (N==2?5:4);
+            conf.levelwisePredictionSelection = (N<=2?5:4);
         if (conf.sampleBlockSize<=0){
-            conf.sampleBlockSize = (N==2?64:32);
+            
+            conf.sampleBlockSize = (N<=2?64:32);
         }
         conf.profiling=1;//added.
     }  
