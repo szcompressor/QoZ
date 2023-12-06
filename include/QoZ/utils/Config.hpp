@@ -136,6 +136,7 @@ namespace QoZ {
             lorenzo2 = cfg.GetBoolean("AlgoSettings", "Lorenzo2ndOrder", lorenzo2);
             regression = cfg.GetBoolean("AlgoSettings", "Regression", regression);
             regression2 = cfg.GetBoolean("AlgoSettings", "Regression2ndOrder", regression2);
+            writeBins = cfg.GetBoolean("GlobalSettings", "writeBins", writeBins);
             
             auto interpAlgoStr = cfg.Get("AlgoSettings", "InterpolationAlgo", "");
             if (interpAlgoStr == INTERP_ALGO_STR[INTERP_ALGO_LINEAR]) {
@@ -268,6 +269,7 @@ namespace QoZ {
         int testLorenzo=0;
         std::vector<int> quant_bins;
         //double pred_square_error;
+        bool writeBins=false;
         double decomp_square_error;
         std::vector<size_t> quant_bin_counts;
         int sampleBlockSize=0;

@@ -513,8 +513,7 @@ namespace QoZ {
              
             //timer.start();
 
-//            writefile("pred.dat", preds.data(), num_elements);
-//            writefile("quant.dat", quant_inds.data(), num_elements);
+
             quantizer.set_eb(eb);
             if (tuning){
                
@@ -530,6 +529,13 @@ namespace QoZ {
                 
                 return buffer;
             }
+            if(conf.writeBins){
+                writefile("pred.dat", preds.data(), num_elements);
+                writefile("quant.dat", quant_inds.data(), num_elements);
+
+            }
+
+            
            
             //if(conf.verbose)
             //    timer.stop("prediction");

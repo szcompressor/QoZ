@@ -228,6 +228,7 @@ int main(int argc, char *argv[]) {
     int sampleBlockSize=0;
 
     bool sz2mode = false;
+    bool writeBins= false;
     int testLorenzo=0;
 
     size_t r4 = 0;
@@ -264,6 +265,9 @@ int main(int argc, char *argv[]) {
                 break;
             case 'a':
                 printCmpResults = 1;
+                break;
+            case 'w':
+                writeBins = true;
                 break;
             case 'l':
                 testLorenzo = 1;
@@ -524,6 +528,7 @@ int main(int argc, char *argv[]) {
         }
         
     }
+    conf.writeBins=writeBins;
 
     if (compression) {
 
