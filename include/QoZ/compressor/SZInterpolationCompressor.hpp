@@ -530,8 +530,8 @@ namespace QoZ {
                 return buffer;
             }
             if(conf.writeBins){
-                writefile("pred.dat", preds.data(), num_elements);
-                writefile("quant.dat", quant_inds.data(), num_elements);
+              //  writefile("pred.dat", preds.data(), num_elements);
+                writefile("quant.code", quant_inds.data(), num_elements);
 
             }
 
