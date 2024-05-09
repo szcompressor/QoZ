@@ -27,10 +27,10 @@ namespace QoZ {
                           "must implement the lossless interface");
         }
 
-        uchar *compress(const Config &conf, T *data, size_t &compressed_size,int tuning=0) {
+        uchar *compress( Config &conf, T *data, size_t &compressed_size,int tuning=0) {
 
             Timer timer(true);
-            
+            //std::cout<<"general1"<<std::endl;
            
             std::vector<int> new_quant_inds = frontend.compress(data);
             quant_inds.insert(quant_inds.end(),new_quant_inds.begin(),new_quant_inds.end());
@@ -42,16 +42,19 @@ namespace QoZ {
                 return buffer;
 
             }
-            
+            //std::cout<<quant_inds.size()<<std::endl;
+            //std::cout<<"general2"<<std::endl;
 //            timer.stop("Prediction & Quantization");
-           
             encoder.preprocess_encode(quant_inds, 0);
-            size_t bufferSize = 1.2 * (frontend.size_est() + encoder.size_est() + sizeof(T) * quant_inds.size());
+            //std::cout<<"general2.1"<<std::endl;
+            size_t bufferSize = 1.5 * (frontend.size_est() + encoder.size_est() + sizeof(T) * quant_inds.size());//todo: lower the 1.5.
             uchar *buffer = new uchar[bufferSize];
+            //std::cout<<"general2.2"<<std::endl;
             uchar *buffer_pos = buffer;
 
             frontend.save(buffer_pos);
-           
+            //std::cout<<"general2.3"<<std::endl;
+            //std::cout<<"general3"<<std::endl;
 
             timer.start();
             
@@ -60,24 +63,27 @@ namespace QoZ {
             encoder.postprocess_encode();
 //            timer.stop("Coding");
             assert(buffer_pos - buffer < bufferSize);
-           
+            //std::cout<<"general4"<<std::endl;
 
             //timer.start();
             uchar *lossless_data = lossless.compress(buffer, buffer_pos - buffer, compressed_size);
-          
+            //std::cout<<"general5"<<std::endl;
             lossless.postcompress_data(buffer);
 //            timer.stop("Lossless");
 
             return lossless_data;
         }
-        uchar *encoding_lossless(size_t &compressed_size){
+        uchar *encoding_lossless(size_t &compressed_size,const std::vector<int> &q_inds=std::vector<int>()){
+
+            if(q_inds.size()>0)
+                quant_inds=q_inds;
           
-            size_t bufferSize = 1.5 * quant_inds.size()*sizeof(T);//original is 3
+            size_t bufferSize = 2 * quant_inds.size()*sizeof(T);//original is 3
             uchar *buffer = new uchar[bufferSize];
             uchar *buffer_pos = buffer;
 
             frontend.save(buffer_pos);
-            
+            //std::cout<<"general3"<<std::endl;
 
             //timer.start();
             encoder.preprocess_encode(quant_inds, 0);
@@ -86,11 +92,11 @@ namespace QoZ {
             encoder.postprocess_encode();
 //            timer.stop("Coding");
             assert(buffer_pos - buffer < bufferSize);
-        
+            //std::cout<<"general4"<<std::endl;
 
             //timer.start();
             uchar *lossless_data = lossless.compress(buffer, buffer_pos - buffer, compressed_size);
-         
+            //std::cout<<"general5"<<std::endl;
             lossless.postcompress_data(buffer);
 //            timer.stop("Lossless");
 
@@ -137,9 +143,11 @@ namespace QoZ {
     };
 
     template<class T, uint N, class Frontend, class Encoder, class Lossless>
-    std::shared_ptr<SZGeneralCompressor<T, N, Frontend, Encoder, Lossless>>
+    //std::shared_ptr<SZGeneralCompressor<T, N, Frontend, Encoder, Lossless>>
+    SZGeneralCompressor<T, N, Frontend, Encoder, Lossless>*
     make_sz_general_compressor(Frontend frontend, Encoder encoder, Lossless lossless) {
-        return std::make_shared<SZGeneralCompressor<T, N, Frontend, Encoder, Lossless>>(frontend, encoder, lossless);
+        //return std::make_shared<SZGeneralCompressor<T, N, Frontend, Encoder, Lossless>>(frontend, encoder, lossless);
+        return new SZGeneralCompressor<T, N, Frontend, Encoder, Lossless>(frontend, encoder, lossless);
     }
 
 

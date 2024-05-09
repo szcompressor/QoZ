@@ -1,7 +1,7 @@
-#ifndef QoZ_FRONTEND
-#define QoZ_FRONTEND
+#ifndef SZ3_FRONTEND
+#define SZ3_FRONTEND
 /**
- * This module is the implementation of general frontend in QoZ
+ * This module is the implementation of general frontend in SZ3
  */
 
 #include "Frontend.hpp"

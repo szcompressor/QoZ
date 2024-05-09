@@ -1,6 +1,4 @@
-//
-// Created by Kai Zhao on 4/21/20.
-//
+
 
 #ifndef SZ_LOSSLESS_ZSTD_HPP
 #define SZ_LOSSLESS_ZSTD_HPP
@@ -20,7 +18,7 @@ namespace QoZ {
         Lossless_zstd(int comp_level) : compression_level(comp_level) {};
 
         uchar *compress(uchar *data, size_t dataLength, size_t &outSize) {
-            size_t estimatedCompressedSize = dataLength < 100 ? 200 : dataLength * 1.2;
+            size_t estimatedCompressedSize = (dataLength < 100 ? 200 : size_t(dataLength * 1.2)) + QoZ::Config::size_est();
             uchar *compressBytes = new uchar[estimatedCompressedSize];
             uchar *compressBytesPos = compressBytes;
             write(dataLength, compressBytesPos);

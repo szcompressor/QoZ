@@ -9,6 +9,7 @@
 #include "QoZ/predictor/LorenzoPredictor.hpp"
 #include "QoZ/predictor/RegressionPredictor.hpp"
 #include "QoZ/predictor/PolyRegressionPredictor.hpp"
+#include "QoZ/predictor/ZeroPredictor.hpp"
 #include "QoZ/lossless/Lossless_zstd.hpp"
 #include "QoZ/utils/Iterator.hpp"
 #include "QoZ/utils/Statistic.hpp"
@@ -16,12 +17,15 @@
 #include "QoZ/utils/QuantOptimization.hpp"
 #include "QoZ/utils/Config.hpp"
 #include "QoZ/def.hpp"
+
 #include <cmath>
+#include <cstdlib>
 #include <memory>
 
 
 template<class T, QoZ::uint N, class Quantizer, class Encoder, class Lossless>
-std::shared_ptr<QoZ::concepts::CompressorInterface<T>>
+//std::shared_ptr<QoZ::concepts::CompressorInterface<T>>
+QoZ::concepts::CompressorInterface<T>*
 make_lorenzo_regression_compressor(const QoZ::Config &conf, Quantizer quantizer, Encoder encoder, Lossless lossless) {
     std::vector<std::shared_ptr<QoZ::concepts::PredictorInterface<T, N>>> predictors;
 
@@ -32,7 +36,12 @@ make_lorenzo_regression_compressor(const QoZ::Config &conf, Quantizer quantizer,
         exit(0);
     }
     if (conf.lorenzo) {
-     
+        
+       // std::vector<double> coeffs;
+        /*
+        if(conf.useCoeff)
+            coeffs=conf.lorenzo1_coeffs;
+        */
         if (use_single_predictor) {
             return QoZ::make_sz_general_compressor<T, N>(
                     QoZ::make_sz_general_frontend<T, N>(conf, QoZ::LorenzoPredictor<T, N, 1>(conf.absErrorBound), quantizer),
@@ -42,8 +51,12 @@ make_lorenzo_regression_compressor(const QoZ::Config &conf, Quantizer quantizer,
         }
     }
     if (conf.lorenzo2) {
-        
        
+        //std::vector<double> coeffs;
+         /*
+        if(conf.useCoeff)
+            coeffs=conf.lorenzo2_coeffs;
+        */
         if (use_single_predictor) {
             return QoZ::make_sz_general_compressor<T, N>(
                     QoZ::make_sz_general_frontend<T, N>(conf, QoZ::LorenzoPredictor<T, N, 2>(conf.absErrorBound), quantizer),
@@ -86,7 +99,7 @@ char *SZ_compress_LorenzoReg(QoZ::Config &conf, T *data, size_t &outSize) {
 
     char *cmpData;
     auto quantizer = QoZ::LinearQuantizer<T>(conf.absErrorBound, conf.quantbinCnt / 2);
-    if (N == 3 and !conf.regression2) {
+    if (N == 3 and !conf.regression2 ) {
         // use fast version for 3D
         auto sz = QoZ::make_sz_general_compressor<T, N>(QoZ::make_sz_fast_frontend<T, N>(conf, quantizer), QoZ::HuffmanEncoder<int>(),
                                                        QoZ::Lossless_zstd());
@@ -101,23 +114,29 @@ char *SZ_compress_LorenzoReg(QoZ::Config &conf, T *data, size_t &outSize) {
 
 
 template<class T, QoZ::uint N>
-void SZ_decompress_LorenzoReg(const QoZ::Config &conf, char *cmpData, size_t cmpSize, T *decData) {
+void SZ_decompress_LorenzoReg(const QoZ::Config &theconf, char *cmpData, size_t cmpSize, T *decData) {
+    QoZ::Config conf(theconf);
     assert(conf.cmprAlgo == QoZ::ALGO_LORENZO_REG);
-
     QoZ::uchar const *cmpDataPos = (QoZ::uchar *) cmpData;
     QoZ::LinearQuantizer<T> quantizer;
+  
+        
     if (N == 3 and !conf.regression2) {
         // use fast version for 3D
         auto sz = QoZ::make_sz_general_compressor<T, N>(QoZ::make_sz_fast_frontend<T, N>(conf, quantizer),
                                                        QoZ::HuffmanEncoder<int>(), QoZ::Lossless_zstd());
         sz->decompress(cmpDataPos, cmpSize, decData);
-        return;
-
+       
     } else {
         auto sz = make_lorenzo_regression_compressor<T, N>(conf, quantizer, QoZ::HuffmanEncoder<int>(), QoZ::Lossless_zstd());
         sz->decompress(cmpDataPos, cmpSize, decData);
-        return;
+       
     }
+    
+    
+
+
+
 
 }
 

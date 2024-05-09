@@ -1,6 +1,4 @@
-//
-// Created by Kai Zhao on 4/21/20.
-//
+
 
 #ifndef SZ_MEMORYOPS_HPP
 #define SZ_MEMORYOPS_HPP

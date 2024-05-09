@@ -1,11 +1,10 @@
-//
-// Created by Kai Zhao on 6/12/20.
-//
+
 
 #ifndef SZ_PREPROCESSOR_HPP
 #define SZ_PREPROCESSOR_HPP
 
 #include "QoZ/def.hpp"
+
 
 namespace QoZ {
     namespace concepts {

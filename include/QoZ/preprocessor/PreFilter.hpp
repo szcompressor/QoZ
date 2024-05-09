@@ -1,9 +1,7 @@
-//
-// Created by Kai Zhao on 1/29/21.
-//
 
-#ifndef QoZ_PREFILTER_HPP
-#define QoZ_PREFILTER_HPP
+
+#ifndef SZ3_PREFILTER_HPP
+#define SZ3_PREFILTER_HPP
 
 #include "QoZ/preprocessor/PreProcessor.hpp"
 
@@ -21,4 +19,4 @@ namespace QoZ {
         }
     };
 }
-#endif //QoZ_PRETRANSPOSE_H
+#endif //SZ3_PRETRANSPOSE_H

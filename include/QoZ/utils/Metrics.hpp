@@ -1,6 +1,4 @@
-//
-// Created by Kai Zhao on 9/1/20.
-//
+
 
 #ifndef SZ_METRICS_HPP
 #define SZ_METRICS_HPP
@@ -21,7 +19,7 @@ namespace QoZ {
        
     }
     template <class T>
-    inline void blockwise_profiling(T *data, const std::vector<size_t> &dims, const std::vector<size_t> &starts,const size_t &blocksize,double & mean,double & sigma2,double & range){
+    void blockwise_profiling(const T *data, const std::vector<size_t> &dims, const std::vector<size_t> &starts,const size_t &blocksize,double & mean,double & sigma2,double & range){
         size_t N=dims.size();
 
         if(N==2){
@@ -102,7 +100,7 @@ namespace QoZ {
     }
 
     template <class T>
-    inline double blockwise_cov(T *data, T * data2,const std::vector<size_t> &dims, const std::vector<size_t> &starts,const size_t &blocksize,const double & mean=0,const double & mean2=0){
+    double blockwise_cov(const T *data,const T * data2,const std::vector<size_t> &dims, const std::vector<size_t> &starts,const size_t &blocksize,const double & mean=0,const double & mean2=0){
         size_t N=dims.size();
 
         if(N==2){
@@ -131,7 +129,10 @@ namespace QoZ {
                 for(size_t j=starty;j<starty+blocksize;j++){
                     for(size_t k=startz;k<startz+blocksize;k++){
                         size_t cur_idx=i*dimyz+j*dimz+k;
+                        //std::cout<<cur_idx<<std::endl;
                         T value=data[cur_idx],value2=data2[cur_idx];
+                        //std::cout<<value<<std::endl;
+                       // std::cout<<value2<<std::endl;
                         covsum+=value*value2;
                     }
 
@@ -147,7 +148,7 @@ namespace QoZ {
     }
 
     template <class T>
-    inline double blockwise_autocorrelation(T *data, T * data2,const std::vector<size_t> &dims, const std::vector<size_t> &starts,const size_t &blocksize){
+    double blockwise_autocorrelation(const T *data,const T * data2,const std::vector<size_t> &dims, const std::vector<size_t> &starts,const size_t &blocksize){
          size_t N=dims.size();
          size_t element_num;
          std::vector<T>diffs;
@@ -221,7 +222,7 @@ namespace QoZ {
     }
 
     template <class T>
-    inline double autocorrelation(T *data, T * data2,const size_t &element_num){
+    double autocorrelation(const T *data, const T * data2,const size_t &element_num){
          
          
         std::vector<T>diffs(element_num,0);
@@ -241,7 +242,7 @@ namespace QoZ {
         }
         cov/=element_num;
         if (cov==0){
-            return 1;
+            return 1.0;
         }
         double sum=0;
         for (size_t i=0;i<element_num-1;i++){

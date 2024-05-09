@@ -111,8 +111,8 @@ namespace QoZ {
 
             block_size = conf.blockSize;
             num_elements = conf.num;
-            interpolator_id = conf.interpAlgo;
-            direction_sequence_id = conf.interpDirection;
+            interpolator_id = conf.interpMeta.interpAlgo;
+            direction_sequence_id = conf.interpMeta.interpDirection;
 
 
             std::copy_n(conf.dims.begin(), N, global_dimensions.begin());
@@ -249,7 +249,7 @@ namespace QoZ {
 
                     for (size_t i = 3; i + 3 < n; i += 2) {
                         d = data + begin + i * stride;
-                        quantize(*d, interp_cubic(*(d - stride3x), *(d - stride), *(d + stride), *(d + stride3x)));
+                        quantize(*d, interp_cubic_1(*(d - stride3x), *(d - stride), *(d + stride), *(d + stride3x)));
                     }
                     if (n % 2 == 0) {
                         d = data + begin + (n - 3) * stride;
@@ -266,7 +266,7 @@ namespace QoZ {
 
                     for (size_t i = 3; i + 3 < n; i += 2) {
                         d = data + begin + i * stride;
-                        recover(*d, interp_cubic(*(d - stride3x), *(d - stride), *(d + stride), *(d + stride3x)));
+                        recover(*d, interp_cubic_1(*(d - stride3x), *(d - stride), *(d + stride), *(d + stride3x)));
                     }
                     if (n % 2 == 0) {
                         d = data + begin + (n - 3) * stride;

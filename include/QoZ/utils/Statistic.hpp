@@ -1,6 +1,3 @@
-//
-// Created by Kai Zhao on 4/20/20.
-//
 
 #ifndef SZ_STATISTIC_HPP
 #define SZ_STATISTIC_HPP
@@ -9,7 +6,7 @@
 
 namespace QoZ {
     template<class T>
-    T data_range(T *data, size_t num) {
+    T data_range(const T *data, size_t num) {
 
         T max = data[0];
         T min = data[0];
@@ -32,16 +29,16 @@ namespace QoZ {
     }
 
     template<class T>
-    void calAbsErrorBound(QoZ::Config &conf, T *data) {
+    void calAbsErrorBound(QoZ::Config &conf, const T *data,T range = 0 ) {
         if (conf.errorBoundMode != EB_ABS) {
             if (conf.errorBoundMode == EB_REL) {
                 conf.errorBoundMode = EB_ABS;
-                double rng=QoZ::data_range(data, conf.num);
+                double rng= (range > 0) ? range : QoZ::data_range(data, conf.num);
                 conf.rng=rng;
                 conf.absErrorBound = conf.relErrorBound * rng;
             } else if (conf.errorBoundMode == EB_PSNR) {
                 conf.errorBoundMode = EB_ABS;
-                double rng=QoZ::data_range(data, conf.num);
+                double rng=(range > 0) ? range : QoZ::data_range(data, conf.num);
                 conf.rng=rng;
                 conf.absErrorBound = computeABSErrBoundFromPSNR(conf.psnrErrorBound, 0.99, rng);
                 conf.relErrorBound=conf.absErrorBound/rng;
@@ -50,12 +47,12 @@ namespace QoZ {
                 conf.absErrorBound = sqrt(3.0 / conf.num) * conf.l2normErrorBound;
             } else if (conf.errorBoundMode == EB_ABS_AND_REL) {
                 conf.errorBoundMode = EB_ABS;
-                double rng=QoZ::data_range(data, conf.num);
+                double rng=(range > 0) ? range : QoZ::data_range(data, conf.num);
                 conf.rng=rng;
                 conf.absErrorBound = std::min(conf.absErrorBound, conf.relErrorBound * rng);
             } else if (conf.errorBoundMode == EB_ABS_OR_REL) {
                 conf.errorBoundMode = EB_ABS;
-                double rng=QoZ::data_range(data, conf.num);
+                double rng=(range > 0) ? range : QoZ::data_range(data, conf.num);
                 conf.rng=rng;
                 conf.absErrorBound = std::max(conf.absErrorBound, conf.relErrorBound *rng);
             } else {
@@ -84,6 +81,35 @@ namespace QoZ {
             }
             return sum / (numOfElem - delta) / cov;
         }
+    }
+
+    template<typename Type>
+    double calcNormedVariance(const Type *data, size_t num){
+        double max=data[0],min=data[0];
+
+        double average=0;
+
+        for(size_t i=0;i<num;i++){
+            double val=data[i];
+            max=val>max?val:max;
+            min=val<min?val:min;
+            average+=val;
+        }
+        average/=num;
+        average=(average-min)/(max-min);
+        double variance=0;
+        for(size_t i=0;i<num;i++){
+            double val=data[i];
+            val=(val-min)/(max-min);
+
+            variance+=(val-average)*(val-average);
+
+        }
+        variance/=num;
+        return variance;
+        
+
+
     }
 
     template<typename Type>

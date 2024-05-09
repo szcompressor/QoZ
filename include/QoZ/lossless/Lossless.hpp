@@ -1,6 +1,3 @@
-//
-// Created by Kai Zhao on 6/12/20.
-//
 
 #ifndef SZ_LOSSLESS_HPP
 #define SZ_LOSSLESS_HPP

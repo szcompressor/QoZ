@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.13)
-project(QoZ VERSION 1.1.0.0)
+project(QoZ VERSION 2.0.0.0)
 include(GNUInstallDirs)
 include(CTest)
+#set(CMAKE_CXX_STANDARD 17)
+#set(CMAKE_C_STANDARD 17)
 
 option(BUILD_SHARED_LIBS "build shared libraries by default" ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -18,7 +20,7 @@ endif()
 find_package(PkgConfig)
 find_package(OpenMP)
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/QoZ/version.hpp.in ${CMAKE_CURRENT_SOURCE_DIR}/include/SZ3/version.hpp)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/QoZ/version.hpp.in ${CMAKE_CURRENT_SOURCE_DIR}/include/QoZ/version.hpp)
 
 add_library(${PROJECT_NAME} INTERFACE)
 target_include_directories(
@@ -29,7 +31,6 @@ target_include_directories(
 target_compile_features(${PROJECT_NAME}
     INTERFACE cxx_std_17
   )
-
 target_link_libraries(${PROJECT_NAME} INTERFACE OpenMP::OpenMP_CXX)
 
 option(QoZ_USE_BUNDLED_ZSTD "prefer the bundled version of Zstd" OFF)
@@ -53,8 +54,13 @@ endif()
 
 find_package(GSL)
 if (GSL_FOUND)
+  message("GSL found.")
+  target_link_libraries(${PROJECT_NAME} INTERFACE GSL::gsl)
   target_compile_definitions(${PROJECT_NAME} INTERFACE -DENABLE_GSL="TRUE")
+else()
+  message("GSL not found.")
 endif()
+
 
 add_subdirectory(test)
 

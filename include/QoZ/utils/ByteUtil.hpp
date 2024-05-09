@@ -1,6 +1,3 @@
-//
-// Created by Kai Zhao on 1/28/21.
-//
 
 #ifndef SZ3_BYTEUTIL_HPP
 #define SZ3_BYTEUTIL_HPP

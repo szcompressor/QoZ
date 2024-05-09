@@ -6,11 +6,11 @@
 #ifndef QoZ_VERSION_HPP
 #define QoZ_VERSION_HPP
 
-#define PROJECT_NAME "QoZ"
-#define PROJECT_VER  "1.1.0.0"
-#define PROJECT_VER_MAJOR "1"
-#define PROJECT_VER_MINOR "1"
-#define PROJECT_VER_PATCH "0"
-#define PROJECT_VER_TWEAK "0"
+#define QoZ_NAME "QoZ"
+#define QoZ_VER  "0.1.0.0"
+#define QoZ_VER_MAJOR 0
+#define QoZ_VER_MINOR 1
+#define QoZ_VER_PATCH 0
+#define QoZ_VER_TWEAK 0
 
-#endif //SZ3_VERSION_HPP
+#endif //QoZ_VERSION_HPP

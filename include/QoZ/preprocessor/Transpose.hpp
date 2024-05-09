@@ -1,9 +1,6 @@
-//
-// Created by Kai Zhao on 1/29/21.
-//
 
-#ifndef QoZ_TRANSPOSE_H
-#define QoZ_TRANSPOSE_H
+#ifndef SZ3_TRANSPOSE_H
+#define SZ3_TRANSPOSE_H
 
 #include "QoZ/preprocessor/PreProcessor.hpp"
 
@@ -80,4 +77,4 @@ namespace QoZ {
 
     };
 }
-#endif //QoZ_TRANSPOSE_H
+#endif //SZ3_TRANSPOSE_H

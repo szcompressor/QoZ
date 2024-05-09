@@ -17,7 +17,6 @@
 #include <unordered_set>
 #include <set>
 
-
 namespace QoZ {
 
 
@@ -62,20 +61,22 @@ namespace QoZ {
 
         //build huffman tree
         HuffmanTree *createHuffmanTree(int stateNum) {
+            //std::cout<<"ctree1"<<std::endl;
             HuffmanTree *huffmanTree = (HuffmanTree *) malloc(sizeof(HuffmanTree));
             memset(huffmanTree, 0, sizeof(HuffmanTree));
             huffmanTree->stateNum = stateNum;
             huffmanTree->allNodes = 2 * stateNum;
-
+            //std::cout<<"ctree2"<<std::endl;
             huffmanTree->pool = (struct node_t *) malloc(huffmanTree->allNodes * 2 * sizeof(struct node_t));
             huffmanTree->qqq = (node *) malloc(huffmanTree->allNodes * 2 * sizeof(node));
             huffmanTree->code = (unsigned long **) malloc(huffmanTree->stateNum * sizeof(unsigned long *));
             huffmanTree->cout = (unsigned char *) malloc(huffmanTree->stateNum * sizeof(unsigned char));
-
+            //std::cout<<"ctree3"<<std::endl;
             memset(huffmanTree->pool, 0, huffmanTree->allNodes * 2 * sizeof(struct node_t));
             memset(huffmanTree->qqq, 0, huffmanTree->allNodes * 2 * sizeof(node));
             memset(huffmanTree->code, 0, huffmanTree->stateNum * sizeof(unsigned long *));
             memset(huffmanTree->cout, 0, huffmanTree->stateNum * sizeof(unsigned char));
+            //std::cout<<"ctree4"<<std::endl;
             huffmanTree->qq = huffmanTree->qqq - 1;
             huffmanTree->n_nodes = 0;
             huffmanTree->n_inode = 0;
@@ -101,10 +102,17 @@ namespace QoZ {
          */
         void preprocess_encode(const T *bins, size_t num_bin, int stateNum) {
             nodeCount = 0;
+            if (num_bin == 0) {
+                printf("Huffman bins should not be empty\n");
+                exit(0);
+            }
+            //std::cout<<"prepro1"<<std::endl;
             init(bins, num_bin);
+            //std::cout<<"prepro2"<<std::endl;
             for (int i = 0; i < huffmanTree->stateNum; i++)
                 if (huffmanTree->code[i]) nodeCount++;
             nodeCount = nodeCount * 2 - 1;
+            //std::cout<<"prepro3"<<std::endl;
         }
 
         //save the huffman Tree in the compressed data
@@ -125,7 +133,7 @@ namespace QoZ {
                 totalSize = convert_HuffTree_to_bytes_anyStates<unsigned int>(nodeCount, c);
             // printf("1\n");
             c += totalSize;
-             return c - cc;
+           return c - cc;
         }
 
         size_t size_est() {
@@ -292,7 +300,7 @@ namespace QoZ {
     private:
         HuffmanTree *huffmanTree = NULL;
         node treeRoot;
-        unsigned int nodeCount;
+        unsigned int nodeCount = 0 ;
         uchar sysEndianType; //0: little endian, 1: big endian
         bool loaded = false;
         T offset;
@@ -519,13 +527,12 @@ namespace QoZ {
          * @param size_t length (input)
          * */
         void init(const T *s, size_t length) {
-            if (length == 0) {
-                return;
-            }
+            
             T max = s[0];
             offset = s[0]; //offset is min
 
             ska::unordered_map<T, size_t> frequency;
+            //std::cout<<"init1"<<std::endl;
             for (size_t i = 0; i < length; i++) {
                 frequency[s[i]]++;
             }
@@ -539,9 +546,11 @@ namespace QoZ {
                     offset = k;
                 }
             }
+            //std::cout<<"init2"<<std::endl;
 
             int stateNum = max - offset + 2;
             huffmanTree = createHuffmanTree(stateNum);
+            //std::cout<<"init3"<<std::endl;
 
             for (const auto &f: frequency) {
                 qinsert(new_node(f.second, f.first - offset, 0, 0));
@@ -552,6 +561,7 @@ namespace QoZ {
 
             build_code(huffmanTree->qq[1], 0, 0, 0);
             treeRoot = huffmanTree->qq[1];
+            //std::cout<<"init4"<<std::endl;
 
         }
 

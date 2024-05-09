@@ -1,5 +1,5 @@
-#ifndef QoZ_SZFASTFRONTEND
-#define QoZ_SZFASTFRONTEND
+#ifndef SZ3_SZFASTFRONTEND
+#define SZ3_SZFASTFRONTEND
 
 /**
  * This module is the implementation of the prediction and quantization methods in SZ2.
@@ -67,17 +67,17 @@ namespace QoZ {
 //            }
 
 //            Huffman_encode_tree_and_data(SELECTOR_RADIUS, indicator, size.num_blocks, c);
-            HuffmanEncoder<int> selector_encoder = HuffmanEncoder<int>();
-            selector_encoder.preprocess_encode(indicator, SELECTOR_RADIUS);
-            selector_encoder.save(c);
-            selector_encoder.encode(indicator, c);
-            selector_encoder.postprocess_encode();
+            //            indicator_huffman.preprocess_encode(indicator, SELECTOR_RADIUS);
+            indicator_huffman.save(c);
+            indicator_huffman.encode(indicator, c);
+            indicator_huffman.postprocess_encode();
+            auto *c2 = c;
 
 //	convertIntArray2ByteArray_fast_1b_to_result_sz(indicator, size.num_blocks, c);
 
             if (reg_count) {
                 encode_regression_coefficients(reg_params_type, reg_unpredictable_data, RegCoeffNum3d * reg_count,
-                                               reg_unpredictable_data_pos - reg_unpredictable_data, c);
+                                               reg_unpredictable_data_pos - reg_unpredictable_data, reg_huffman, c);
             }
 
             quantizer.save(c);
@@ -115,10 +115,10 @@ namespace QoZ {
 //            }
 //            memset(unpred_count_buffer, 0, size.block_size * size.block_size * sizeof(int));
 //	unsigned char * indicator = convertByteArray2IntArray_fast_1b_sz(size.num_blocks, c, (size.num_blocks - 1)/8 + 1);
-            HuffmanEncoder<int> selector_encoder = HuffmanEncoder<int>();
-            selector_encoder.load(c, remaining_length);
-            indicator = selector_encoder.decode(c, size.num_blocks);
-            selector_encoder.postprocess_decode();
+            indicator_huffman = HuffmanEncoder<int>();
+            indicator_huffman.load(c, remaining_length);
+            indicator = indicator_huffman.decode(c, size.num_blocks);
+            indicator_huffman.postprocess_decode();
 
 
             if (reg_count) {
@@ -156,9 +156,9 @@ namespace QoZ {
 
         size_t size_est() {
             return quantizer.size_est() //unpred
-                  // + sizeof(T) * size.num_elements//quantbin
-                   + indicator.size() * sizeof(int) //loren or reg indicator
-                   + RegCoeffNum3d * reg_count * sizeof(int) // reg coeff quant
+                  
+                   + indicator.size() * sizeof(int) + indicator_huffman.size_est()//loren or reg indicator
+                   + RegCoeffNum3d * reg_count * sizeof(int) + reg_huffman.size_est() // reg coeff quant
                    + (reg_unpredictable_data_pos - reg_unpredictable_data) * sizeof(float); //reg coeff unpred
         }
 
@@ -172,7 +172,7 @@ namespace QoZ {
     private:
         //        unsigned char *
 //        compress_3d(const T *data, size_t r1, size_t r2, size_t r3, double precision, size_t &compressed_size,
-//                    const QoZMETA::meta_params &params, QoZMETA::CompressStats &compress_info) {
+//                    const QoZMETA::meta_params &params, SZMETA::CompressStats &compress_info) {
         std::vector<int> compress_3d(const T *data) {
             clear();
 
@@ -327,6 +327,13 @@ namespace QoZ {
             }
             free(pred_buffer);
             free(reg_params);
+            if (reg_count) {
+                reg_huffman = HuffmanEncoder<int>();
+                reg_huffman.preprocess_encode(reg_params_type, RegCoeffNum3d * reg_count, 0);
+            }
+            indicator_huffman = HuffmanEncoder<int>();
+            
+            indicator_huffman.preprocess_encode(indicator, SELECTOR_RADIUS);
 
 //    printf("block %ld; lorenzo %ld, lorenzo_2layer %ld, regression %ld, poly regression %ld\n", size.num_blocks,
 //        lorenzo_count, lorenzo_2layer_count, reg_count);
@@ -408,6 +415,7 @@ namespace QoZ {
                 x_data_pos += size.block_size * size.dim0_offset;
             }
             free(pred_buffer);
+
 
 //            free(unpred_count_buffer);
 //            free(unpred_data_buffer);
@@ -534,6 +542,9 @@ namespace QoZ {
         int est_unpred_count_per_index = 0; // not used, unpredictable data is controlled by quantizer
         int *unpred_count_buffer = nullptr; // not used, unpredictable data is controlled by quantizer
         T *unpred_data_buffer = nullptr; // not used, unpredictable data is controlled by quantizer
+
+        HuffmanEncoder<int> indicator_huffman;
+        HuffmanEncoder<int> reg_huffman;
 
         Quantizer quantizer;
         Config conf;

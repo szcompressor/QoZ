@@ -1,10 +1,12 @@
 
  
-//#include <stdio.h>
+
 //#include <stdlib.h>
 
 #ifndef SZ_MATRIX_OPERATION_HPP
 #define SZ_MATRIX_OPERATION_HPP
+#include <iostream>
+#include<cstdio>
 namespace QoZ {
 
     inline void matrixTranspose(double *a, double *b, size_t row, size_t column)
@@ -60,20 +62,26 @@ namespace QoZ {
         } 
 
         //judge whether we can use Guass(i.e., whether the diagonal elements are all 0.
+        /*
         for(i=0;i<size;i++)
         {
-            if(A[i][i]==0)
+            if(fabs(A[i][i])<1e-10)
             {
                 //printf("This matrix cannot be solved by Gauss\n");
                 return 1; //error
             }
         } 
-
+        */
         float C[size];//Store coefficients
 
-        //Elimitation method
+        //Elimination method
         for(k=0; k<size-1;k++)
         {
+            if(fabs(A[k][k])<1e-5)
+            {
+                //printf("This matrix cannot be solved by Gauss\n");
+                return 1; //error
+            }
             for(i=k+1;i<size;i++)
             {
                 C[i]=A[i][k]/A[k][k];
@@ -90,6 +98,11 @@ namespace QoZ {
         } 
 
         //Use X to store the results
+        if(fabs(A[size-1][size-1])<1e-5)
+            {
+                //printf("This matrix cannot be solved by Gauss\n");
+                return 1; //error
+            }
         float X[size];
         X[size-1]=B[size-1]/A[size-1][size-1];
 
@@ -109,7 +122,7 @@ namespace QoZ {
 
     	return 0;
     } 
-     /*
+     
     void printMatrix(double* matrix, int m, int n)
     {
     	for(int i = 0;i<m;i++)
@@ -128,12 +141,12 @@ namespace QoZ {
     		printf("%f\t", vector[i]);
     	printf("\n");		
     }
-    */
-    double* Regression(double * A,size_t numPoints,size_t numFeatures,double * b)
+    
+    double* Regression(double * A,size_t numPoints,size_t numFeatures,double * b,int &status)
     {
         
         double* AT = new double[numPoints*numFeatures]; //transpose
-        
+
         matrixTranspose(A, AT, numPoints, numFeatures);
         
         double* c = new double [numFeatures];
@@ -141,13 +154,14 @@ namespace QoZ {
         
         double* ATA = new double [numFeatures*numFeatures];
         matrixMul(AT,A, ATA, numFeatures, numFeatures, numPoints);
+        //printMatrix(ATA,numFeatures,numFeatures);
         /*
         printMatrix(ATA, interpSize, interpSize);
         printf("-----------------------------------\n");
         printVector(c, interpSize);
         */
         double* result = NULL;
-        Gauss(ATA, c, numFeatures, &result);
+        status=Gauss(ATA, c, numFeatures, &result);
         
         //delete A(extractedMatrix);
         delete []AT;
