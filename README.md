@@ -2,7 +2,7 @@
 
 ## Introduction
 
-The second major version of QoZ: QoZ 2.0, is based on both QoZ 1.1 and the paper: "High-performance Effective Scientific Error-bounded Lossy Compression with Auto-tuned Multi-component Interpolation" [Paper Link](https://dl.acm.org/doi/abs/10.1145/3639259).
+The second major version of QoZ: QoZ 2.0, is based on both QoZ 1.1 and the paper: "High-performance Effective Scientific Error-bounded Lossy Compression with Auto-tuned Multi-component Interpolation". [Paper Link](https://dl.acm.org/doi/abs/10.1145/3639259)
 
 ## Dependencies
 
