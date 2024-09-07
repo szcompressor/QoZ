@@ -121,52 +121,16 @@ namespace QoZ {
 
         template<uint NN = N, uint LL = L>
         inline typename std::enable_if<NN == 2 && LL == 1, T>::type do_predict(const iterator &iter) const noexcept {
-            //if(!useCoeff)
-                return iter.prev(0, 1) + iter.prev(1, 0) - iter.prev(1, 1);
-            /*else{
-                
-                T value=0;
-                size_t idx=0;
-                for(int i=1;i>=0;i--){
-                    for(int j=1;j>=0;j--){
-                        if(i==0 and j==0)
-                            break;
-                        value+=iter.prev(i,j)*coeffs[idx++];
-
-                    }
-
-                }
-                return value;
-                
-               // return (int)coeffs[2]*iter.prev(0, 1) + (int)coeffs[1]*iter.prev(1, 0) - (int)coeffs[0]*iter.prev(1, 1);
-            }*/
+            return iter.prev(0, 1) + iter.prev(1, 0) - iter.prev(1, 1);
         }
 
         template<uint NN = N, uint LL = L>
         inline typename std::enable_if<NN == 3 && LL == 1, T>::type do_predict(const iterator &iter) const noexcept {
-           // if (!useCoeff)
-                return iter.prev(0, 0, 1) + iter.prev(0, 1, 0) + iter.prev(1, 0, 0)
-                       - iter.prev(0, 1, 1) - iter.prev(1, 0, 1) - iter.prev(1, 1, 0)
-                       + iter.prev(1, 1, 1);
-            /*
-            else{
-                T value=0;
-                size_t idx=0;
-                for(int i=1;i>=0;i--){
-                    for(int j=1;j>=0;j--){
-                        for(int k=1;k>=0;k--){
-                            if(i==0 and j==0 and k==0)
-                                break;
-                            value+=iter.prev(i,j,k)*coeffs[idx++];
-                        }
+        
+            return iter.prev(0, 0, 1) + iter.prev(0, 1, 0) + iter.prev(1, 0, 0)
+                   - iter.prev(0, 1, 1) - iter.prev(1, 0, 1) - iter.prev(1, 1, 0)
+                   + iter.prev(1, 1, 1);
 
-                    }
-
-                }
-                return value;
-
-            }
-            */
 
 
 
@@ -187,62 +151,26 @@ namespace QoZ {
 
         template<uint NN = N, uint LL = L>
         inline typename std::enable_if<NN == 2 && LL == 2, T>::type do_predict(const iterator &iter) const noexcept {
-            //if(!useCoeff)
-                return 2 * iter.prev(0, 1) - iter.prev(0, 2) + 2 * iter.prev(1, 0)
-                       - 4 * iter.prev(1, 1) + 2 * iter.prev(1, 2) - iter.prev(2, 0)
-                       + 2 * iter.prev(2, 1) - iter.prev(2, 2);
-            /*           
-            else{
-                
-                T value=0;
-                size_t idx=0;
-                for(int i=2;i>=0;i--){
-                    for(int j=2;j>=0;j--){
-                        if(i==0 and j==0)
-                            break;
-                        value+=iter.prev(i,j)*coeffs[idx++];
-
-                    }
-
-                }
-                return value;
-
-                
-                
-            }
-            */
+           
+            return 2 * iter.prev(0, 1) - iter.prev(0, 2) + 2 * iter.prev(1, 0)
+                   - 4 * iter.prev(1, 1) + 2 * iter.prev(1, 2) - iter.prev(2, 0)
+                   + 2 * iter.prev(2, 1) - iter.prev(2, 2);
+   
         }
 
         template<uint NN = N, uint LL = L>
         inline typename std::enable_if<NN == 3 && LL == 2, T>::type do_predict(const iterator &iter) const noexcept {
-            //if (!useCoeff)
-                return 2 * iter.prev(0, 0, 1) - iter.prev(0, 0, 2) + 2 * iter.prev(0, 1, 0)
-                       - 4 * iter.prev(0, 1, 1) + 2 * iter.prev(0, 1, 2) - iter.prev(0, 2, 0)
-                       + 2 * iter.prev(0, 2, 1) - iter.prev(0, 2, 2) + 2 * iter.prev(1, 0, 0)
-                       - 4 * iter.prev(1, 0, 1) + 2 * iter.prev(1, 0, 2) - 4 * iter.prev(1, 1, 0)
-                       + 8 * iter.prev(1, 1, 1) - 4 * iter.prev(1, 1, 2) + 2 * iter.prev(1, 2, 0)
-                       - 4 * iter.prev(1, 2, 1) + 2 * iter.prev(1, 2, 2) - iter.prev(2, 0, 0)
-                       + 2 * iter.prev(2, 0, 1) - iter.prev(2, 0, 2) + 2 * iter.prev(2, 1, 0)
-                       - 4 * iter.prev(2, 1, 1) + 2 * iter.prev(2, 1, 2) - iter.prev(2, 2, 0)
-                       + 2 * iter.prev(2, 2, 1) - iter.prev(2, 2, 2);
-            /*
-            else{
-                T value=0;
-                size_t idx=0;
-                for(int i=2;i>=0;i--){
-                    for(int j=2;j>=0;j--){
-                        for(int k=2;k>=0;k--){
-                            if(i==0 and j==0 and k==0)
-                                break;
-                            value+=iter.prev(i,j,k)*coeffs[idx++];
-                        }
+           
+            return 2 * iter.prev(0, 0, 1) - iter.prev(0, 0, 2) + 2 * iter.prev(0, 1, 0)
+                   - 4 * iter.prev(0, 1, 1) + 2 * iter.prev(0, 1, 2) - iter.prev(0, 2, 0)
+                   + 2 * iter.prev(0, 2, 1) - iter.prev(0, 2, 2) + 2 * iter.prev(1, 0, 0)
+                   - 4 * iter.prev(1, 0, 1) + 2 * iter.prev(1, 0, 2) - 4 * iter.prev(1, 1, 0)
+                   + 8 * iter.prev(1, 1, 1) - 4 * iter.prev(1, 1, 2) + 2 * iter.prev(1, 2, 0)
+                   - 4 * iter.prev(1, 2, 1) + 2 * iter.prev(1, 2, 2) - iter.prev(2, 0, 0)
+                   + 2 * iter.prev(2, 0, 1) - iter.prev(2, 0, 2) + 2 * iter.prev(2, 1, 0)
+                   - 4 * iter.prev(2, 1, 1) + 2 * iter.prev(2, 1, 2) - iter.prev(2, 2, 0)
+                   + 2 * iter.prev(2, 2, 1) - iter.prev(2, 2, 2);
 
-                    }
-
-                }
-                return value;
-
-            }*/
         
         }
     };

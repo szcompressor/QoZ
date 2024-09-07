@@ -178,9 +178,6 @@ void decompress(char *inPath, char *cmpPath, char *decPath,
     size_t cmpSize;
    
     auto cmpData = QoZ::readfile<char>(cmpPath, cmpSize);
-    //std::cout<<"woshinidie"<<std::endl;
-    
-
     QoZ::Timer timer(true);
     T *decData = SZ_decompress<T>(conf, cmpData.get(), cmpSize);
     double compress_time = timer.stop();
@@ -536,21 +533,17 @@ int main(int argc, char *argv[]) {
         }
         
     }
-
-    //if(conf.pyBind){
-        //py::initialize_interpreter();
-    //}
-
    
     if (compression) {
 
         if (dataType == SZ_FLOAT) {
             compress<float>(inPath, cmpPath, conf);
         } 
-        /*else if (dataType == SZ_DOUBLE) {
+        else if (dataType == SZ_DOUBLE) {
             compress<double>(inPath, cmpPath, conf);
         
         } 
+        /*
         else if (dataType == SZ_INT32) {
             compress<int32_t>(inPath, cmpPath, conf);
         } else if (dataType == SZ_INT64) {
@@ -594,9 +587,6 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    //if(conf.pyBind){
-        //py::finalize_interpreter();
-    //}
 
     if (delCmpPath) {
         remove(cmpPath);

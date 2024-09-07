@@ -37,18 +37,13 @@ namespace QoZ {
         if(N==3){
             size_t dimx=dims[0],dimy=dims[1],dimz=dims[2],dimyz=dimy*dimz;
             size_t is1=dimyz*interp_stride,is3x1=3*is1,is2=dimz*interp_stride,is3x2=3*is2,is3=interp_stride,is3x3=3*is3;
-           // std::cout<<vars[0]<<" "<<vars[1]<<" "<<vars[2]<<std::endl;
-
-           // std::cout<<interp_stride<<" "<<stride<<std::endl;
             for (size_t i = 3*interp_stride; i+3*interp_stride < dimx; i+=(stride/2)*2*interp_stride) {
                 for (size_t j = 3*interp_stride; j+3*interp_stride < dimy; j+=(stride/2)*2*interp_stride) {
                     for (size_t k = 3*interp_stride; k+3*interp_stride < dimz; k+=(stride/2)*2*interp_stride) {
-                        //std::cout<<i<<" "<<j<<" "<<k<<std::endl;
                         count+=1;
                         size_t idx=i*dimyz+j*dimz+k;
                         T *d= data+idx;
                         T cur_value=*d;
-                        //std::cout<<cur_value<<std::endl;
                         if(interp_op==1){
                             auto interp_cubic=nat?interp_cubic_2<T>:interp_cubic_1<T>;
                             T interp_err=interp_cubic(*(d - is3x1), *(d - is1), *(d + is1), *(d + is3x1))-cur_value;
@@ -60,10 +55,8 @@ namespace QoZ {
                         }
                         else{
                             T interp_err=interp_linear<T>( *(d -  is1), *(d + is1))-cur_value;
-                            //std::cout<<interp_value<<std::endl;
                             vars[0]+=interp_err*interp_err;
                             interp_err=interp_linear<T>( *(d -  is2), *(d + is2))-cur_value;
-                            //std::cout<<interp_value<<std::endl;
                             vars[1]+=interp_err*interp_err;
                             interp_err=interp_linear<T>( *(d -  is3), *(d + is3) )-cur_value;
                             vars[2]+=interp_err*interp_err;
@@ -72,8 +65,6 @@ namespace QoZ {
                     }
                 }
             }
-            //std::cout<<"nopost:"<<vars[0]<<" "<<vars[1]<<" "<<vars[2]<<std::endl;
-
         }
         else if(N==2){
             size_t  dimx=dims[0],dimy=dims[1];
@@ -102,7 +93,6 @@ namespace QoZ {
             }
 
         }
-        //double offset=0.0;
         
         for (size_t i=0;i<N;i++){
             if(count>0)
@@ -119,16 +109,11 @@ namespace QoZ {
                 vars[i]+=abs_eb*abs_eb*(1.0/12)*0.5;
             }
         }
-       //std::cout<<vars[0]<<" "<<vars[1]<<" "<<vars[2]<<std::endl;
-
-
-
     }
 
     template<uint N>
     inline void
     preprocess_vars(std::vector<double>&vars){
-        //std::cout<<vars[0]<<" "<<vars[1]<<" "<<vars[2]<<std::endl;
         if(N==2){
             double a=vars[1],b=vars[0];
             vars[0]=a/(a+b);
@@ -140,9 +125,6 @@ namespace QoZ {
             vars[1]=b/(a+b+c);
             vars[2]=c/(a+b+c);
         }
-        //std::cout<<vars[0]<<" "<<vars[1]<<" "<<vars[2]<<std::endl;
-
-
     }
 
 
@@ -152,32 +134,22 @@ template<class T, uint N>
     inline int
     calculate_interp_coeffs(T *data, std::vector<size_t> &dims,std::vector<double> &coeffs, size_t stride=2){
 
-        //size_t count=0;
         std::vector<double>xs,ys; 
         size_t stride2x=2*stride;
         if(N==3){
             size_t dimx=dims[0],dimy=dims[1],dimz=dims[2],dimyz=dimy*dimz;
-            //std::cout<<dimx<<" "<<dimy<<" "<<dimz<<std::endl;
             for (size_t i = 3; i < dimx-3; i+=stride) {
                 for (size_t j = 3; j < dimy-3; j+=stride) {
                     for (size_t k = 3; k < dimz-3; k+=stride) {
                         if(i%stride2x==0 and j%stride2x==0 and k%stride2x==0)
                             continue;
-                        //std::cout<<i<<" "<<j<<" "<<k<<std::endl;
-                        //count+=1;
                         size_t idx=i*dimyz+j*dimz+k;
                         T *d= data+idx;
                         T cur_value=*d;
-                        //std::cout<<cur_value<<std::endl;
                         std::vector<double>temp_xs={*(d - 3*dimyz),*(d - dimyz),*(d + dimyz), *(d + 3*dimyz),*(d - 3*dimz),*(d - dimz),*(d + dimz),*(d + 3*dimz),*(d - 3), *(d - 1), *(d + 1), *(d + 3)};
-                        //std::cout<<"dwa"<<std::endl;
                         std::vector<double>temp_ys={cur_value,cur_value,cur_value};
-                       // std::cout<<"dwa2"<<std::endl;
                         xs.insert(xs.end(),temp_xs.begin(),temp_xs.end());
-                        //std::cout<<"dwa3"<<std::endl;
-                        ys.insert(ys.end(),temp_ys.begin(),temp_ys.end());
-                        //std::cout<<"dwa4"<<std::endl;
-                       
+                        ys.insert(ys.end(),temp_ys.begin(),temp_ys.end());                       
 
                     }
                 }
@@ -251,7 +223,6 @@ template<class T, uint N>
                         }
                     }
                     if (max-min>abseb){
-                       // std::cout<<"selected"<<std::endl;
                         size_t a[3]={i,j,k};
                         starts.push_back(std::vector<size_t>(a,a+3));
                     }
