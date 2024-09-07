@@ -157,33 +157,29 @@ namespace QoZ {
                 uint8_t cur_interpolator=interpolator_id;
                 uint8_t cur_direction=direction_sequence_id;
                 
-                //if(!blockwiseTuning){
-                    if (levelwise_predictor_levels==0){
-                        cur_interpolator=interpolator_id;
-                        cur_direction=direction_sequence_id;
+
+                if (levelwise_predictor_levels==0){
+                    cur_interpolator=interpolator_id;
+                    cur_direction=direction_sequence_id;
+                }
+                else{
+                    if (level-1<levelwise_predictor_levels){
+                        cur_interpolator=interpAlgo_list[level-1];
+                        cur_direction=interpDirection_list[level-1];
                     }
                     else{
-                        if (level-1<levelwise_predictor_levels){
-                            cur_interpolator=interpAlgo_list[level-1];
-                            cur_direction=interpDirection_list[level-1];
-                        }
-                        else{
-                            cur_interpolator=interpAlgo_list[levelwise_predictor_levels-1];
-                            cur_direction=interpDirection_list[levelwise_predictor_levels-1];
-                        }
+                        cur_interpolator=interpAlgo_list[levelwise_predictor_levels-1];
+                        cur_direction=interpDirection_list[levelwise_predictor_levels-1];
                     }
-                //}
-                
+                }
+
                 
                 
                 size_t stride = 1U << (level - 1);
                 size_t cur_blocksize;
                 
-                //if (blockwiseTuning){
-                 //   cur_blocksize=blocksize;
-                //}
-                //else 
-                    if (fixBlockSize>0){
+
+                if (fixBlockSize>0){
                     cur_blocksize=fixBlockSize;
                 }
                 else{
@@ -210,20 +206,10 @@ namespace QoZ {
                             end_idx[i] = global_dimensions[i] - 1;
                         }
                     }
-                    /*
-                    if (blockwiseTuning){
-                        
-    
-                        block_interpolation(decData, start_idx, end_idx, PB_recover,
-                                        interpolators[interpAlgo_list[op_index]], interpDirection_list[op_index], stride);
-                        op_index++;
-                    }
-                   */
-                   //else{
-                        block_interpolation(decData, block.get_global_index(), end_idx, PB_recover,
-                                        interpolators[cur_interpolator], cur_direction, stride);
-                   // }
-                   
+
+                    block_interpolation(decData, block.get_global_index(), end_idx, PB_recover,
+                                    interpolators[cur_interpolator], cur_direction, stride);
+
 
                 }
                 
@@ -261,8 +247,6 @@ namespace QoZ {
                 std::vector<int>().swap(quant_inds);
                 std::vector<int>().swap(conf.quant_bins);
                 conf.quant_bin_counts=std::vector<size_t>(interpolation_level,0);
-                //conf.quant_bin_counts.reserve(interpolation_level);
-                //conf.pred_square_error=0.0;
                 conf.decomp_square_error=0.0;
 
             }
@@ -403,100 +387,10 @@ namespace QoZ {
                             end_idx[i] = global_dimensions[i] - 1;
                         }
                     }
-                    /*
-                    if (conf.blockwiseTuning){
-                        size_t cur_element_num=1;
-                        for (int i=0;i<N;i++){
-                            cur_element_num*=(end_idx[i]-start_idx[i]+1);
-                        }
-                        
-                        std::vector<T> orig_block(cur_element_num,0);
-                        size_t local_idx=0;
-                        if(N==2){
-                            for(size_t x=start_idx[0];x<=end_idx[0];x++){
-                                for(size_t y=start_idx[1];y<=end_idx[1];y++){
-                                    size_t global_idx=x*dimension_offsets[0]+y*dimension_offsets[1];
-                                    orig_block[local_idx]=data[global_idx];
-                                    local_idx++;
-                                }
-                            }
-                        }
-
-                        else if(N==3){
-                            for(size_t x=start_idx[0];x<=end_idx[0];x++){
-                                for(size_t y=start_idx[1];y<=end_idx[1];y++){
-                                    for(size_t z=start_idx[2];z<=end_idx[2];z++){
-                                        size_t global_idx=x*dimension_offsets[0]+y*dimension_offsets[1]+z*dimension_offsets[2];
-                                        orig_block[local_idx]=data[global_idx];
-                                        local_idx++;
-                                    }
-                                }
-                            }
-                        }
-                        
-                        uint8_t best_op=QoZ::INTERP_ALGO_CUBIC;
-                        uint8_t best_dir=0;
-                        double best_loss=9e10;
-                        std::vector<int> op_candidates={QoZ::INTERP_ALGO_LINEAR,QoZ::INTERP_ALGO_CUBIC};
-                        std::vector<int> dir_candidates={0,QoZ::factorial(N) - 1};
-                        for (auto &interp_op:op_candidates) {
-                            for (auto &interp_direction: dir_candidates) {
-                                double cur_loss=block_interpolation(data, start_idx, end_idx, PB_predict_overwrite,
-                                        interpolators[interp_op], interp_direction, stride,2);
-
-                                if(cur_loss<best_loss){
-                                    best_loss=cur_loss;
-                                    best_op=interp_op;
-                                    best_dir=interp_direction;
-                                }
-
-                                size_t local_idx=0;
-                                if(N==2){
-                                    for(size_t x=start_idx[0];x<=end_idx[0];x++){
-                                        for(size_t y=start_idx[1];y<=end_idx[1];y++){
-                                            size_t global_idx=x*dimension_offsets[0]+y*dimension_offsets[1];
-                                            data[global_idx]=orig_block[local_idx];
-                                            local_idx++;
-                                        }
-                                    }
-                                }
-                                else if(N==3){
-                                    for(size_t x=start_idx[0];x<=end_idx[0];x++){
-                                        for(size_t y=start_idx[1];y<=end_idx[1];y++){
-                                            for(size_t z=start_idx[2];z<=end_idx[2];z++){
-                                                size_t global_idx=x*dimension_offsets[0]+y*dimension_offsets[1]+z*dimension_offsets[2];
-                                                data[global_idx]=orig_block[local_idx];
-                                                local_idx++;
-                                            }
-                                        }
-                                    }
-                                }
-
-                            }
-                        }
-
-                        interp_ops.push_back(best_op);
-                        interp_dirs.push_back(best_dir);
-                        block_interpolation(data, start_idx, end_idx, PB_predict_overwrite,
-                                        interpolators[best_op], best_dir, stride,0);
-
-
-                        
-                    }
-
                     
+                    predict_error+=block_interpolation(data, start_idx, end_idx, PB_predict_overwrite,
+                                        interpolators[cur_interpolator], cur_direction, stride,tuning);
 
-                    */
-
-                    
-
-                    //else{
-                    
-                    
-                        predict_error+=block_interpolation(data, start_idx, end_idx, PB_predict_overwrite,
-                                            interpolators[cur_interpolator], cur_direction, stride,tuning);
-                    //}
-                
                     
                 }
                 if(tuning){
@@ -507,14 +401,11 @@ namespace QoZ {
 
             }
             
-//            std::cout << "Number of data point = " << num_elements << std::endl;
-//            std::cout << "quantization element = " << quant_inds.size() << std::endl;
+
              
              
             //timer.start();
 
-//            writefile("pred.dat", preds.data(), num_elements);
-//            writefile("quant.dat", quant_inds.data(), num_elements);
             quantizer.set_eb(eb);
             if (tuning){
                
@@ -708,14 +599,6 @@ namespace QoZ {
            
             if(tuning>1)
                 return;
-            /*
-            else if(tuning==1 and conf.sampleBlockSize<conf.maxStep and conf.tuningTarget==QoZ::TUNING_TARGET_RD){
-                
-                quantizer.insert_unpred(*data);
-                return;
-
-            }
-            */
             if (N==1){
                 for (size_t x=maxStep*(tuning==1);x<conf.dims[0];x+=maxStep){
                     quantizer.insert_unpred(*(data+x));
@@ -1017,9 +900,6 @@ namespace QoZ {
             if (interp_func == "linear" || n < 5) {
                 if (pb == PB_predict_overwrite) {
 
-                    
-                       
-
                         for (size_t i = 1; i + 1 < n; i += 2) {
                             T *d = data + begin + i * stride;
                             quantize(d - data, *d, interp_linear(*(d - stride), *(d + stride)));
@@ -1062,12 +942,6 @@ namespace QoZ {
                 }
             } else {
                 if (pb == PB_predict_overwrite) {
-
-                    
-
-                    
-                    
-                        
 
                         T *d;
                         size_t i;
@@ -1177,9 +1051,6 @@ namespace QoZ {
                     }
 
 
-
-
-
                     else{
                         for (size_t i = 1; i + 1 < n; i += 2) {
                             for(size_t j=1;j+1<m;j+=2){
@@ -1193,7 +1064,6 @@ namespace QoZ {
 
 
                             }
-
 
                            
                         }
@@ -1331,10 +1201,6 @@ namespace QoZ {
 
                     }
 
-
-
-
-
                     else{
                         for (size_t i = 1; i + 1 < n; i += 2) {
                             for(size_t j=1;j+1<m;j+=2){
@@ -1358,7 +1224,6 @@ namespace QoZ {
                                     quantize(d - data, *d, interp_linear(*(d - stride1), *(d + stride1)));
                                 }
                             }
-
 
                            
                         }
@@ -1455,10 +1320,6 @@ namespace QoZ {
 
 
 
-
-
-
-
         template<uint NN = N>
         typename std::enable_if<NN == 1, double>::type
         block_interpolation(T *data, std::array<size_t, N> begin, std::array<size_t, N> end, const PredictorBehavior pb,
@@ -1540,158 +1401,44 @@ namespace QoZ {
 
             double predict_error = 0;
             size_t stride2x = stride * 2;
-            //if(direction!=6){
+           
             
 
-                const std::array<int, N> dims = dimension_sequences[direction];
-                for (size_t j = (begin[dims[1]] ? begin[dims[1]] + stride2x : 0); j <= end[dims[1]]; j += stride2x) {
-                    for (size_t k = (begin[dims[2]] ? begin[dims[2]] + stride2x : 0); k <= end[dims[2]]; k += stride2x) {
-                        size_t begin_offset = begin[dims[0]] * dimension_offsets[dims[0]] + j * dimension_offsets[dims[1]] +
-                                              k * dimension_offsets[dims[2]];
-                        predict_error += block_interpolation_1d(data, begin_offset,
-                                                                begin_offset +
-                                                                (end[dims[0]] - begin[dims[0]]) *
-                                                                dimension_offsets[dims[0]],
-                                                                stride * dimension_offsets[dims[0]], interp_func, pb,tuning);
-                    }
+            const std::array<int, N> dims = dimension_sequences[direction];
+            for (size_t j = (begin[dims[1]] ? begin[dims[1]] + stride2x : 0); j <= end[dims[1]]; j += stride2x) {
+                for (size_t k = (begin[dims[2]] ? begin[dims[2]] + stride2x : 0); k <= end[dims[2]]; k += stride2x) {
+                    size_t begin_offset = begin[dims[0]] * dimension_offsets[dims[0]] + j * dimension_offsets[dims[1]] +
+                                          k * dimension_offsets[dims[2]];
+                    predict_error += block_interpolation_1d(data, begin_offset,
+                                                            begin_offset +
+                                                            (end[dims[0]] - begin[dims[0]]) *
+                                                            dimension_offsets[dims[0]],
+                                                            stride * dimension_offsets[dims[0]], interp_func, pb,tuning);
                 }
-                for (size_t i = (begin[dims[0]] ? begin[dims[0]] + stride : 0); i <= end[dims[0]]; i += stride) {
-                    for (size_t k = (begin[dims[2]] ? begin[dims[2]] + stride2x : 0); k <= end[dims[2]]; k += stride2x) {
-                        size_t begin_offset = i * dimension_offsets[dims[0]] + begin[dims[1]] * dimension_offsets[dims[1]] +
-                                              k * dimension_offsets[dims[2]];
-                        predict_error += block_interpolation_1d(data, begin_offset,
-                                                                begin_offset +
-                                                                (end[dims[1]] - begin[dims[1]]) *
-                                                                dimension_offsets[dims[1]],
-                                                                stride * dimension_offsets[dims[1]], interp_func, pb,tuning);
-                    }
+            }
+            for (size_t i = (begin[dims[0]] ? begin[dims[0]] + stride : 0); i <= end[dims[0]]; i += stride) {
+                for (size_t k = (begin[dims[2]] ? begin[dims[2]] + stride2x : 0); k <= end[dims[2]]; k += stride2x) {
+                    size_t begin_offset = i * dimension_offsets[dims[0]] + begin[dims[1]] * dimension_offsets[dims[1]] +
+                                          k * dimension_offsets[dims[2]];
+                    predict_error += block_interpolation_1d(data, begin_offset,
+                                                            begin_offset +
+                                                            (end[dims[1]] - begin[dims[1]]) *
+                                                            dimension_offsets[dims[1]],
+                                                            stride * dimension_offsets[dims[1]], interp_func, pb,tuning);
                 }
-                for (size_t i = (begin[dims[0]] ? begin[dims[0]] + stride : 0); i <= end[dims[0]]; i += stride) {
-                    for (size_t j = (begin[dims[1]] ? begin[dims[1]] + stride : 0); j <= end[dims[1]]; j += stride) {
-                        size_t begin_offset = i * dimension_offsets[dims[0]] + j * dimension_offsets[dims[1]] +
-                                              begin[dims[2]] * dimension_offsets[dims[2]];
-                        predict_error += block_interpolation_1d(data, begin_offset,
-                                                                begin_offset +
-                                                                (end[dims[2]] - begin[dims[2]]) *
-                                                                dimension_offsets[dims[2]],
-                                                                stride * dimension_offsets[dims[2]], interp_func, pb,tuning);
-                    }
+            }
+            for (size_t i = (begin[dims[0]] ? begin[dims[0]] + stride : 0); i <= end[dims[0]]; i += stride) {
+                for (size_t j = (begin[dims[1]] ? begin[dims[1]] + stride : 0); j <= end[dims[1]]; j += stride) {
+                    size_t begin_offset = i * dimension_offsets[dims[0]] + j * dimension_offsets[dims[1]] +
+                                          begin[dims[2]] * dimension_offsets[dims[2]];
+                    predict_error += block_interpolation_1d(data, begin_offset,
+                                                            begin_offset +
+                                                            (end[dims[2]] - begin[dims[2]]) *
+                                                            dimension_offsets[dims[2]],
+                                                            stride * dimension_offsets[dims[2]], interp_func, pb,tuning);
                 }
-            //}
-            /*
-            else{
-
-                const std::array<int, N> dims = dimension_sequences[0];
-                for (size_t j = (begin[dims[1]] ? begin[dims[1]] + stride2x : 0); j <= end[dims[1]]; j += stride2x) {
-                    for (size_t k = (begin[dims[2]] ? begin[dims[2]] + stride2x : 0); k <= end[dims[2]]; k += stride2x) {
-                        size_t begin_offset = begin[dims[0]] * dimension_offsets[dims[0]] + j * dimension_offsets[dims[1]] +
-                                              k * dimension_offsets[dims[2]];
-                        predict_error += block_interpolation_1d(data, begin_offset,
-                                                                begin_offset +
-                                                                (end[dims[0]] - begin[dims[0]]) *
-                                                                dimension_offsets[dims[0]],
-                                                                stride * dimension_offsets[dims[0]], interp_func, pb,tuning);
-                    }
-                }
-                for (size_t i = (begin[dims[0]] ? begin[dims[0]] + stride2x : 0); i <= end[dims[0]]; i += stride2x) {
-                    for (size_t k = (begin[dims[2]] ? begin[dims[2]] + stride2x : 0); k <= end[dims[2]]; k += stride2x) {
-                        size_t begin_offset = i * dimension_offsets[dims[0]] + begin[dims[1]] * dimension_offsets[dims[1]] +
-                                              k * dimension_offsets[dims[2]];
-                        predict_error += block_interpolation_1d(data, begin_offset,
-                                                                begin_offset +
-                                                                (end[dims[1]] - begin[dims[1]]) *
-                                                                dimension_offsets[dims[1]],
-                                                                stride * dimension_offsets[dims[1]], interp_func, pb,tuning);
-                    }
-                }
-                for (size_t i = (begin[dims[0]] ? begin[dims[0]] + stride2x : 0); i <= end[dims[0]]; i += stride2x) {
-                    for (size_t j = (begin[dims[1]] ? begin[dims[1]] + stride2x : 0); j <= end[dims[1]]; j += stride2x) {
-                        size_t begin_offset = i * dimension_offsets[dims[0]] + j * dimension_offsets[dims[1]] +
-                                              begin[dims[2]] * dimension_offsets[dims[2]];
-                        predict_error += block_interpolation_1d(data, begin_offset,
-                                                                begin_offset +
-                                                                (end[dims[2]] - begin[dims[2]]) *
-                                                                dimension_offsets[dims[2]],
-                                                                stride * dimension_offsets[dims[2]], interp_func, pb,tuning);
-                    }
-                }
-
-
-                    for (size_t k = (begin[dims[2]] ? begin[dims[2]] + stride2x : 0); k <= end[dims[2]]; k += stride2x) {
-                        size_t begin_offset1 = begin[dims[0]] * dimension_offsets[dims[0]] + k * dimension_offsets[dims[2]];
-                        size_t begin_offset2 =  begin[dims[1]] * dimension_offsets[dims[1]];
-                                            
-                        predict_error += block_interpolation_2d(data, begin_offset1,
-                                                                begin_offset1 +
-                                                                (end[dims[0]] - begin[dims[0]]) *
-                                                                dimension_offsets[dims[0]],
-                                                                begin_offset2,
-                                                                begin_offset2 +
-                                                                (end[dims[1]] - begin[dims[1]]) *
-                                                                dimension_offsets[dims[1]],
-                                                                stride * dimension_offsets[dims[0]], stride * dimension_offsets[dims[1]],interp_func, pb,tuning);
-                    }
-
-
-                    for (size_t j = (begin[dims[1]] ? begin[dims[1]] + stride2x : 0); j <= end[dims[1]]; j += stride2x) {
-                        size_t begin_offset1 = begin[dims[0]] * dimension_offsets[dims[0]] + j * dimension_offsets[dims[1]];
-                        size_t begin_offset2 =  begin[dims[2]] * dimension_offsets[dims[2]];
-                                            
-                        predict_error += block_interpolation_2d(data, begin_offset1,
-                                                                begin_offset1 +
-                                                                (end[dims[0]] - begin[dims[0]]) *
-                                                                dimension_offsets[dims[0]],
-                                                                begin_offset2,
-                                                                begin_offset2 +
-                                                                (end[dims[2]] - begin[dims[2]]) *
-                                                                dimension_offsets[dims[2]],
-                                                                stride * dimension_offsets[dims[0]], stride * dimension_offsets[dims[2]],interp_func, pb,tuning);
-                    }
-
-                    for (size_t i = (begin[dims[0]] ? begin[dims[0]] + stride2x : 0); i <= end[dims[0]]; i += stride2x) {
-                        size_t begin_offset1 = begin[dims[1]] * dimension_offsets[dims[1]] + i * dimension_offsets[dims[0]];
-                        size_t begin_offset2 =  begin[dims[2]] * dimension_offsets[dims[2]];
-                                            
-                        predict_error += block_interpolation_2d(data, begin_offset1,
-                                                                begin_offset1 +
-                                                                (end[dims[1]] - begin[dims[1]]) *
-                                                                dimension_offsets[dims[1]],
-                                                                begin_offset2,
-                                                                begin_offset2 +
-                                                                (end[dims[2]] - begin[dims[2]]) *
-                                                                dimension_offsets[dims[2]],
-                                                                stride * dimension_offsets[dims[1]], stride * dimension_offsets[dims[2]],interp_func, pb,tuning);
-                    }
-                    size_t begin_offset1 = begin[dims[0]] * dimension_offsets[dims[0]] ;
-                    size_t begin_offset2 = begin[dims[1]] * dimension_offsets[dims[1]] ;
-                    size_t begin_offset3 =  begin[dims[2]] * dimension_offsets[dims[2]];
-                    predict_error += block_interpolation_3d(data, begin_offset1,
-                                                                begin_offset1 +
-                                                                (end[dims[0]] - begin[dims[0]]) *
-                                                                dimension_offsets[dims[0]],
-                                                                begin_offset2,
-                                                                begin_offset2 +
-                                                                (end[dims[1]] - begin[dims[1]]) *
-                                                                dimension_offsets[dims[1]],
-                                                                begin_offset3,
-                                                                begin_offset3 +
-                                                                (end[dims[2]] - begin[dims[2]]) *
-                                                                dimension_offsets[dims[2]],
-                                                                stride * dimension_offsets[dims[0]],stride * dimension_offsets[dims[1]], stride * dimension_offsets[dims[2]],interp_func, pb,tuning);
-
-
-                
-                
-
-
-
-
-
-            }*/
-
-
-
-
+            }
+         
             return predict_error;
         }
 

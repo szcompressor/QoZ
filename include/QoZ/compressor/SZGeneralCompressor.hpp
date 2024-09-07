@@ -35,8 +35,6 @@ namespace QoZ {
             std::vector<int> new_quant_inds = frontend.compress(data);
             quant_inds.insert(quant_inds.end(),new_quant_inds.begin(),new_quant_inds.end());
              if (tuning){
-                //std::vector<int>().swap(conf.quant_inds);
-                //conf.quant_inds=quant_inds;
                 uchar *buffer = new uchar[1];
                 buffer[0]=0;
                 return buffer;
