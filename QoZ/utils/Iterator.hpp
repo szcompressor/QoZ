@@ -75,62 +75,17 @@ namespace QoZ {
 
             multi_dimensional_iterator &operator--() {
 
-                /*
-                if(order>0){//mhtd first
-                    if(local_index[0]==range->dimensions[0]){
-                        global_offset=0;
-                        for(size_t i=0;i<N;i++){
-                            local_index[i]=range->dimensions[i]-1;
-                            global_offset+=local_index[i] * range->global_dim_strides[i];
-                        }
-
-                    }
-                    else{
-                        size_t i=N-1;
-
-                        while (local_index[i]==range->dimensions[i]-1 and i>0)
-                            i--;
-                        if (i>0){
-                            i--;
-                            while (local_index[i]==0 and i>0)
-                                i--;
-                            if (i==0 and local_index[i]==0){
-                                cur_level--;
-                                this->rearrange_last(0,cur_level);
-                            }
-                                
-                            else{
-                                local_index[i]-=1;
-                                global_offset-=range->global_dim_strides[i];
-                                size_t level=cur_level;
-                                for(size_t j=0;j<=i;j++)
-                                
-                                    level-=local_index[j];
-                                this->rearrange_last(i+1,level);
-                            }
-                        }
-                        else{
-                            cur_level-=1;
-                            this->rearrange_last(0,cur_level);
-
-                        }
-                    }
-
-
-
-                }*/
-               // else{
-                    size_t i = N - 1;
+                size_t i = N - 1;
+                local_index[i]--;
+                ptrdiff_t offset = -range->global_dim_strides[i];
+                while (i && (local_index[i] < 0)) {
+                    offset += range->dimensions[i] * range->global_dim_strides[i];
+                    local_index[i--] = range->dimensions[i]-1;
+                    offset -= range->global_dim_strides[i];
                     local_index[i]--;
-                    ptrdiff_t offset = -range->global_dim_strides[i];
-                    while (i && (local_index[i] < 0)) {
-                        offset += range->dimensions[i] * range->global_dim_strides[i];
-                        local_index[i--] = range->dimensions[i]-1;
-                        offset -= range->global_dim_strides[i];
-                        local_index[i]--;
-                    }
-                    global_offset += offset;
-                //}
+                }
+                global_offset += offset;
+
                 return *this;
             }
 
@@ -141,78 +96,18 @@ namespace QoZ {
             }
 
             inline multi_dimensional_iterator &operator++() {
-                /*
-                if(order>0){//mhtd
-                    //this->print();
-                   //std::cout<<cur_level<<std::endl;
-                   //std::cout<<max_level<<std::endl;
-
-                    if(cur_level==max_level){
-                        global_offset=range->dimensions[0]*range->global_dim_strides[0];
-                        local_index[0]=range->dimensions[0];
-
-                        for(size_t i=1;i<N;i++){
-                            local_index[i]=0;
-                        }
-
-                    }
-                    else{
-                        size_t i=N-1;
-
-                        while (local_index[i]==0 and i>0)
-                            i--;
-                        //std::cout<<"p1 "<<i<<std::endl;
-                        if (i>0){
-                            i--;
-                            //std::cout<<"p2 "<<i<<std::endl;
-                            while (local_index[i]==range->dimensions[i]-1 and i>0)
-                                i--;
-                            //std::cout<<"p3 "<<i<<std::endl;
-                            if (i==0 and local_index[i]==range->dimensions[i]-1){
-                                cur_level++;
-                                this->rearrange_first(0,cur_level);
-                                 //std::cout<<"p4 "<<i<<std::endl;
-                            }
-           
-                            else{
-                                //std::cout<<"p5 "<<i<<std::endl;
-                                local_index[i]+=1;
-                                global_offset+=range->global_dim_strides[i];
-                                size_t level=cur_level;
-                                for(size_t j=0;j<=i;j++)
-                                
-                                    level-=local_index[j];
-                                 //std::cout<<"p6 "<<i<<std::endl;
-                                this->rearrange_first(i+1,level);
-                                // std::cout<<"p7 "<<i<<std::endl;
-                            }
-                        }
-                        else{
-                            //std::cout<<"p8 "<<i<<std::endl;
-                            cur_level+=1;
-                            this->rearrange_first(0,cur_level);
-                            //std::cout<<"p9 "<<i<<std::endl;
-
-                        }
-                    }
-
-
-
-                }*/
-
-               // else{
-                    size_t i = N - 1;
+                
+                size_t i = N - 1;
+                local_index[i]++;
+                ptrdiff_t offset = range->global_dim_strides[i];
+                while (i && (local_index[i] == range->dimensions[i])) {
+                    offset -= range->dimensions[i] * range->global_dim_strides[i];
+                    local_index[i--] = 0;
+                    offset += range->global_dim_strides[i];
                     local_index[i]++;
-                    ptrdiff_t offset = range->global_dim_strides[i];
-                    while (i && (local_index[i] == range->dimensions[i])) {
-                        offset -= range->dimensions[i] * range->global_dim_strides[i];
-                        local_index[i--] = 0;
-                        offset += range->global_dim_strides[i];
-                        local_index[i]++;
-                    }
-                    global_offset += offset;
-                //}
-                // std::cout << "offset=" << offset << ", current_offset=" << current_offset << std::endl;
+                }
+                global_offset += offset;
+                
                 return *this;
             }
 
@@ -422,29 +317,22 @@ namespace QoZ {
             int i = 0;
             for (auto iter = begin; iter != end; ++iter) {
                 dimensions[i++] = *iter;
-                // std::cout << dimensions[i-1] << " ";
             }
         }
 
         void set_dimensions_auto() {
             // std::cout << "dimensions: ";
             for (int i = 0; i < dimensions.size(); i++) {
-                // std::cout << "g[i]=" << global_dimensions[i] << ",str=" << access_stride << " ";
                 dimensions[i] = (global_dimensions[i] - 1) / access_stride[i] + 1;
-                // std::cout << dimensions[i] << " ";
             }
-            // std::cout << std::endl;
         }
 
         void set_global_dim_strides() {
-            // std::cout << "strides: ";
             size_t cur_stride = 1;
             for (int i = N - 1; i >= 0; i--) {
                 global_dim_strides[i] = cur_stride * access_stride[i];
                 cur_stride *= global_dimensions[i];
-                // std::cout << dim_strides[i] << " ";
             }
-            // std::cout << std::endl;
         }
 
         void set_offsets(ptrdiff_t offset_) {

@@ -86,21 +86,6 @@ char *SZ_compress( QoZ::Config &config, const T *data, size_t &outSize) {
         outSize = (char *) cmpDataPos - cmpData;
         
     }
-    /*
-    if(conf.peTracking){
-        //int status;
-        //printf("wad\n");
-        //QoZ::writeFloatData_inBytes(conf.predictionErrors.data(), conf.num, "prederror.qoz", &status);
-        //printf("%d\n",conf.predictionErrors.size());
-        //printf("%d\n",conf.num);
-        QoZ::writefile<float>("prederror.qoz", conf.predictionErrors.data(), conf.num);
-        if(conf.blockwiseTuning){
-            QoZ::writefile<uint8_t>("interp_ops.qoz", conf.interp_ops.data(), conf.interp_ops.size());
-            QoZ::writefile<uint8_t>("interp_dirs.qoz", conf.interp_dirs.data(), conf.interp_dirs.size());
-        }
-    }*/
-    
-    //std::cout<<"szce"<<std::endl;
     return cmpData;
 }
 

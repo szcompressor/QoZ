@@ -30,46 +30,32 @@ namespace QoZ {
         uchar *compress( Config &conf, T *data, size_t &compressed_size,int tuning=0) {
 
             Timer timer(true);
-            //std::cout<<"general1"<<std::endl;
-           
+
             std::vector<int> new_quant_inds = frontend.compress(data);
             quant_inds.insert(quant_inds.end(),new_quant_inds.begin(),new_quant_inds.end());
              if (tuning){
-                //std::vector<int>().swap(conf.quant_inds);
-                //conf.quant_inds=quant_inds;
                 uchar *buffer = new uchar[1];
                 buffer[0]=0;
                 return buffer;
 
             }
-            //std::cout<<quant_inds.size()<<std::endl;
-            //std::cout<<"general2"<<std::endl;
-//            timer.stop("Prediction & Quantization");
+
             encoder.preprocess_encode(quant_inds, 0);
-            //std::cout<<"general2.1"<<std::endl;
             size_t bufferSize = 1.5 * (frontend.size_est() + encoder.size_est() + sizeof(T) * quant_inds.size());//todo: lower the 1.5.
             uchar *buffer = new uchar[bufferSize];
-            //std::cout<<"general2.2"<<std::endl;
             uchar *buffer_pos = buffer;
 
             frontend.save(buffer_pos);
-            //std::cout<<"general2.3"<<std::endl;
-            //std::cout<<"general3"<<std::endl;
 
             timer.start();
             
             encoder.save(buffer_pos);
             encoder.encode(quant_inds, buffer_pos);
             encoder.postprocess_encode();
-//            timer.stop("Coding");
             assert(buffer_pos - buffer < bufferSize);
-            //std::cout<<"general4"<<std::endl;
 
-            //timer.start();
             uchar *lossless_data = lossless.compress(buffer, buffer_pos - buffer, compressed_size);
-            //std::cout<<"general5"<<std::endl;
             lossless.postcompress_data(buffer);
-//            timer.stop("Lossless");
 
             return lossless_data;
         }
@@ -83,22 +69,15 @@ namespace QoZ {
             uchar *buffer_pos = buffer;
 
             frontend.save(buffer_pos);
-            //std::cout<<"general3"<<std::endl;
 
-            //timer.start();
             encoder.preprocess_encode(quant_inds, 0);
             encoder.save(buffer_pos);
             encoder.encode(quant_inds, buffer_pos);
             encoder.postprocess_encode();
-//            timer.stop("Coding");
             assert(buffer_pos - buffer < bufferSize);
-            //std::cout<<"general4"<<std::endl;
 
-            //timer.start();
             uchar *lossless_data = lossless.compress(buffer, buffer_pos - buffer, compressed_size);
-            //std::cout<<"general5"<<std::endl;
             lossless.postcompress_data(buffer);
-//            timer.stop("Lossless");
 
             return lossless_data;
 
@@ -115,7 +94,6 @@ namespace QoZ {
             Timer timer(true);
             auto compressed_data = lossless.decompress(cmpData, remaining_length);
             uchar const *compressed_data_pos = compressed_data;
-//            timer.stop("Lossless");
 
             frontend.load(compressed_data_pos, remaining_length);
 
@@ -124,13 +102,11 @@ namespace QoZ {
             timer.start();
             auto quant_inds = encoder.decode(compressed_data_pos, frontend.get_num_elements());
             encoder.postprocess_decode();
-//            timer.stop("Decoder");
 
             lossless.postdecompress_data(compressed_data);
 
             timer.start();
             frontend.decompress(quant_inds, decData);
-//            timer.stop("Prediction & Recover");
             return decData;
         }
 

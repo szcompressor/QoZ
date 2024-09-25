@@ -31,18 +31,18 @@ char *SZ_compress_dispatcher(QoZ::Config &conf, T *data, size_t &outSize) {
     */
     /*
     else if (conf.cmprAlgo == QoZ::ALGO_INTERP_BLOCKED) {
-        //std::cout<<"111"<<std::endl;
+
         cmpData = (char *) SZ_compress_Interp_blocked<T, N>(conf, data, outSize);
     }
     */
-    //std::cout<<"dispend"<<std::endl;
+  
     return cmpData;
 }
 
 
 template<class T, QoZ::uint N>
 void SZ_decompress_dispatcher(QoZ::Config &conf, char *cmpData, size_t cmpSize, T *decData) {
-    //std::cout<<"disp"<<conf.absErrorBound<<std::endl;
+ 
     if (conf.cmprAlgo == QoZ::ALGO_LORENZO_REG) {
         SZ_decompress_LorenzoReg<T, N>(conf, cmpData, cmpSize, decData);
     } else if (conf.cmprAlgo == QoZ::ALGO_INTERP) {
