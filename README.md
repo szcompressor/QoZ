@@ -2,7 +2,7 @@
 
 ## Introduction
 
-The second major version of QoZ: QoZ 2.0, is based on both QoZ 1.1 and the paper: "High-performance Effective Scientific Error-bounded Lossy Compression with Auto-tuned Multi-component Interpolation". [Paper Link](https://dl.acm.org/doi/abs/10.1145/3639259)
+The second major version of QoZ: QoZ 2.0, is based on both QoZ 1.1 and the paper: "High-performance Effective Scientific Error-bounded Lossy Compression with Auto-tuned Multi-component Interpolation". [ACM Paper Link](https://dl.acm.org/doi/abs/10.1145/3639259) [arXiv Paper Link](https://arxiv.org/abs/2311.12133) 
 
 ## Dependencies
 
@@ -31,10 +31,10 @@ You can use the executable 'qoz' command to do the compression/decompression (th
 For the convenience of tests, the qoz executable includes the SZ3.1 compression, QoZ 1.1 compression, and 3 optimization levels of QoZ 2.0 compression. In the command:
 * -q 0: SZ3.1 compression.
 * Containing -q 1: QoZ 1.1 compression.
-* Containing -q 2 or -q 3: 2 intermediate optimization levels of HPEZ compression (having faster speeds but slightly worse rate-distortion).
+* Containing -q 2 or -q 3: 2 intermediate optimization levels of QoZ 2.0 compression (having faster speeds but slightly worse rate-distortion).
 * Not containing -q argument or containing -q 4: Full QoZ 2.0 compression (for the results reported in the paper).
 
-Notice: the intergrated SZ3.1 and QoZ 1.1 in QoZ 2.0 has already leveraged the Fast-varying-first interpolation (proposed in our paper), therefore their compression ratios are sometimes higher than the original public released versions of SZ3.1 and QoZ 1.1.
+Notice: the integrated SZ3.1 and QoZ 1.1 in QoZ 2.0 have already leveraged the Fast-varying-first interpolation (proposed in our paper), therefore their compression ratios are sometimes higher than the original public released versions of SZ3.1 and QoZ 1.1.
 
 ## Test Dataset
 

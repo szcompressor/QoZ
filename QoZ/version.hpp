@@ -7,9 +7,9 @@
 #define QoZ_VERSION_HPP
 
 #define QoZ_NAME "QoZ"
-#define QoZ_VER  "0.1.0.0"
-#define QoZ_VER_MAJOR 0
-#define QoZ_VER_MINOR 1
+#define QoZ_VER  "2.0.0.0"
+#define QoZ_VER_MAJOR 2
+#define QoZ_VER_MINOR 0
 #define QoZ_VER_PATCH 0
 #define QoZ_VER_TWEAK 0
 

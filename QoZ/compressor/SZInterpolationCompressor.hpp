@@ -799,14 +799,22 @@ namespace QoZ {
         }
 
         inline void recover(size_t idx, T &d, T pred) {
+<<<<<<< HEAD:QoZ/compressor/SZInterpolationCompressor.hpp
             d = quantizer.recover(pred, quant_inds[quant_index++]);
+=======
+            d = quantizer.recover(pred, quant_inds[idx]);
+>>>>>>> fb33954e8dd10f2dc4b9701cb99537e623471f01:include/QoZ/compressor/SZInterpolationCompressor.hpp
         };
 
         inline double quantize_integrated(size_t idx, T &d, T pred, int mode=0){
 
             double pred_error=0;
             if(mode==-1){//recover
+<<<<<<< HEAD:QoZ/compressor/SZInterpolationCompressor.hpp
                 d = quantizer.recover(pred, quant_inds[quant_index++]);
+=======
+                d = quantizer.recover(pred, quant_inds[idx]);
+>>>>>>> fb33954e8dd10f2dc4b9701cb99537e623471f01:include/QoZ/compressor/SZInterpolationCompressor.hpp
                 return 0;
             }
             else if(mode==0){
@@ -924,7 +932,11 @@ namespace QoZ {
                             }
                             else {
 
+<<<<<<< HEAD:QoZ/compressor/SZInterpolationCompressor.hpp
                                 predict_error+=quantize_integrated(d - data, *d,
+=======
+                                predict_error+=quantize_integrated(quant_idx++, *d,
+>>>>>>> fb33954e8dd10f2dc4b9701cb99537e623471f01:include/QoZ/compressor/SZInterpolationCompressor.hpp
                                         interp_linear1(*(d - stride3x), *(d - stride)),mode);
                                 
                             }
@@ -1030,7 +1042,11 @@ namespace QoZ {
                                 predict_error+=quantize_integrated(d - data, *d,
                                         interp_quad_2_adj(*(d - stride2x), *(d - stride), *(d + stride)),mode);
                             else {
+<<<<<<< HEAD:QoZ/compressor/SZInterpolationCompressor.hpp
                                 predict_error+=quantize_integrated(d - data, *d,
+=======
+                                predict_error+=quantize_integrated(quant_idx++, *d,
+>>>>>>> fb33954e8dd10f2dc4b9701cb99537e623471f01:include/QoZ/compressor/SZInterpolationCompressor.hpp
                                         lorenzo_1d(*(d - stride2x), *(d - stride)),mode);
                             }
                         }
@@ -1435,7 +1451,11 @@ namespace QoZ {
                                         predict_error+=quantize_integrated(d - data, *d,
                                                 interp_quad_2(*(d - stride3x), *(d - stride), *(d + stride)),mode);
                                     else{
+<<<<<<< HEAD:QoZ/compressor/SZInterpolationCompressor.hpp
                                         predict_error+=quantize_integrated(d - data, *d,
+=======
+                                        predict_error+=quantize_integrated(quant_idx++, *d,
+>>>>>>> fb33954e8dd10f2dc4b9701cb99537e623471f01:include/QoZ/compressor/SZInterpolationCompressor.hpp
                                                 interp_linear1(*(d - stride3x), *(d - stride)),mode);
                                     }
                                 }
@@ -1504,7 +1524,11 @@ namespace QoZ {
                                         predict_error+=quantize_integrated(d - data, *d,
                                                 interp_quad_2_adj(*(d - stride2x), *(d - stride), *(d + stride)),mode);
                                     else {
+<<<<<<< HEAD:QoZ/compressor/SZInterpolationCompressor.hpp
                                         predict_error+=quantize_integrated(d - data, *d,
+=======
+                                        predict_error+=quantize_integrated(quant_idx++, *d,
+>>>>>>> fb33954e8dd10f2dc4b9701cb99537e623471f01:include/QoZ/compressor/SZInterpolationCompressor.hpp
                                                 lorenzo_1d(*(d - stride2x), *(d - stride)),mode);
                                     }
                                 }
@@ -1708,7 +1732,11 @@ namespace QoZ {
                                             
                                         }
                                         else {
+<<<<<<< HEAD:QoZ/compressor/SZInterpolationCompressor.hpp
                                             predict_error+=quantize_integrated(d - data, *d,
+=======
+                                            predict_error+=quantize_integrated(quant_idx++, *d,
+>>>>>>> fb33954e8dd10f2dc4b9701cb99537e623471f01:include/QoZ/compressor/SZInterpolationCompressor.hpp
                                                     interp_linear1(*(d - stride3x), *(d - stride)),mode);
                                             
                                         }
@@ -1868,7 +1896,11 @@ namespace QoZ {
                                             predict_error+=quantize_integrated(d - data, *d,
                                                     interp_quad_2_adj(*(d - stride2x), *(d - stride), *(d + stride)),mode);
                                         else {
+<<<<<<< HEAD:QoZ/compressor/SZInterpolationCompressor.hpp
                                             predict_error+=quantize_integrated(d - data, *d,
+=======
+                                            predict_error+=quantize_integrated(quant_idx++, *d,
+>>>>>>> fb33954e8dd10f2dc4b9701cb99537e623471f01:include/QoZ/compressor/SZInterpolationCompressor.hpp
                                                     lorenzo_1d(*(d - stride2x), *(d - stride)),mode);
                                         }
                                     }
@@ -2038,8 +2070,13 @@ namespace QoZ {
                 for (size_t i = 1; i + 1 < n; i += 2) {
                     for(size_t j=1;j+1<m;j+=2){
                         T *d = data + begin + i* stride1+j*stride2;
+<<<<<<< HEAD:QoZ/compressor/SZInterpolationCompressor.hpp
                         //predict_error+=quantize_integrated(d - data, *d, interp_2d(*(d - stride1), *(d + stride1),*(d - stride2), *(d + stride2)),mode);
                         predict_error+=quantize_integrated(d - data, *d, coeff_x*interp_linear(*(d - stride1), *(d + stride1))+coeff_y*interp_linear(*(d - stride2), *(d + stride2)),mode);
+=======
+                        //predict_error+=quantize_integrated(quant_idx++, *d, interp_2d(*(d - stride1), *(d + stride1),*(d - stride2), *(d + stride2)),mode);
+                        predict_error+=quantize_integrated(quant_idx++, *d, coeff_x*interp_linear(*(d - stride1), *(d + stride1))+coeff_y*interp_linear(*(d - stride2), *(d + stride2)),mode);
+>>>>>>> fb33954e8dd10f2dc4b9701cb99537e623471f01:include/QoZ/compressor/SZInterpolationCompressor.hpp
 
                     }
                     if(m%2 ==0){
@@ -2328,8 +2365,13 @@ namespace QoZ {
  
                             d = data + begin+ (n-1) * stride1+j*stride2;
 
+<<<<<<< HEAD:QoZ/compressor/SZInterpolationCompressor.hpp
                             //predict_error+=quantize_integrated(d - data, *d, interp_linear( interp_quad_3(*(d - stride5x1), *(d - stride3x1), *(d - stride1)), interp_quad_3(*(d - stride5x2), *(d - stride3x2), *(d - stride2)) ),mode);
                             predict_error+=quantize_integrated(d - data, *d, lorenzo_2d(*(d-stride1-stride2),*(d-stride1),*(d-stride2)), mode);
+=======
+                            //predict_error+=quantize_integrated(quant_idx++, *d, interp_linear( interp_quad_3(*(d - stride5x1), *(d - stride3x1), *(d - stride1)), interp_quad_3(*(d - stride5x2), *(d - stride3x2), *(d - stride2)) ),mode);
+                            predict_error+=quantize_integrated(quant_idx++, *d, lorenzo_2d(*(d-stride1-stride2),*(d-stride1),*(d-stride2)), mode);
+>>>>>>> fb33954e8dd10f2dc4b9701cb99537e623471f01:include/QoZ/compressor/SZInterpolationCompressor.hpp
                         } 
                     }
 
@@ -2506,8 +2548,13 @@ namespace QoZ {
                 for (size_t i = 1; i + 1 < n; i += 2) {
                     for(size_t j=1;j+1<m;j+=2){
                         T *d = data + begin + i* stride1+j*stride2;
+<<<<<<< HEAD:QoZ/compressor/SZInterpolationCompressor.hpp
                         //predict_error+=quantize_integrated(d - data, *d, interp_2d(*(d - stride1), *(d + stride1),*(d - stride2), *(d + stride2)),mode);
                         predict_error+=quantize_integrated(d - data, *d, coeff_x*interp_linear(*(d - stride1), *(d + stride1))+coeff_y*interp_linear(*(d - stride2), *(d + stride2)),mode);
+=======
+                        //predict_error+=quantize_integrated(quant_idx++, *d, interp_2d(*(d - stride1), *(d + stride1),*(d - stride2), *(d + stride2)),mode);
+                        predict_error+=quantize_integrated(quant_idx++, *d, coeff_x*interp_linear(*(d - stride1), *(d + stride1))+coeff_y*interp_linear(*(d - stride2), *(d + stride2)),mode);
+>>>>>>> fb33954e8dd10f2dc4b9701cb99537e623471f01:include/QoZ/compressor/SZInterpolationCompressor.hpp
 
                     }
                     if(m%2 ==0){
@@ -2695,7 +2742,11 @@ namespace QoZ {
  
                             d = data + begin + i* stride1+j*stride2;
 
+<<<<<<< HEAD:QoZ/compressor/SZInterpolationCompressor.hpp
                             //predict_error+=quantize_integrated(d - data, *d, interp_linear( interp_cubic(meta.cubicSplineType,*(d - stride3x1), *(d - stride1), *(d + stride1), *(d + stride3x1))
+=======
+                            //predict_error+=quantize_integrated(quant_idx++, *d, interp_linear( interp_cubic(meta.cubicSplineType,*(d - stride3x1), *(d - stride1), *(d + stride1), *(d + stride3x1))
+>>>>>>> fb33954e8dd10f2dc4b9701cb99537e623471f01:include/QoZ/compressor/SZInterpolationCompressor.hpp
                             //                                        ,interp_cubic(meta.cubicSplineType,*(d - stride3x2), *(d - stride2), *(d + stride2), *(d + stride3x2)) ),mode);
                             predict_error+=quantize_integrated(d - data, *d , coeff_x*interp_cubic(meta.cubicSplineType,*(d - stride3x1), *(d - stride1), *(d + stride1), *(d + stride3x1))
                                                                     +coeff_y*interp_cubic(meta.cubicSplineType,*(d - stride3x2), *(d - stride2), *(d + stride2), *(d + stride3x2)) ,mode);
@@ -3039,8 +3090,13 @@ namespace QoZ {
                     for(size_t j=begins[1];j<ends[1];j+=steps[1]){
                         for(size_t k=begins[2];k<ends[2];k+=steps[2]){
                             T *d = data + begin + i * strides[0]+j*strides[1]+k*strides[2];
+<<<<<<< HEAD:QoZ/compressor/SZInterpolationCompressor.hpp
                             //predict_error+=quantize_integrated(d - data, *d, interp_2d(*(d - stride1), *(d + stride1),*(d - stride2), *(d + stride2)),mode);
                             predict_error+=quantize_integrated(d - data, *d, coeff_x*interp_linear(*(d - stride1), *(d + stride1))+coeff_y*interp_linear(*(d - stride2), *(d + stride2)),mode);
+=======
+                            //predict_error+=quantize_integrated(quant_idx++, *d, interp_2d(*(d - stride1), *(d + stride1),*(d - stride2), *(d + stride2)),mode);
+                            predict_error+=quantize_integrated(quant_idx++, *d, coeff_x*interp_linear(*(d - stride1), *(d + stride1))+coeff_y*interp_linear(*(d - stride2), *(d + stride2)),mode);
+>>>>>>> fb33954e8dd10f2dc4b9701cb99537e623471f01:include/QoZ/compressor/SZInterpolationCompressor.hpp
                         }
 
                     }
