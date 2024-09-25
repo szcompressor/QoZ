@@ -6,7 +6,7 @@ This is the source code of the QoZ data compression introduced in the paper: QoZ
 
 ## Dependencies
 
-Please Install the following dependencies before running the artiact evaluation experiments:
+Please Install the following dependencies:
 
 * cmake>=3.13
 * gcc>=6.0
@@ -33,12 +33,12 @@ Notice: Currently the QoZ features only support 2D and 3D input data. QoZ will u
 
 ## Version History
 
-* QoZ 1.1: Minor improvements over 1.0.
+* QoZ 1.1: Improvements over 1.0.
 * QoZ 1.0: The SC '22 Version.
 
 ## Bug Report
 
-The current version of QoZ may have unexpected and unfound bugs. If you have met errors or abnormal results when using QoZ, feel free to raise issues or contact me via jliu447@ucr.edu. 
+If you have met any errors or abnormal results when using QoZ, feel free to raise issues or contact me via jliu447@ucr.edu. 
 
 
 
