@@ -548,7 +548,7 @@ void setLorenzoFixRates(QoZ::Config &conf,double rel_bound){
     //double f3=1.3;
     double f3=conf.sampleBlockSize>=64?4:1.3;
     */
-    double f1=conf.sampleBlockSize>=64?2: 1;
+    double f1=conf.sampleBlockSize>=64?2: 1.1;//updated from 1.0 to 1.1, not tested.
     // double f2=1.1;old
     double f2=conf.sampleBlockSize>=64?3:1.2; 
     // double f3=1.2;//old need to raise 
@@ -579,7 +579,7 @@ double Tuning(QoZ::Config &conf, T *data){
         
 
         //activate
-        conf.profiling=1;
+        conf.profiling=0;//temp deactivated Lorenzo. Need further revision.
         if(conf.autoTuningRate<=0)
             conf.autoTuningRate = (N<=2?0.01:0.005);
         if(conf.predictorTuningRate<=0)
@@ -596,7 +596,7 @@ double Tuning(QoZ::Config &conf, T *data){
         }
 
         if(conf.QoZ>=2){
-            conf.testLorenzo=1;
+            //conf.testLorenzo=1;
             conf.multiDimInterp=1;
             conf.naturalSpline=1;
             conf.fullAdjacentInterp=1;
