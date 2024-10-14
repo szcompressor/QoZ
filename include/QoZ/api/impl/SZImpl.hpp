@@ -8,16 +8,15 @@
 
 
 template<class T, QoZ::uint N>
-char *SZ_compress_impl(QoZ::Config &conf, const T *data, size_t &outSize) {
+char *SZ_compress_impl(QoZ::Config &conf, T *data, size_t &outSize) {
 #ifndef _OPENMP
     conf.openmp=false;
 #endif
     if (conf.openmp) {
         return SZ_compress_OMP<T, N>(conf, data, outSize);
     } else {
-        std::vector<T> dataCopy(data, data + conf.num);
        
-        auto output=SZ_compress_dispatcher<T, N>(conf, dataCopy.data(), outSize);
+        auto output=SZ_compress_dispatcher<T, N>(conf, data, outSize);
      
        
         return output;
