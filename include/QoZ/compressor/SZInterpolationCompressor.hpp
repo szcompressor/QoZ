@@ -334,7 +334,7 @@ namespace QoZ {
                         }
                     }
 
-                    if(!conf.blockwiseTuning){
+                    if(!conf.blockwiseTuning or (N!=2 and N!=3)){
                         predict_error+=block_interpolation(data, start_idx, end_idx, PB_predict_overwrite,
                                     interpolators[cur_meta.interpAlgo],cur_meta, stride,tuning,cross_block);//,cross_block,regressiveInterp);
 
@@ -458,7 +458,7 @@ namespace QoZ {
                                             cur_meta.adjInterp=adj_interp;
 
                                             if(conf.dynamicDimCoeff){
-                                                for(size_t i=0;i<N;i++){
+                                                for(size_t i=0;i < N;i++){
                                                     cur_meta.dimCoeffs[i]=interp_vars[i];
                                                 }
 
