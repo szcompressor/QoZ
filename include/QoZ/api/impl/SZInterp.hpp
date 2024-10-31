@@ -717,7 +717,7 @@ double Tuning(QoZ::Config &conf, T *data){
 
     std::vector<std::vector<size_t> >starts;
     if((conf.autoTuningRate>0 or conf.predictorTuningRate>0) and conf.profiling){      
-        conf.profStride=conf.sampleBlockSize/4;
+        conf.profStride=std::max(1,conf.sampleBlockSize/4);
         if(N==2){
             QoZ::profiling_block_2d<T,N>(data,conf.dims,starts,sampleBlockSize,conf.absErrorBound,conf.profStride);
         }
@@ -729,7 +729,7 @@ double Tuning(QoZ::Config &conf, T *data){
 
 
     size_t num_filtered_blocks=starts.size();
-    if(num_filtered_blocks<=(int)(0.3*conf.predictorTuningRate))//temp. to refine
+    if(num_filtered_blocks<=(int)(0.3*conf.predictorTuningRate*totalblock_num))//temp. to refine
         conf.profiling=0;
     double profiling_coeff=1;//It seems that this coefficent is useless. Need further test
   
