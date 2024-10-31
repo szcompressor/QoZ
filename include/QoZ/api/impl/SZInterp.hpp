@@ -255,7 +255,7 @@ double Tuning(QoZ::Config &conf, T *data){
     double best_interp_cr=0.0;
     double best_lorenzo_ratio=0.0;
     bool useInterp=true;
-    int totalblock_num=-1;
+    int totalblock_num=1;
         
     std::vector<size_t> sample_dims(N);
     std::vector<T> sampling_data;
@@ -325,8 +325,11 @@ double Tuning(QoZ::Config &conf, T *data){
     
     size_t num_blocks=0;
     std::vector<std::vector<size_t> >starts;
+    for(int i=0;i<N;i++){                      
+        totalblock_num*=(size_t)((conf.dims[i]-1)/sampleBlockSize);
+    }
     if((conf.autoTuningRate>0 or conf.predictorTuningRate>0) and conf.profiling){
-        size_t profStride=sampleBlockSize/4;
+        size_t profStride=std::max(1,sampleBlockSize/4);
         if(N==2){
             QoZ::profiling_block_2d<T,N>(data,conf.dims,starts,sampleBlockSize,conf.absErrorBound,profStride);
         }
@@ -337,7 +340,7 @@ double Tuning(QoZ::Config &conf, T *data){
 
     }
 
-    if(num_blocks<=(int)(0.3*conf.predictorTuningRate))//temp. to refine
+    if(num_blocks<=(int)(0.3*conf.predictorTuningRate*totalblock_num))//temp. to refine
         conf.profiling=0;
 
     if (conf.predictorTuningRate>0 and conf.predictorTuningRate<1){
@@ -358,17 +361,6 @@ double Tuning(QoZ::Config &conf, T *data){
             }
             std::vector< std::vector<T> >().swap(sampled_blocks);
               
-            
-            
-            if (totalblock_num==-1){
-                totalblock_num=1;
-                for(int i=0;i<N;i++){
-                    
-                    totalblock_num*=(int)((conf.dims[i]-1)/sampleBlockSize);
-                }
-
-
-            }
 
            
             int idx=0,block_idx=0;   
