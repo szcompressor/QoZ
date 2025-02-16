@@ -24,8 +24,7 @@
 
 
 template<class T, QoZ::uint N, class Quantizer, class Encoder, class Lossless>
-//std::shared_ptr<QoZ::concepts::CompressorInterface<T>>
-QoZ::concepts::CompressorInterface<T>*
+std::shared_ptr<QoZ::concepts::CompressorInterface<T>>
 make_lorenzo_regression_compressor(const QoZ::Config &conf, Quantizer quantizer, Encoder encoder, Lossless lossless) {
     std::vector<std::shared_ptr<QoZ::concepts::PredictorInterface<T, N>>> predictors;
 

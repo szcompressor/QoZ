@@ -119,11 +119,9 @@ namespace QoZ {
     };
 
     template<class T, uint N, class Frontend, class Encoder, class Lossless>
-    //std::shared_ptr<SZGeneralCompressor<T, N, Frontend, Encoder, Lossless>>
-    SZGeneralCompressor<T, N, Frontend, Encoder, Lossless>*
+    std::shared_ptr<SZGeneralCompressor<T, N, Frontend, Encoder, Lossless>>
     make_sz_general_compressor(Frontend frontend, Encoder encoder, Lossless lossless) {
-        //return std::make_shared<SZGeneralCompressor<T, N, Frontend, Encoder, Lossless>>(frontend, encoder, lossless);
-        return new SZGeneralCompressor<T, N, Frontend, Encoder, Lossless>(frontend, encoder, lossless);
+        return std::make_shared<SZGeneralCompressor<T, N, Frontend, Encoder, Lossless>>(frontend, encoder, lossless);
     }
 
 

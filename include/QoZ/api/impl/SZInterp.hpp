@@ -318,7 +318,7 @@ std::pair<double,double> CompressTest(const QoZ::Config &conf,const std::vector<
     std::vector<size_t> q_bin_counts;
     std::vector<T> flattened_cur_blocks;
     size_t idx=0;   
-    QoZ::concepts::CompressorInterface<T> *sz;
+    std::shared_ptr<QoZ::concepts::CompressorInterface<T>> sz;
     size_t totalOutSize=0;
     if(algo == QoZ::ALGO_LORENZO_REG){
         auto quantizer = QoZ::LinearQuantizer<T>(testConfig.absErrorBound, testConfig.quantbinCnt / 2);
@@ -333,7 +333,7 @@ std::pair<double,double> CompressTest(const QoZ::Config &conf,const std::vector<
     }
     else if(algo == QoZ::ALGO_INTERP){
 
-        sz =  new QoZ::SZInterpolationCompressor<T, N, QoZ::LinearQuantizer<T>, QoZ::HuffmanEncoder<int>, QoZ::Lossless_zstd>(
+        sz =  std::make_shared< QoZ::SZInterpolationCompressor<T, N, QoZ::LinearQuantizer<T>, QoZ::HuffmanEncoder<int>, QoZ::Lossless_zstd>>(
                         QoZ::LinearQuantizer<T>(testConfig.absErrorBound),
                         QoZ::HuffmanEncoder<int>(),
                         QoZ::Lossless_zstd());
@@ -456,7 +456,6 @@ std::pair<double,double> CompressTest(const QoZ::Config &conf,const std::vector<
     if(algo==QoZ::ALGO_LORENZO_REG)    {
         bitrate*=testConfig.lorenzoBrFix;
     }
-    delete sz;
     return std::pair<double,double>(bitrate,metric);
 }
 
