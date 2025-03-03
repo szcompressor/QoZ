@@ -33,6 +33,7 @@ For the convenience of tests, the qoz executable includes the SZ3.1 compression,
 *  **-q 1**: QoZ 1.1 compression.
 *  **-q 2** or **-q 3**: 2 intermediate optimization levels of QoZ 2.0 compression (having faster speeds but slightly worse rate-distortion).
 *  **-q 4**: Full QoZ 2.0 compression (for the results reported in the paper).
+
 Currently, **-q 3** is the default optimization level.
 
 Notice: the integrated SZ3.1 and QoZ 1.1 in QoZ 2.0 have already leveraged the Fast-varying-first interpolation (proposed in our paper). Therefore, their compression ratios are sometimes higher than the original public released versions of SZ3.1 and QoZ 1.1.
