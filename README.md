@@ -1,4 +1,4 @@
-# QoZ 2.0
+# QoZ 2.0 (HPEZ)
 
 ## Introduction
 
