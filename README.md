@@ -40,7 +40,12 @@ Notice: Currently, the QoZ features only support 2D and 3D input data. QoZ will 
 
 If you have encountered any errors or abnormal results when using QoZ, please contact Jinyang Liu via jliu447@ucr.edu. 
 
+## Citations
 
+**Kindly note**: If you mention QoZ 1.0/1.1 in your paper, the most appropriate citation is the following reference:
+
+
+**[SC 22]** Jinyang Liu, Sheng Di, Sian Jin, Kai Zhao, Xin Liang, Zizhong Chen, and Franck Cappello. "[Dynamic quality metric oriented error bounded lossy compression for scientific datasets.](https://ieeexplore.ieee.org/abstract/document/10046076)" In SC22: International Conference for High Performance Computing, Networking, Storage and Analysis, pp. 1-15. IEEE, 2022.
 
 
 
