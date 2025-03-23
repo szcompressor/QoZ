@@ -169,31 +169,31 @@ namespace QoZ {
             write(num, c);
             write(cmprAlgo, c);
             write(errorBoundMode, c);
-            write(tuningTarget, c);
+            //write(tuningTarget, c);
             write(absErrorBound, c);
             write(relErrorBound, c);
-            write(alpha,c);
-            write(beta,c);
-            write(autoTuningRate,c);
-            write(predictorTuningRate,c);
+            //write(alpha,c);
+            //write(beta,c);
+            //write(autoTuningRate,c);
+            //write(predictorTuningRate,c);
             write(lorenzo, c);
             write(lorenzo2, c);
             write(regression, c);
             write(regression2, c);
-            write(interpAlgo, c);
-            write(interpDirection, c);
+            //write(interpAlgo, c);
+           // write(interpDirection, c);
             write(interpBlockSize, c);
             write(lossless, c);
             write(encoder, c);
             write(quantbinCnt, c);
             write(blockSize, c);
             
-            write(levelwisePredictionSelection, c);
+            //write(levelwisePredictionSelection, c);
             write(stride, c);
-            write(maxStep,c);
+            //write(maxStep,c);
             write(pred_dim, c);
             write(openmp, c);
-            write(fixBlockSize, c);
+            //write(fixBlockSize, c);
             
         };
 
@@ -204,30 +204,30 @@ namespace QoZ {
             read(num, c);
             read(cmprAlgo, c);
             read(errorBoundMode, c);
-            read(tuningTarget, c);
+            //read(tuningTarget, c);
             read(absErrorBound, c);
             read(relErrorBound, c);
-            read(alpha,c);
-            read(beta,c);
-            read(autoTuningRate,c);
-            read(predictorTuningRate,c);
+            //read(alpha,c);
+            //read(beta,c);
+            //read(autoTuningRate,c);
+            //read(predictorTuningRate,c);
             read(lorenzo, c);
             read(lorenzo2, c);
             read(regression, c);
             read(regression2, c);
-            read(interpAlgo, c);
-            read(interpDirection, c);
+            //read(interpAlgo, c);
+            //read(interpDirection, c);
             read(interpBlockSize, c);
             read(lossless, c);
             read(encoder, c);
             read(quantbinCnt, c);
             read(blockSize, c);
-            read(levelwisePredictionSelection, c);
+            //read(levelwisePredictionSelection, c);
             read(stride, c);
-            read(maxStep,c);
+            //read(maxStep,c);
             read(pred_dim, c);
             read(openmp, c);
-            read(fixBlockSize, c);
+            //read(fixBlockSize, c);
         }
 
         void print() {
