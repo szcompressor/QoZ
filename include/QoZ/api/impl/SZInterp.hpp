@@ -738,7 +738,14 @@ double Tuning(QoZ::Config &conf, T *data){
     }
     std::vector<size_t> global_dims=conf.dims;
     size_t global_num=conf.num;
-    if(conf.autoTuningRate>0){
+    if (conf.autoTuningRate>0){
+        if (conf.rng<0)
+            conf.rng=QoZ::data_range<T>(data,conf.num);
+        if(conf.relErrorBound<=0)
+            conf.relErrorBound=conf.absErrorBound/conf.rng;
+        double rel_bound = conf.relErrorBound;
+        if(rel_bound>=3e-4 or conf.tuningTarget==QoZ::TUNING_TARGET_SSIM)//rencently changed, need to fix later
+            conf.testLorenzo=0;
         if (conf.testLorenzo>0)
             setLorenzoFixRates(conf,rel_bound);
     }
@@ -1560,13 +1567,7 @@ char *SZ_compress_Interp_lorenzo(QoZ::Config &conf, T *data, size_t &outSize) {
     }//merge this part to other branches
    
    
-    
-    if (conf.rng<0)
-        conf.rng=QoZ::data_range<T>(data,conf.num);
 
-    
-    if (conf.relErrorBound<=0)
-        conf.relErrorBound=conf.absErrorBound/conf.rng;
   
     
 
