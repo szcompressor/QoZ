@@ -1218,7 +1218,7 @@ double Tuning(QoZ::Config &conf, T *data){
     }
     
     else{// if (!conf.blockwiseTuning){ //recently modified. not sure.
-        QoZ::Timer timer(true);
+        //QoZ::Timer timer(true);
     
         sampling_data = QoZ::sampling<T, N>(data, conf.dims, sampling_num, sample_dims, sampling_block);
         if (sampling_num == conf.num) {
@@ -1282,8 +1282,8 @@ double Tuning(QoZ::Config &conf, T *data){
                 conf.cmprAlgo=QoZ::ALGO_LORENZO_REG;
             }
         }
-        if(conf.verbose)
-            timer.stop("sz3 tuning");
+        //if(conf.verbose)
+        //    timer.stop("sz3 tuning");
     }
     /*
     if(conf.verbose){

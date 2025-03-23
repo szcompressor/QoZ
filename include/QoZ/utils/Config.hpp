@@ -5,8 +5,6 @@
 #include <iostream>
 #include <vector>
 #include <numeric>
-#include <array>
-#include <cstdlib>
 #include "QoZ/def.hpp"
 #include "MemoryUtil.hpp"
 #include "QoZ/utils/inih/INIReader.h"
@@ -259,9 +257,9 @@ namespace QoZ {
         }
 
         static size_t size_est() {
-            
-            return sizeof(size_t) * 10 + sizeof(double) * 8 + sizeof(bool) * 10 + sizeof(uint8_t) * 12 + sizeof(int) * 10 + 200; //doubled SZ3 est+100
-        }
+                
+                return sizeof(size_t) * 5 + sizeof(double) * 4 + sizeof(bool) * 5 + sizeof(uint8_t) * 6+ sizeof(int) * 6 + 50; //original SZ3
+            }
 
         void save(unsigned char *&c) {
             write(N, c);
@@ -269,11 +267,11 @@ namespace QoZ {
             write(num, c);
             write(cmprAlgo, c);
             write(errorBoundMode, c);
-            write(tuningTarget, c);
+            //write(tuningTarget, c);
             write(absErrorBound, c);
             write(relErrorBound, c);
-            write(alpha,c);
-            write(beta,c);
+            //write(alpha,c);
+            //write(beta,c);
             //write(autoTuningRate,c);
             //write(predictorTuningRate,c);
             write(lorenzo, c);
@@ -287,20 +285,20 @@ namespace QoZ {
             write(interpMeta.interpDirection, c);
             write(interpMeta.adjInterp, c);
             */
-            write(interpMeta,c);
+            //write(interpMeta,c);
             write(interpBlockSize, c);
             write(lossless, c);
             write(encoder, c);
             write(quantbinCnt, c);
             write(blockSize, c);
             
-            write(levelwisePredictionSelection, c);
+            //write(levelwisePredictionSelection, c);
             //write(blockwiseTuning, c);
             write(stride, c);
-            write(maxStep,c);
+            //write(maxStep,c);
             write(pred_dim, c);
             write(openmp, c);
-            write(fixBlockSize, c);
+            //write(fixBlockSize, c);
             //write(blockwiseSampleBlockSize, c);
             //write(QoZ, c);//recently changed.
             //write(crossBlock, c);
@@ -316,11 +314,11 @@ namespace QoZ {
             read(num, c);
             read(cmprAlgo, c);
             read(errorBoundMode, c);
-            read(tuningTarget, c);
+            //read(tuningTarget, c);
             read(absErrorBound, c);
             read(relErrorBound, c);
-            read(alpha,c);
-            read(beta,c);
+            //read(alpha,c);
+            //read(beta,c);
             //read(autoTuningRate,c);
             //read(predictorTuningRate,c);
             read(lorenzo, c);
@@ -334,19 +332,19 @@ namespace QoZ {
             read(interpMeta.interpDirection, c);
             read(interpMeta.adjInterp, c);
             */
-            read(interpMeta,c);
+            //read(interpMeta,c);
             read(interpBlockSize, c);
             read(lossless, c);
             read(encoder, c);
             read(quantbinCnt, c);
             read(blockSize, c);
-            read(levelwisePredictionSelection, c);
+            //read(levelwisePredictionSelection, c);
             //read(blockwiseTuning, c);
             read(stride, c);
-            read(maxStep,c);
+            //read(maxStep,c);
             read(pred_dim, c);
             read(openmp, c);
-            read(fixBlockSize, c);
+            //read(fixBlockSize, c);
             //read(blockwiseSampleBlockSize, c);
             //read(QoZ, c);//recently changed.
             //read(crossBlock, c);
@@ -442,7 +440,7 @@ namespace QoZ {
         //std::vector<double> lorenzo1_coeffs;
         //std::vector<double> lorenzo2_coeffs;
         bool verbose=1;
-        int QoZ = 3;//modified the default value.
+        int QoZ=4;
         bool pdTuningRealComp=0;
         int pdTuningAbConf=0;
         //double pdAlpha=-1;
