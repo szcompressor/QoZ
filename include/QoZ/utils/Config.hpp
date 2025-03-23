@@ -440,7 +440,7 @@ namespace QoZ {
         //std::vector<double> lorenzo1_coeffs;
         //std::vector<double> lorenzo2_coeffs;
         bool verbose=1;
-        int QoZ=4;
+        int QoZ = 3;
         bool pdTuningRealComp=0;
         int pdTuningAbConf=0;
         //double pdAlpha=-1;
