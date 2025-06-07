@@ -638,18 +638,11 @@ namespace QoZ {
                 num_elements *= global_dimensions[i];
             }
             if (maxStep>0){
-                anchor = false;
-                for (int i = 0; i < N; i++) {
-                    if(maxStep < global_dimensions[i]){
-                        anchor = true;
-                        break;
-                    }
-                }
-                if (anchor){
-                    int max_interpolation_level=(uint)log2(maxStep)+1;
-                    if (max_interpolation_level<=interpolation_level){ 
-                        interpolation_level=max_interpolation_level;
-                    }
+                anchor = true;
+                interpolation_level += 1;
+                int max_interpolation_level=(uint)log2(maxStep)+1;
+                if (max_interpolation_level<=interpolation_level){ 
+                    interpolation_level=max_interpolation_level;
                 }
             }
             dimension_offsets[N - 1] = 1;
