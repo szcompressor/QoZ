@@ -568,15 +568,13 @@ namespace QoZ {
             }
 
             if (maxStep>0){
-               
+                anchor = true;
+                interpolation_level += 1;
                 int max_interpolation_level=(uint)log2(maxStep)+1;
-                if (max_interpolation_level<=interpolation_level){
-                    anchor=true;
+                if (max_interpolation_level<=interpolation_level){ 
                     interpolation_level=max_interpolation_level;
                 }
-
             }
-
 
             dimension_offsets[N - 1] = 1;
             for (int i = N - 2; i >= 0; i--) {
